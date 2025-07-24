@@ -1,84 +1,76 @@
-import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Route, Routes, Navigate, useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import HomePage from './components/HomePage';
+import LoginForm from './components/LoginForm';
+import GameLayout from './components/GameLayout';
 import Phase1 from './components/Phase1';
 import Phase2 from './components/Phase2';
 import Phase3 from './components/Phase3';
-import Phase4 from './components/Phase4';
-import Phase5 from './components/Phase5';
-import Phase6 from './components/Phase6';
-import Phase7 from './components/Phase7';
 import GameOver from './components/GameOver';
-import Congratulations from './components/Congratulations';
-import LivesCounter from './components/LivesCounter';
+import { usePersistedState } from './hooks/usePersistedState';
 import './styles.css';
 
-const AppWrapper = () => {
-  return (
-    <Router>
-      <App />
-    </Router>
-  );
-};
-
 const App = () => {
-  const [lives, setLives] = useState(5);
-  const [currentPhase, setCurrentPhase] = useState(1);
+  const [user, setUser] = usePersistedState('gameUser', null);
+  const [lives, setLives] = usePersistedState('gameLives', 5);
+  const [currentPhase, setCurrentPhase] = usePersistedState('currentPhase', 1);
   const [gameOver, setGameOver] = useState(false);
-  const [gameCompleted, setGameCompleted] = useState(false);
-  const navigate = useNavigate();
 
-  // Reset game when lives change to 0
-  useEffect(() => {
-    if (lives <= 0) {
-      setGameOver(true);
-    }
-  }, [lives]);
-
-  const loseLife = () => {
-    setLives(prev => prev - 1);
-  };
-
-  const proceedToNextPhase = () => {
-    if (currentPhase < 7) {
-      setCurrentPhase(prev => prev + 1);
-      navigate(`/phase${currentPhase + 1}`);
-    } else {
-      setGameCompleted(true);
-    }
+  const handleLogout = () => {
+    localStorage.removeItem('gameUser');
+    localStorage.removeItem('gameLives');
+    localStorage.removeItem('currentPhase');
+    setUser(null);
+    setLives(5);
+    setCurrentPhase(1);
+    setGameOver(false);
   };
 
   const resetGame = () => {
     setLives(5);
     setCurrentPhase(1);
     setGameOver(false);
-    setGameCompleted(false);
-    navigate('/phase1');
   };
 
-  if (gameOver) {
-    return <GameOver resetGame={resetGame} />;
-  }
-
-  if (gameCompleted) {
-    return <Congratulations resetGame={resetGame} />;
+  if (!user) {
+    return (
+      <Router>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/login" element={<LoginForm setUser={setUser} />} />
+          <Route path="*" element={<Navigate to="/" />} />
+        </Routes>
+      </Router>
+    );
   }
 
   return (
-    <div className="game-container">
-      <LivesCounter lives={lives} />
-      
+    <Router>
       <Routes>
-        <Route path="/" element={<Navigate to="/phase1" />} />
-        <Route path="/phase1" element={<Phase1 proceed={proceedToNextPhase} loseLife={loseLife} />} />
-        <Route path="/phase2" element={<Phase2 proceed={proceedToNextPhase} loseLife={loseLife} />} />
-        <Route path="/phase3" element={<Phase3 proceed={proceedToNextPhase} loseLife={loseLife} />} />
-        <Route path="/phase4" element={<Phase4 proceed={proceedToNextPhase} loseLife={loseLife} />} />
-        <Route path="/phase5" element={<Phase5 proceed={proceedToNextPhase} loseLife={loseLife} />} />
-        <Route path="/phase6" element={<Phase6 proceed={proceedToNextPhase} loseLife={loseLife} />} />
-        <Route path="/phase7" element={<Phase7 proceed={proceedToNextPhase} loseLife={loseLife} />} />
+        <Route 
+          path="/game" 
+          element={
+            <GameLayout 
+              user={user} 
+              onLogout={handleLogout}
+              onRestart={resetGame}
+            >
+              {gameOver ? (
+                <GameOver restartGame={resetGame} />
+              ) : (
+                <>
+                  {currentPhase === 1 && <Phase1 proceed={() => setCurrentPhase(2)} loseLife={() => setLives(l => l - 1)} />}
+                  {currentPhase === 2 && <Phase2 proceed={() => setCurrentPhase(3)} loseLife={() => setLives(l => l - 1)} />}
+                  {currentPhase === 3 && <Phase3 proceed={() => setCurrentPhase(4)} loseLife={() => setLives(l => l - 1)} />}
+                </>
+              )}
+            </GameLayout>
+          } 
+        />
+        <Route path="*" element={<Navigate to="/game" />} />
       </Routes>
-    </div>
+    </Router>
   );
 };
 
-export default AppWrapper;
+export default App;

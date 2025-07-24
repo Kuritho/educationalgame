@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { usePersistedState } from '../hooks/usePersistedState';
 import '../styles.css';
 
 const Phase2 = ({ proceed, loseLife }) => {
@@ -18,15 +19,19 @@ const Phase2 = ({ proceed, loseLife }) => {
     { letter: 'L', word: 'Lion', image: 'lion.png', color: '#FFC8A2' }
   ];
 
-  const [currentRound, setCurrentRound] = useState(1);
+//   const [currentRound, setCurrentRound] = useState(1);
   const [selectedLetters, setSelectedLetters] = useState([]);
   const [selectedPictures, setSelectedPictures] = useState([]);
   const [currentSelection, setCurrentSelection] = useState(null);
-  const [matchedPairs, setMatchedPairs] = useState([]);
+//   const [matchedPairs, setMatchedPairs] = useState([]);
   const [gameItems, setGameItems] = useState([]);
   const [feedback, setFeedback] = useState('');
   const [roundCompleted, setRoundCompleted] = useState(false);
   const [celebrate, setCelebrate] = useState(false);
+  const [currentRound, setCurrentRound] = usePersistedState('phase2_round', 1);
+  const [matchedPairs, setMatchedPairs] = usePersistedState('phase2_matchedPairs', []);
+  const [completed, setCompleted] = usePersistedState('phase2_completed', false);
+  const [currentItems, setCurrentItems] = useState([]);
 
   // Initialize each round
   useEffect(() => {
@@ -85,6 +90,10 @@ const Phase2 = ({ proceed, loseLife }) => {
     if (currentRound < 3) {
       setCurrentRound(currentRound + 1);
     } else {
+      // Clear persisted state when game is complete
+      localStorage.removeItem('phase2_round');
+      localStorage.removeItem('phase2_matchedPairs');
+      localStorage.removeItem('phase2_completed');
       proceed();
     }
   };
