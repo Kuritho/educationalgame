@@ -252,36 +252,30 @@ button:hover {
 
 /* Lives Counter */
 .lives-counter-container {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  z-index: 100;
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+  padding: 0 15px;
 }
 
 .lives-counter {
-  background-color: rgba(255, 255, 255, 0.8);
-  padding: 10px 15px;
-  border-radius: 20px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
   display: flex;
   gap: 5px;
-  backdrop-filter: blur(5px);
-  border: 2px solid #f8f8f8;
 }
 
-.heart {
-  font-size: 1.5em;
-  transition: all 0.3s;
+.lives-counter .heart {
+  font-size: 1.5rem;
+  transition: all 0.3s ease;
 }
 
-.heart.active {
-  animation: pulse 1.5s infinite;
-  color: #ff0000;
+.lives-counter .heart.active {
+  color: #ff4d4d;
+  text-shadow: 0 0 5px rgba(255, 77, 77, 0.5);
 }
 
-.heart.lost {
-  opacity: 0.3;
-  color: #999;
+.lives-counter .heart.lost {
+  color: #ccc;
+  transform: scale(0.9);
 }
 
 @keyframes pulse {
@@ -354,7 +348,7 @@ button:hover {
 }
 
 .letter-btn:hover {
-  background-color: #e6f0ff;
+  background-color: #fffbe6;
 }
 
 .letter-btn.active {
@@ -493,10 +487,12 @@ button:hover {
 }
 
 .game-header {
-  text-align: center;
-  margin-bottom: 20px;
-  position: relative;
-  z-index: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  background-color: #2c3e50;
+  color: white;
 }
 
 .game-header h2 {
@@ -611,7 +607,7 @@ button:hover {
 .letters-side h3, .pictures-side h3 {
   text-align: center;
   color: #6a4c93;
-  margin-top: 0;
+  margin-top: 0px;
   font-size: 1.5rem;
 }
 
@@ -889,10 +885,16 @@ button:hover {
 .matching-grid {
   background-color: white;
   padding: 20px;
-  border-radius: 15px;
+  border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0,0,0,0.1);
   overflow-x: auto;
-  margin: 20px 0;
+
+  width: 120%;
+  max-width: 120%;
+  box-sizing: border-box;
+
+  /* Align to left */
+  margin: 20px 0 20px -10%; /* Negative margin shifts it left for visual balance */
 }
 
 table {
@@ -1032,6 +1034,48 @@ td {
   }
 }
 
+/* Phase3 Table Styles */
+.matching-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 3px solid #4a6fa5;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.table-header {
+  background-color: #4a6fa5;
+  color: white;
+  padding: 12px;
+  text-align: center;
+  border: 1px solid #ddd;
+}
+
+.table-row {
+  background-color: #f8f9fa;
+}
+
+.table-row:nth-child(even) {
+  background-color: #e9ecef;
+}
+
+.table-cell {
+  padding: 12px;
+  text-align: center;
+  border: 1px solid #ddd;
+}
+
+.picture-cell {
+  width: 150px;
+}
+
+.picture {
+  max-width: 100px;
+  max-height: 100px;
+  display: block;
+  margin: 0 auto;
+}
+
 /* game over */
 .game-over-screen {
   display: flex;
@@ -1071,73 +1115,400 @@ td {
 }
 
 /* Homepage */
+:root {
+  --primary-color: #6a4c93;
+  --secondary-color: #ff9a76;
+  --accent-color: #8a5a44;
+  --light-color: #f8f8f8;
+  --dark-color: #333;
+  --success-color: #4caf50;
+}
+
 .home-container {
-  max-width: 800px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 1rem;
+  text-align: center;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  overflow-x: hidden;
+}
+
+/* Section Styling */
+.section {
+  padding: 4rem 2rem;
   text-align: center;
 }
 
-.hero-section {
-  background: linear-gradient(135deg, #6a4c93, #8a5a44);
-  color: white;
-  padding: 3rem 2rem;
-  border-radius: 16px;
-  margin-bottom: 2rem;
+.section-title {
+  color: var(--primary-color);
+  margin-bottom: 3rem;
+  font-size: 2.5rem;
+  position: relative;
+  display: inline-block;
 }
 
-.hero-section h1 {
-  font-size: 3rem;
-  margin-bottom: 1rem;
+.section-title::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 4px;
+  background: var(--secondary-color);
+  border-radius: 2px;
+}
+
+/* Hero Section */
+.hero-section {
+  background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+  color: white;
+  padding: 5rem 2rem;
+  border-radius: 16px;
+  margin: 2rem 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+  min-height: 500px;
+}
+
+.hero-content {
+  flex: 1;
+  z-index: 2;
+  text-align: center;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.hero-title {
+  font-size: 4rem;
+  margin-bottom: 1.5rem;
+  font-weight: 800;
+  line-height: 1.2;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.hero-subtitle {
+  font-size: 1.8rem;
+  margin-bottom: 2.5rem;
+  opacity: 0.9;
+}
+
+.hero-illustration {
+  flex: 1;
+  min-height: 400px;
+  background: url('https://illustrations.popsy.co/amber/child-reading-a-book.svg') no-repeat center;
+  background-size: contain;
+  position: relative;
 }
 
 .start-button {
   display: inline-block;
-  padding: 12px 24px;
+  padding: 18px 36px;
   background: white;
-  color: #6a4c93;
+  color: var(--primary-color);
   border-radius: 50px;
   font-weight: bold;
   text-decoration: none;
-  margin-top: 1rem;
+  margin: 1.5rem 0;
   transition: all 0.3s;
+  font-size: 1.2rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  border: none;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
 }
 
 .start-button:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+  transform: translateY(-5px);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+  background: var(--secondary-color);
+  color: white;
 }
 
-.game-description {
-  background: #f8f8f8;
-  padding: 2rem;
-  border-radius: 16px;
-  text-align: left;
-}
-
-.game-description h2 {
-  color: #6a4c93;
-  margin-bottom: 1rem;
-}
-
-.game-description ul {
-  list-style-type: none;
-  padding: 0;
-}
-
-.game-description li {
-  padding: 0.5rem 0;
-  position: relative;
-  padding-left: 1.5rem;
-}
-
-.game-description li:before {
-  content: "•";
-  color: #6a4c93;
-  font-size: 1.5rem;
+.start-button::after {
+  content: '';
   position: absolute;
-  left: 0;
+  top: -50%;
+  left: -60%;
+  width: 200%;
+  height: 200%;
+  background: rgba(255, 255, 255, 0.2);
+  transform: rotate(30deg);
+  transition: all 0.3s;
+}
+
+.start-button:hover::after {
+  left: 100%;
+}
+
+.hero-features {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 2rem;
+}
+
+.feature-bubble {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 0.6rem 1.2rem;
+  border-radius: 20px;
+  font-size: 1rem;
+  backdrop-filter: blur(5px);
+  transition: all 0.3s;
+}
+
+.feature-bubble:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-3px);
+}
+
+/* Game Description */
+.game-description {
+  background: var(--light-color);
+}
+
+.steps-container {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.step-card {
+  flex: 1;
+  min-width: 250px;
+  max-width: 300px;
+  background: white;
+  padding: 2.5rem 2rem;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  transition: all 0.4s;
+  position: relative;
+  overflow: hidden;
+}
+
+.step-card::before {
+  content: '';
+  position: absolute;
   top: 0;
+  left: 0;
+  width: 100%;
+  height: 5px;
+  background: var(--secondary-color);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s;
+}
+
+.step-card:hover {
+  transform: translateY(-10px) scale(1.03);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+}
+
+.step-card:hover::before {
+  transform: scaleX(1);
+}
+
+.step-icon {
+  width: 60px;
+  height: 60px;
+  background: var(--primary-color);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  font-weight: bold;
+  margin: 0 auto 1.5rem;
+  transition: all 0.3s;
+}
+
+.step-card:hover .step-icon {
+  background: var(--secondary-color);
+  transform: rotate(10deg) scale(1.1);
+}
+
+.step-card h3 {
+  color: var(--primary-color);
+  margin-bottom: 1.2rem;
+  font-size: 1.5rem;
+}
+
+.step-card p {
+  color: var(--dark-color);
+  line-height: 1.6;
+  font-size: 1.1rem;
+}
+
+/* Testimonial Section */
+.testimonial-card {
+  max-width: 700px;
+  margin: 0 auto;
+  background: white;
+  padding: 3rem;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+  position: relative;
+}
+
+.testimonial-card::before {
+  content: '"';
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  font-size: 5rem;
+  color: rgba(106, 76, 147, 0.1);
+  font-family: serif;
+  line-height: 1;
+}
+
+.testimonial-card p {
+  font-size: 1.4rem;
+  font-style: italic;
+  line-height: 1.8;
+  margin-bottom: 1.5rem;
+  position: relative;
+  z-index: 1;
+}
+
+.testimonial-author {
+  font-weight: bold;
+  color: var(--accent-color);
+  font-size: 1.2rem;
+}
+
+/* ======================
+   ANIMATIONS
+   ====================== */
+@keyframes pop-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes card-float {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+/* Animation Classes */
+.animate-pop-in {
+  animation: pop-in 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  opacity: 0;
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.8s ease-out forwards;
+  opacity: 0;
+}
+
+.animate-card-1 {
+  animation: slide-up 0.8s ease-out 0.1s forwards,
+             card-float 8s ease-in-out 1s infinite;
+  opacity: 0;
+}
+
+.animate-card-2 {
+  animation: slide-up 0.8s ease-out 0.2s forwards,
+             card-float 8s ease-in-out 1.2s infinite;
+  opacity: 0;
+}
+
+.animate-card-3 {
+  animation: slide-up 0.8s ease-out 0.3s forwards,
+             card-float 8s ease-in-out 1.4s infinite;
+  opacity: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+  .hero-section {
+    flex-direction: column;
+    text-align: center;
+    padding: 4rem 1rem;
+    min-height: auto;
+  }
+  
+  .hero-content {
+    margin-bottom: 2rem;
+  }
+  
+  .hero-illustration {
+    min-height: 300px;
+    width: 100%;
+  }
+  
+  .hero-title {
+    font-size: 3rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .section {
+    padding: 3rem 1rem;
+  }
+  
+  .step-card {
+    min-width: 100%;
+    max-width: 350px;
+  }
+  
+  .testimonial-card {
+    padding: 2rem;
+  }
+  
+  .testimonial-card p {
+    font-size: 1.2rem;
+  }
 }
 
 /* LoginForm */
@@ -1214,7 +1585,7 @@ td {
 }
 
 .game-header {
-  background: white;
+  background: rgba(73, 217, 233, 0.482);
   padding: 1rem 2rem;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   display: flex;
@@ -1226,11 +1597,8 @@ td {
 }
 
 .player-info {
-  background: linear-gradient(90deg, var(--sky-blue), var(--lavender));
-  color: white;
-  padding: 0.8rem 1.2rem;
-  border-radius: 20px;
-  display: inline-block;
+  display: flex;
+  flex-direction: column;
 }
 
 .user-name {
@@ -1262,9 +1630,7 @@ td {
 
 .action-buttons {
   display: flex;
-  justify-content: center;
-  gap: 1rem;
-  margin-bottom: 0.5rem;
+  gap: 10px;
 }
 
 .action-button {
@@ -1471,4 +1837,242 @@ td {
     width: 16px;
     height: 16px;
   }
+}
+
+/* success */
+.success-container {
+  max-width: 600px;
+  margin: 2rem auto;
+  padding: 2rem;
+  text-align: center;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.success-container h1 {
+  color: #6a4c93;
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.success-container p {
+  font-size: 1.2rem;
+  color: #333;
+  margin-bottom: 2rem;
+}
+
+.button-group {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.success-button {
+  background: #6a4c93;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 50px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.success-button:hover {
+  background: #8a5a44;
+  transform: translateY(-2px);
+}
+
+/* for forest */
+/* Forest Theme Additions */
+.forest-theme {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+.forest-layer {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  background-repeat: repeat-x;
+  background-position: bottom;
+  z-index: -1;
+}
+
+.trees-deep {
+  background-image: url('https://www.svgrepo.com/show/530888/trees.svg');
+  background-size: auto 40%;
+  bottom: 0;
+  opacity: 0.3;
+  animation: sway 15s infinite ease-in-out;
+}
+
+.trees-mid {
+  background-image: url('https://www.svgrepo.com/show/530888/trees.svg');
+  background-size: auto 60%;
+  bottom: -5%;
+  opacity: 0.5;
+  animation: sway 12s infinite ease-in-out reverse;
+}
+
+.trees-front {
+  background-image: url('https://www.svgrepo.com/show/530888/trees.svg');
+  background-size: auto 80%;
+  bottom: -10%;
+  opacity: 0.7;
+  animation: sway 8s infinite ease-in-out;
+}
+
+.ground {
+  background: linear-gradient(to bottom, transparent, #8BC34A 30%, #689F38 100%);
+  height: 30%;
+  bottom: 0;
+}
+
+.forest-creature {
+  position: absolute;
+  width: 80px;
+  height: 80px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  z-index: -1;
+}
+
+.forest-creature.owl {
+  background-image: url('https://www.svgrepo.com/show/530886/owl.svg');
+  top: 15%;
+  left: 10%;
+  animation: float 6s infinite ease-in-out;
+}
+
+.forest-creature.fox {
+  background-image: url('https://www.svgrepo.com/show/530885/fox.svg');
+  top: 25%;
+  right: 10%;
+  animation: float 7s infinite ease-in-out 1s;
+}
+
+.reading-bear {
+  width: 100%;
+  height: 100%;
+  background-image: url('https://www.svgrepo.com/show/530884/bear.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+/* Forest-themed cards */
+.forest-card {
+  position: relative;
+  overflow: hidden;
+  background-color: rgba(255, 255, 255, 0.9);
+  border: 2px solid #AED581;
+}
+
+.forest-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 5px;
+  background: linear-gradient(to right, #8BC34A, #689F38);
+}
+
+.card-decoration {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  opacity: 0.7;
+}
+
+.acorn {
+  background-image: url('https://www.svgrepo.com/show/530882/acorn.svg');
+  bottom: 10px;
+  right: 10px;
+}
+
+.leaf {
+  background-image: url('https://www.svgrepo.com/show/530883/leaf.svg');
+  top: 10px;
+  right: 10px;
+}
+
+.berry {
+  background-image: url('https://www.svgrepo.com/show/530881/berry.svg');
+  bottom: 10px;
+  left: 10px;
+}
+
+/* Forest button */
+.forest-btn {
+  background: linear-gradient(to right, #8BC34A, #689F38);
+  color: white;
+  padding: 15px 30px;
+  border-radius: 50px;
+  display: inline-flex;
+  align-items: center;
+  transition: all 0.3s;
+}
+
+.forest-btn:hover {
+  background: linear-gradient(to right, #689F38, #2E7D32);
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.button-icon {
+  margin-left: 10px;
+  font-size: 1.2rem;
+  transition: transform 0.3s;
+}
+
+.forest-btn:hover .button-icon {
+  transform: rotate(15deg) scale(1.2);
+}
+
+/* Forest sections */
+.forest-section {
+  background-color: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(5px);
+  border-radius: 16px;
+}
+
+/* New animations */
+@keyframes sway {
+  0%, 100% {
+    background-position-x: 0%;
+  }
+  50% {
+    background-position-x: 5%;
+  }
+}
+
+@keyframes float-delay {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+.animate-float-delay {
+  animation: float 6s infinite ease-in-out 0.5s;
+}
+
+.testimonial-decoration {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  background-image: url('https://www.svgrepo.com/show/530887/rabbit.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  opacity: 0.1;
+  bottom: 10px;
+  right: 10px;
 }

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { usePersistedState } from '../hooks/usePersistedState';
 import '../styles.css';
 
-const Phase3 = ({ proceed, loseLife }) => {
+const Phase3 = ({ proceed, loseLife}) => {
   // Extended word bank with correct answers and distractors
   const wordBank = [
     { image: 'bat.png', correct: 'bat', distractors: ['fat', 'mat'] },
@@ -30,6 +30,15 @@ const Phase3 = ({ proceed, loseLife }) => {
   const [roundCompleted, setRoundCompleted] = useState(false);
   const [feedback, setFeedback] = useState('');
 
+  // Reset the game when reset prop changes
+  // useEffect(() => {
+  //   if (reset) {
+  //     setCurrentRound(1);
+  //     setSelectedCells({});
+  //     setCompletedItems([]);
+  //   }
+  // }, [reset]);
+
   // Initialize each round with 4 random items and randomized option positions
   useEffect(() => {
     const shuffled = [...wordBank].sort(() => 0.5 - Math.random()).slice(0, 4);
@@ -45,7 +54,7 @@ const Phase3 = ({ proceed, loseLife }) => {
       };
     });
     
-    setCurrentItems(itemsWithRandomizedOptions);
+     setCurrentItems(itemsWithRandomizedOptions);
     setRoundCompleted(false);
     setFeedback(`Round ${currentRound} - Match the pictures to their names!`);
   }, [currentRound]);
@@ -55,7 +64,7 @@ const Phase3 = ({ proceed, loseLife }) => {
     if (completedItems.length === 4 && !roundCompleted) {
       setRoundCompleted(true);
       setFeedback(`Round ${currentRound} completed!`);
-      new Audio('/audio/success.mp3').play();
+      // new Audio('/audio/success.mp3').play();
     }
   }, [completedItems, currentRound, roundCompleted]);
 
@@ -69,12 +78,12 @@ const Phase3 = ({ proceed, loseLife }) => {
       setCompletedItems([...completedItems, rowIndex]);
       setSelectedCells({...selectedCells, [cellKey]: 'correct'});
       setFeedback(`Correct! ${correctAnswer} matches the picture!`);
-      new Audio('/audio/correct.mp3').play();
+      new Audio('/sounds/correct.mp3').play();
     } else {
       loseLife();
       setSelectedCells({...selectedCells, [cellKey]: 'wrong'});
       setFeedback(`Try again! Find the word for ${correctAnswer}`);
-      new Audio('/audio/wrong.mp3').play();
+      new Audio('/sounds/incorrect.mp3').play();
     }
   };
 
@@ -83,13 +92,32 @@ const Phase3 = ({ proceed, loseLife }) => {
       setCurrentRound(currentRound + 1);
       setCompletedItems([]);
     } else {
+      // Clear persisted state when moving to next phase
+      localStorage.removeItem('phase3_round');
+      localStorage.removeItem('phase3_selectedCells');
+      localStorage.removeItem('phase3_completedItems');
       proceed();
     }
   };
 
+  // Add restart function
+  const restartGame = () => {
+    setCurrentRound(1);
+    setSelectedCells({});
+    setCompletedItems([]);
+    setRoundCompleted(false);
+    setFeedback('Game restarted! Match the pictures to their names!');
+  };
+
   return (
     <div className="phase3-container">
-      <h2>Phase 3: Picture Match Challenge</h2>
+      <h2>Level 2: Sight Word Safari</h2>
+      
+      {/* <div className="controls">
+        <button onClick={restartGame} className="restart-button">
+          Restart Game
+        </button>
+      </div> */}
       
       <div className="round-tracker">
         {[1, 2, 3].map(round => (

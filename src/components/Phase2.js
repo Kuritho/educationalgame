@@ -6,17 +6,31 @@ const Phase2 = ({ proceed, loseLife }) => {
   // Extended word bank with images
   const wordBank = [
     { letter: 'A', word: 'Apple', image: 'apple.png', color: '#FF6B6B' },
-    { letter: 'B', word: 'Ball', image: 'ball.png', color: '#4ECDC4' },
-    { letter: 'C', word: 'Cat', image: 'cat.png', color: '#FFD166' },
-    { letter: 'D', word: 'Dog', image: 'dog.png', color: '#06D6A0' },
-    { letter: 'E', word: 'Egg', image: 'egg.png', color: '#FF9E7D' },
-    { letter: 'F', word: 'Fish', image: 'fish.png', color: '#A0CED9' },
-    { letter: 'G', word: 'Goat', image: 'goat.png', color: '#FFC09F' },
-    { letter: 'H', word: 'Hat', image: 'hat.png', color: '#ADF7B6' },
-    { letter: 'I', word: 'Igloo', image: 'igloo.png', color: '#AFCBFF' },
-    { letter: 'J', word: 'Jam', image: 'jam.png', color: '#FFEE93' },
-    { letter: 'K', word: 'Kite', image: 'kite.png', color: '#D6A3DC' },
-    { letter: 'L', word: 'Lion', image: 'lion.png', color: '#FFC8A2' }
+    { letter: 'B', word: 'Ball', image: 'ball.png', color: '#FF6B6B' },
+    { letter: 'C', word: 'Cat', image: 'cat.png', color: '#FF6B6B' },
+    { letter: 'D', word: 'Dog', image: 'dog.png', color: '#FF6B6B' },
+    { letter: 'E', word: 'Egg', image: 'egg.png', color: '#FF6B6B' },
+    { letter: 'F', word: 'Fish', image: 'fish.png', color: '#FF6B6B' },
+    { letter: 'G', word: 'Goat', image: 'goat.png', color: '#FF6B6B' },
+    { letter: 'H', word: 'Hat', image: 'hat.png', color: '#FF6B6B' },
+    { letter: 'I', word: 'Igloo', image: 'igloo.png', color: '#FF6B6B' },
+    { letter: 'J', word: 'Jam', image: 'jam.png', color: '#FF6B6B' },
+    { letter: 'K', word: 'Kite', image: 'kite.png', color: '#FF6B6B' },
+    { letter: 'L', word: 'Lion', image: 'lion.png', color: '#FF6B6B' },
+    { letter: 'M', word: 'Moon', image: 'moon.png', color: '#FF6B6B' },
+    { letter: 'N', word: 'Nest', image: 'nest.png', color: '#FF6B6B' },
+    { letter: 'O', word: 'Owl', image: 'owl.png', color: '#FF6B6B' },
+    { letter: 'P', word: 'Pig', image: 'pig.png', color: '#FF6B6B' },
+    { letter: 'Q', word: 'Queen', image: 'queen.png', color: '#FF6B6B' },
+    { letter: 'R', word: 'Ring', image: 'ring.png', color: '#FF6B6B' },
+    { letter: 'S', word: 'Star', image: 'star.png', color: '#FF6B6B' },
+    { letter: 'T', word: 'Turtle', image: 'turtle.png', color: '#FF6B6B' },
+    { letter: 'U', word: 'Umbrella', image: 'umbrella.png', color: '#FF6B6B' },
+    { letter: 'V', word: 'Violin', image: 'violin.png', color: '#FF6B6B' },
+    { letter: 'W', word: 'Wings', image: 'wings.png', color: '#FF6B6B' },
+    { letter: 'X', word: 'X-Ray', image: 'x-ray.png', color: '#FF6B6B' },
+    { letter: 'Y', word: 'Yoyo', image: 'yoyo.png', color: '#FF6B6B' },
+    { letter: 'Z', word: 'Zebra', image: 'zebra.png', color: '#FF6B6B' },
   ];
 
 //   const [currentRound, setCurrentRound] = useState(1);
@@ -111,7 +125,7 @@ const Phase2 = ({ proceed, loseLife }) => {
       </div>
       
       <header className="game-header">
-        <h2>🌈 Alphabet Adventure 🎈</h2>
+        <h2>Alphabet Matching</h2>
         <div className="progress-tracker">
           {[1, 2, 3].map(round => (
             <div 
@@ -136,6 +150,7 @@ const Phase2 = ({ proceed, loseLife }) => {
       <div className="game-board">
         <div className="letters-side">
           <h3>✨ Letters ✨</h3>
+          <p className="instruction-text">Match the letters to their pictures and learn the alphabet!</p>
           <div className="letters-grid">
             {selectedLetters.map((letter, index) => {
               const color = getLetterColor(letter);

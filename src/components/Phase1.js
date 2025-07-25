@@ -73,7 +73,7 @@ const Phase1 = ({ proceed, loseLife }) => {
 
   return (
     <div className="phase-container">
-      <h2>Phase 1: Alphabet Adventure</h2>
+      <h2>Exercise: Alphabet Adventure</h2>
       <p>Click a letter to see items that start with it!</p>
       <button onClick={handleComplete} disabled={!completed}>
         {completed ? "Already Completed" : "Complete Phase"}
