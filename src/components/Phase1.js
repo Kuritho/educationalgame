@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { usePersistedState } from '../hooks/usePersistedState';
 import '../styles.css';
 
 const Phase1 = ({ proceed, loseLife }) => {
+  const [completed, setCompleted] = usePersistedState('phase1_completed', false);
   const [selectedLetter, setSelectedLetter] = useState(null);
   const [items, setItems] = useState([]);
   const [audio, setAudio] = useState(null);
@@ -27,6 +29,11 @@ const Phase1 = ({ proceed, loseLife }) => {
     'Banana': 'banana.mp3',
     'Bear': 'bear.mp3'
     // Continue for all items...
+  };
+
+    const handleComplete = () => {
+    setCompleted(true);
+    proceed();
   };
 
   const handleLetterClick = (letter) => {
@@ -66,8 +73,11 @@ const Phase1 = ({ proceed, loseLife }) => {
 
   return (
     <div className="phase-container">
-      <h2>Phase 1: Alphabet Adventure</h2>
+      <h2>Exercise: Alphabet Adventure</h2>
       <p>Click a letter to see items that start with it!</p>
+      <button onClick={handleComplete} disabled={!completed}>
+        {completed ? "Already Completed" : "Complete Phase"}
+      </button>
       
       <div className="alphabet-grid">
         {alphabet.map(letter => (

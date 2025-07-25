@@ -1,67 +1,479 @@
-/* TicTacToe.css */
+/* Phase 5 - Super Fun Voice Tic Tac Toe - Complete CSS */
 
-.tic-tac-toe {
-  max-width: 400px;
-  margin: 40px auto;
+/* Main Container - Carnival Theme */
+.phase-container {
   text-align: center;
-  font-family: 'Segoe UI', sans-serif;
+  padding: 2rem;
+  background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
+  border-radius: 30px;
+  max-width: 420px;
+  margin: 2rem auto;
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 0, 0.2),
+    inset 0 0 30px rgba(255, 255, 255, 0.7);
+  border: 5px solid #fff;
+  position: relative;
+  overflow: hidden;
+  font-family: 'Comic Sans MS', 'Marker Felt', sans-serif;
+}
+/* Score Display */
+.score-display {
+  display: flex;
+  justify-content: space-around;
+  margin: 1rem 0;
+  font-size: 1.5rem;
+  font-weight: bold;
 }
 
-h2 {
-  color: #333;
-  margin-bottom: 20px;
+.score-x {
+  color: #ff4757;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+  background: rgba(255,255,255,0.7);
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  min-width: 100px;
 }
 
-.board {
+.score-o {
+  color: #1e90ff;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+  background: rgba(255,255,255,0.7);
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  min-width: 100px;
+}
+
+/* Final Score Screen */
+.final-score {
+  background: rgba(255,255,255,0.8);
+  padding: 1.5rem;
+  border-radius: 20px;
+  margin: 1rem 0;
+  border: 3px dashed #5d4390;
+}
+
+.score-player {
+  font-size: 1.8rem;
+  margin: 0.5rem 0;
+  font-weight: bold;
+}
+
+.winner-message {
+  font-size: 1.8rem;
+  color: #5d4390;
+  margin: 1rem 0;
+  font-weight: bold;
+  animation: rainbowText 3s infinite;
+}
+
+.play-again-button {
+  background: linear-gradient(145deg, #4CAF50, #45a049);
+  color: white;
+  border: none;
+  padding: 15px 30px;
+  font-size: 1.2rem;
+  border-radius: 50px;
+  cursor: pointer;
+  margin-top: 1rem;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+  transition: all 0.3s;
+}
+
+.play-again-button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+}
+
+@keyframes rainbowText {
+  0% { color: #ff4757; }
+  20% { color: #ff8a00; }
+  40% { color: #ffd700; }
+  60% { color: #2ed573; }
+  80% { color: #1e90ff; }
+  100% { color: #9c88ff; }
+}
+
+/* Round Indicator */
+.round-indicator {
+  font-size: 1.3rem;
+  font-weight: bold;
+  color: #5d4390;
+  margin-bottom: 1rem;
+  background: rgba(255,255,255,0.7);
+  padding: 0.5rem;
+  border-radius: 20px;
+  display: inline-block;
+}
+
+/* Animated Background Elements */
+.phase-container::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: 
+    radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%),
+    url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="%23ffffff40"><circle cx="25" cy="25" r="3"/><circle cx="75" cy="25" r="4"/><circle cx="50" cy="50" r="2"/><circle cx="25" cy="75" r="3"/><circle cx="75" cy="75" r="5"/></svg>');
+  animation: rotate 25s linear infinite;
+  z-index: 0;
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Header Styles */
+.phase-container h2 {
+  color: #5d4390;
+  margin-bottom: 1rem;
+  font-size: 32px;
+  font-weight: 700;
+  text-shadow: 2px 2px 4px rgba(190, 32, 32, 0.089);
+  position: relative;
+  z-index: 1;
+  background: linear-gradient(to right, #ff8a00, #e52e71);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: titleColorShift 8s infinite alternate;
+}
+.secondline {
+  font-size: 24px;
+  color: #5d4390;
+  margin-top: -10px;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+}
+.thirline {
+  font-size: 20px;
+  color: #5d4390;
+  margin-top: -20px;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+}
+@keyframes titleColorShift {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
+}
+
+/* Instructions */
+.instructions {
+  color: #5d4390;
+  margin-bottom: 1.5rem;
+  font-size: 18px;
+  line-height: 1.5;
+  position: relative;
+  z-index: 1;
+  min-height: 40px;
+  background-color: rgba(255,255,255,0.7);
+  padding: 10px;
+  border-radius: 15px;
+  border: 2px dashed #ff8a00;
+}
+
+/* Voice Control Section - Microphone Button */
+.voice-controls {
+  margin: 25px 0;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+
+.listen-button {
+  background: linear-gradient(145deg, #4CAF50, #45a049);
+  color: white;
+  border: none;
+  padding: 15px 30px;
+  font-size: 18px;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 
+    0 5px 15px rgba(0,0,0,0.2),
+    inset 0 2px 0 rgba(255,255,255,0.3);
+  position: relative;
+  overflow: hidden;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.listen-button:hover:not(:disabled) {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+}
+
+.listen-button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.listen-button:disabled {
+  background: linear-gradient(145deg, #cccccc, #aaaaaa);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.listen-button.active {
+  background: linear-gradient(145deg, #f44336, #e53935);
+  animation: pulseGlow 1.5s infinite;
+}
+
+@keyframes pulseGlow {
+  0% { 
+    transform: scale(1);
+    box-shadow: 0 0 10px rgba(244, 67, 54, 0.7);
+  }
+  50% { 
+    transform: scale(1.05);
+    box-shadow: 0 0 20px rgba(244, 67, 54, 0.9);
+  }
+  100% { 
+    transform: scale(1);
+    box-shadow: 0 0 10px rgba(244, 67, 54, 0.7);
+  }
+}
+
+/* Feedback Bubble */
+.feedback {
+  margin-top: 15px;
+  padding: 12px;
+  background-color: rgba(255,255,255,0.9);
+  border-radius: 15px;
+  font-size: 16px;
+  min-height: 20px;
+  border: 3px solid #4CAF50;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+  position: relative;
+}
+
+.feedback::after {
+  content: "";
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-bottom: 10px solid #4CAF50;
+}
+
+/* Game Board - Playful Design */
+.tic-tac-toe-game {
+  background: rgba(253, 252, 252, 0.85);
+  padding: 1.5rem;
+  border-radius: 25px;
+  box-shadow: 
+    0 8px 20px rgba(0, 0, 0, 0.1),
+    inset 0 0 15px rgba(0, 0, 0, 0.13);
+  backdrop-filter: blur(5px);
+  position: relative;
+  z-index: 1;
+  border: 3px solid #fff;
+}
+
+.game-board {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  margin-bottom: 20px;
+  grid-template-rows: repeat(3, 1fr);
+  gap: 15px;
+  width: 100%;
+  aspect-ratio: 1/1;
+  margin-bottom: 1.5rem;
 }
 
-.cell {
-  background-color: #f0f0f0;
-  border: 2px solid #ccc;
-  padding: 30px;
-  font-size: 18px;
-  font-weight: bold;
-  color: #333;
-  cursor: default;
-  border-radius: 8px;
-  transition: background-color 0.3s ease;
-}
-
-.cell:empty {
-  background-color: #ffffff;
-}
-
-.word-form {
+/* Squares - Fun Design */
+.square {
+  background: rgba(255, 255, 255, 0.95);
+  border: none;
+  border-radius: 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
-}
-
-.word-form input {
+  justify-content: center;
+  font-weight: 700;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  box-shadow: 
+    0 4px 10px rgba(14, 13, 13, 0.829),
+    inset 0 0 0 3px rgba(0, 0, 0, 0.123);
+  position: relative;
+  overflow: hidden;
   padding: 10px;
-  font-size: 16px;
-  width: 80%;
-  max-width: 250px;
-  border: 2px solid #aaa;
-  border-radius: 6px;
-}
-
-.word-form button {
-  padding: 10px 16px;
-  font-size: 15px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 6px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
 }
 
-.word-form button:hover {
-  background-color: #0056b3;
+.square::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.4) 0%, transparent 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.square:hover::before {
+  opacity: 1;
+}
+
+/* Square Content */
+.square-word {
+  font-size: 16px;
+  color: #5d4390;
+  margin-bottom: 8px;
+  font-weight: 600;
+  text-transform: capitalize;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+}
+
+.square-mark {
+  font-size: 42px;
+  font-weight: bold;
+  line-height: 1;
+  transition: all 0.3s;
+}
+
+.square.X {
+  color: #ff4757;
+  text-shadow: 2px 2px 4px rgba(255, 71, 87, 0.3);
+}
+
+.square.O {
+  color: #1e90ff;
+  text-shadow: 2px 2px 4px rgba(30, 144, 255, 0.3);
+}
+
+.square.empty {
+  color: rgba(93, 67, 144, 0.2);
+}
+
+/* Winning Squares - Celebration! */
+.winning-square {
+  animation: bounce 0.6s ease 2, rainbowBorder 3s infinite;
+  position: relative;
+}
+
+.winning-square::after {
+  content: "";
+  position: absolute;
+  top: -5px;
+  left: -5px;
+  right: -5px;
+  bottom: -5px;
+  border-radius: 25px;
+  border: 4px solid;
+  animation: borderPulse 1.5s infinite;
+  z-index: -1;
+}
+
+@keyframes rainbowBorder {
+  0% { border-color: #ff4757; }
+  25% { border-color: #ffa502; }
+  50% { border-color: #2ed573; }
+  75% { border-color: #1e90ff; }
+  100% { border-color: #ff4757; }
+}
+
+.trophy-icon {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  font-size: 20px;
+  animation: bounce 0.8s infinite alternate;
+}
+
+/* Player Turn Indicator */
+.player-turn-indicator {
+  font-weight: bold;
+  font-size: 18px;
+  color: #5d4390;
+  animation: pulseColor 2s infinite;
+  margin-bottom: 15px;
+  background-color: rgba(255,255,255,0.7);
+  padding: 8px 15px;
+  border-radius: 50px;
+  display: inline-block;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+}
+
+@keyframes pulseColor {
+  0% { color: #ff4757; }
+  50% { color: #5d4390; }
+  100% { color: #ff4757; }
+}
+
+/* Animations */
+@keyframes bounce {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+@keyframes borderPulse {
+  0%, 100% { opacity: 0.8; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(1.05); }
+}
+
+/* Confetti Celebration */
+.confetti {
+  position: absolute;
+  width: 15px;
+  height: 15px;
+  opacity: 0;
+  animation: confettiFall 3s linear forwards;
+  z-index: 10;
+}
+
+@keyframes confettiFall {
+  0% {
+    transform: translateY(-100px) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 450px) {
+  .phase-container {
+    padding: 1.5rem;
+    max-width: 340px;
+  }
+  
+  .square-word {
+    font-size: 14px;
+  }
+  
+  .square-mark {
+    font-size: 36px;
+  }
+  
+  .listen-button {
+    padding: 12px 24px;
+    font-size: 16px;
+  }
+  
+  .phase-container h2 {
+    font-size: 28px;
+  }
+  
+  .instructions {
+    font-size: 16px;
+  }
+}
+
+/* Fun Emoji Animations */
+.emoji {
+  font-size: 24px;
+  animation: float 3s ease-in-out infinite;
+  display: inline-block;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-10px) rotate(5deg); }
 }
