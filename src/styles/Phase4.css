@@ -405,4 +405,44 @@ h1 {
   color: #333;
 }
 
-/* Keep all your existing styles below */
+.feedback-box {
+  margin: 10px 0;
+  padding: 10px;
+  background-color: #f0f8ff;
+  border-radius: 5px;
+  border-left: 4px solid #4285f4;
+}
+
+.voice-feedback {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #4285f4;
+  font-weight: 500;
+}
+
+.error-message {
+  color: #dc3545;
+  background: #f8d7da;
+  padding: 8px;
+  border-radius: 4px;
+  margin: 10px 0;
+  border-left: 4px solid #dc3545;
+}
+
+.recovering-message {
+  color: #ffc107;
+  background: #fff3cd;
+  padding: 8px;
+  border-radius: 4px;
+  margin: 10px 0;
+  border-left: 4px solid #ffc107;
+}
+
+.maze-loading {
+  padding: 2rem;
+  text-align: center;
+  font-size: 1.5rem;
+  color: #666;
+}
+

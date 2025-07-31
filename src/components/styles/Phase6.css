@@ -1,0 +1,384 @@
+/* Rhyming BINGO - Super Kid-Friendly Theme - Responsive */
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;700&display=swap');
+
+:root {
+  --primary: #FF9E00;
+  --secondary: #FF6B6B;
+  --accent: #4ECDC4;
+  --background: #FFF5E6;
+  --text: #5D5D5D;
+  --highlight: #FFD166;
+  --success: #06D6A0;
+  --error: #EF476F;
+  --card-bg: #FFFFFF;
+}
+
+.phase6-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: var(--background);
+  border-radius: 32px;
+  max-width: 800px;
+  margin: 1rem auto;
+  padding: 1.5rem;
+  font-family: 'Baloo 2', cursive;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+  border: 8px solid var(--highlight);
+  position: relative;
+  overflow: hidden;
+  min-height: auto;
+  width: 95%;
+}
+
+.phase6-container::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 10px;
+  background: linear-gradient(90deg, 
+    #FF9E00, #FF6B6B, #4ECDC4, #06D6A0, #FFD166, #EF476F);
+  z-index: 1;
+}
+
+.phase6-container h1 {
+  color: var(--primary);
+  font-size: 2.2rem;
+  margin: 0.5rem 0;
+  text-shadow: 3px 3px 0 rgba(0,0,0,0.1);
+  position: relative;
+  display: inline-block;
+  text-align: center;
+}
+
+.hearts {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 0.5rem;
+}
+
+.heart {
+  font-size: 1.8rem;
+  color: var(--error);
+  animation: pulse 1.5s infinite;
+}
+
+.instructions {
+  background: white;
+  padding: 0.8rem 1rem; 
+  border-radius: 15px;
+  font-size: 1rem;
+  color: var(--text);
+  margin-bottom: 1rem;
+  text-align: center;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  border: 3px dashed var(--accent);
+  width: 95%;
+}
+
+.message-box {
+  background: white;
+  padding: 0.8rem;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  color: var(--primary);
+  margin-bottom: 1rem;
+  text-align: center;
+  font-weight: bold;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  border-left: 6px solid var(--secondary);
+  width: 95%;
+}
+
+.bingo-boards {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  width: 100%;
+}
+
+.player-board {
+  order: 1;
+}
+
+.current-word-container {
+  order: 2;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin: 0.5rem 0;
+}
+
+.current-word {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--secondary);
+  background: white;
+  padding: 0.5rem 1.5rem;
+  border-radius: 50px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  border: 3px solid var(--highlight);
+  text-align: center;
+}
+
+.ai-board {
+  order: 3;
+}
+
+.player-board, .ai-board {
+  background: white;
+  border-radius: 15px;
+  padding: 1rem;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+  width: 95%;
+  max-width: 320px;
+  position: relative;
+}
+
+.player-board h2, .ai-board h2 {
+  color: var(--primary);
+  font-size: 1.5rem;
+  margin: 0 0 0.8rem 0;
+  text-align: center;
+}
+
+.bingo-card {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin: 0 auto;
+}
+
+.bingo-cell {
+  aspect-ratio: 1;
+  background: white;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  font-weight: bold;
+  color: var(--text);
+  cursor: default;
+  transition: all 0.3s;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  border: 2px solid #f0f0f0;
+  position: relative;
+  overflow: hidden;
+}
+
+.bingo-cell.clickable {
+  cursor: pointer;
+}
+
+.bingo-cell.clickable:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+  border-color: var(--primary);
+}
+
+.bingo-cell.selected {
+  background: var(--success);
+  color: white;
+  transform: rotate(360deg);
+  transition: all 0.6s;
+}
+
+.bingo-cell.current {
+  animation: none;
+  border: 2px solid #f0f0f0;
+}
+
+.next-button-container {
+  order: 1.5; /* Between player and current word */
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin: 0.5rem 0;
+}
+
+.button-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  margin-top: 1rem;
+  gap: 0.5rem;
+}
+
+.start-button, .restart-button {
+  background: var(--primary);
+  color: white;
+  font-size: 1.2rem;
+  padding: 0.7rem 1.5rem;
+  border-radius: 50px;
+  border: none;
+  margin: 0.2rem 0;
+  box-shadow: 0 4px 8px rgba(255,158,0,0.3);
+}
+
+.exit-button {
+  background: white;
+  color: var(--error);
+  font-size: 1.1rem;
+  padding: 0.6rem 1.5rem;
+  border-radius: 50px;
+  border: 2px solid var(--error);
+  margin: 0.2rem 0;
+  box-shadow: 0 2px 6px rgba(239,71,111,0.2);
+}
+
+/* Desktop Layout */
+@media (min-width: 768px) {
+  .phase6-container {
+    padding: 2rem;
+    min-height: 700px;
+  }
+  
+  .phase6-container h1 {
+    font-size: 3rem;
+  }
+  
+  .bingo-boards {
+    flex-direction: row;
+    justify-content: center;
+    gap: 2rem;
+    align-items: flex-start;
+  }
+  
+  .current-word-container {
+    order: 3;
+    margin: 1rem 0;
+  }
+  
+  .next-button-container {
+    order: 4;
+    margin: 0.5rem 0;
+  }
+  
+  .player-board, .ai-board {
+    width: 300px;
+  }
+  
+  .bingo-cell {
+    font-size: 1.2rem;
+  }
+  
+  .button-container {
+    flex-direction: row;
+    justify-content: center;
+    gap: 1rem;
+  }
+}
+
+/* Animation keyframes */
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+@keyframes highlight {
+  from { box-shadow: 0 0 8px var(--highlight); }
+  to { box-shadow: 0 0 15px var(--highlight); }
+}
+/* Add these to your Phase6.css */
+
+.cards-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.player-board, .ai-board {
+  width: 100%;
+  max-width: 320px;
+  margin: 0 auto;
+}
+
+.current-word-container {
+  width: 100%;
+  text-align: center;
+  margin: 0.5rem 0;
+}
+
+.current-word {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #FF6B6B;
+  background: white;
+  padding: 0.5rem 1.5rem;
+  border-radius: 50px;
+  display: inline-block;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.next-button-container {
+  width: 100%;
+  text-align: center;
+  margin: 0.5rem 0;
+}
+
+.next-button {
+  background: #4ECDC4;
+  color: white;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  font-size: 1.2rem;
+  border-radius: 50px;
+  cursor: pointer;
+  font-weight: bold;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  transition: all 0.3s;
+}
+
+.next-button:hover {
+  background: #3DBDB4;
+  transform: translateY(-2px);
+}
+.cards-vertical-layout {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+  width: 100%;
+  position: relative;
+  right: 0px;
+}
+
+.current-word-display {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #FF6B6B;
+  background: white;
+  padding: 0.5rem 1.5rem;
+  border-radius: 50px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  margin: 0.5rem 0;
+}
+
+.next-word-button {
+  background: #4ECDC4;
+  color: white;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  font-size: 1.2rem;
+  border-radius: 50px;
+  cursor: pointer;
+  font-weight: bold;
+  margin: 0.5rem 0;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.action-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}

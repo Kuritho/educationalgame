@@ -3,6 +3,7 @@ import Phase1 from './Phase1';
 import Phase2 from './Phase2';
 import Phase3 from './Phase3';
 import Phase4 from './Phase4'; // Import Phase4
+import Phase5 from './Phase5'; // Import Phase5
 import LivesCounter from './LivesCounter';
 import GameOver from './GameOver';
 import GameComplete from './GameComplete';
@@ -54,6 +55,8 @@ const Game = () => {
     loseLife={loseLife} 
     lives={lives}  // Pass the lives prop
   />;
+      case 5:
+        return <Phase5 proceed={proceedToNextPhase} loseLife={loseLife} />;
       default:
         return <GameComplete onRestart={restartGame} />;
     }

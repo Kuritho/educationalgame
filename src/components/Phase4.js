@@ -1,12 +1,13 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import '../styles/Phase4.css';
 import LivesCounter from './LivesCounter';
 
 const Phase4 = ({ proceed, loseLife, lives: initialLives }) => {
-  const [maze, setMaze] = useState([]);
+  // State declarations
+  const [maze, setMaze] = useState([[]]);
   const [letters, setLetters] = useState({});
-  const [playerPosition, setPlayerPosition] = useState({ x: 1, y: 1 });
-  const [exitPosition, setExitPosition] = useState({ x: 15, y: 15 });
+  const [playerPosition, setPlayerPosition] = useState({ x: 0, y: 0 });
+  const [exitPosition, setExitPosition] = useState({ x: 0, y: 0 });
   const [visited, setVisited] = useState([]);
   const [currentRound, setCurrentRound] = useState(1);
   const [score, setScore] = useState(0);
@@ -18,9 +19,39 @@ const Phase4 = ({ proceed, loseLife, lives: initialLives }) => {
   const [retryCount, setRetryCount] = useState(0);
   const [isSpeechSupported, setIsSpeechSupported] = useState(true);
   const recognitionRef = useRef(null);
+  const [isMazeReady, setIsMazeReady] = useState(false);
 
   const letterPool = ['B', 'C', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 
                      'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'X', 'Y', 'Z'];
+
+  // Comprehensive pronunciation mapping
+  const letterPronunciationMap = {
+    'ay': 'A', 'eh': 'A', 'alpha': 'A',
+    'bee': 'B', 'be': 'B', 'bravo': 'B', 'beer': 'B',
+    'see': 'C', 'sea': 'C', 'cee': 'C', 'si': 'C', 'charley': 'C', 'charlie': 'C',
+    'dee': 'D', 'delta': 'D', 'dog': 'D', 'day': 'D',
+    'ee': 'E', 'echo': 'E', 'eat': 'E',
+    'eff': 'F', 'foxtrot': 'F', 'fox': 'F',
+    'gee': 'G', 'golf': 'G', 'go': 'G', 'girl': 'G',
+    'aitch': 'H', 'haitch': 'H', 'hotel': 'H', 'house': 'H',
+    'jay': 'J', 'juliet': 'J', 'jump': 'J', 'jet': 'J',
+    'kay': 'K', 'kilo': 'K', 'king': 'K', 'key': 'K',
+    'el': 'L', 'lima': 'L', 'love': 'L', 'lake': 'L',
+    'em': 'M', 'mike': 'M', 'mother': 'M', 'man': 'M',
+    'en': 'N', 'november': 'N', 'no': 'N', 'now': 'N',
+    'oh': 'O', 'oscar': 'O', 'open': 'O', 'orange': 'O',
+    'pee': 'P', 'papa': 'P', 'pet': 'P', 'park': 'P',
+    'cue': 'Q', 'quebec': 'Q', 'queen': 'Q', 'quick': 'Q',
+    'are': 'R', 'romeo': 'R', 'red': 'R', 'run': 'R',
+    'ess': 'S', 'sierra': 'S', 'sun': 'S', 'sea': 'S',
+    'tee': 'T', 'tango': 'T', 'top': 'T', 'talk': 'T',
+    'you': 'U', 'uniform': 'U', 'up': 'U', 'under': 'U',
+    'vee': 'V', 'victor': 'V', 'van': 'V', 'voice': 'V',
+    'double you': 'W', 'double-u': 'W', 'whiskey': 'W', 'water': 'W',
+    'ex': 'X', 'x-ray': 'X',
+    'why': 'Y', 'yankee': 'Y', 'yes': 'Y', 'yellow': 'Y',
+    'zee': 'Z', 'zed': 'Z', 'zulu': 'Z', 'zoo': 'Z'
+  };
 
   // Generate initial maze
   useEffect(() => {
@@ -38,116 +69,96 @@ const Phase4 = ({ proceed, loseLife, lives: initialLives }) => {
     return () => clearTimeout(timer);
   }, [timeLeft, timerActive]);
 
+  // Letter detection handler
+  const handleDetectedLetter = useCallback((letter) => {
+    console.log('Processing letter:', letter);
+    setLastSpokenLetter(letter);
+    setMessage(`Moving to ${letter}...`);
+
+    const letterPos = Object.entries(letters).find(
+      ([pos, l]) => l === letter
+    );
+
+    if (letterPos) {
+      const [posKey] = letterPos;
+      const [x, y] = posKey.split(',').map(Number);
+      moveBeeToPosition({ x, y });
+    } else {
+      setMessage(`${letter} not found. Try: ${Object.values(letters).join(', ')}`);
+    }
+  }, [letters]);
+
   // Speech recognition setup
   useEffect(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     
     if (!SpeechRecognition) {
       setIsSpeechSupported(false);
-      setMessage('Voice control not supported in your browser. Use keyboard instead.');
+      setMessage('Voice control not supported. Use keyboard instead.');
       return;
     }
 
-    recognitionRef.current = new SpeechRecognition();
-    recognitionRef.current.continuous = true;
-    recognitionRef.current.interimResults = false;
-    recognitionRef.current.lang = 'en-US';
+    const recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = false;
+    recognition.lang = 'en-US';
+    recognition.maxAlternatives = 10;
 
-    recognitionRef.current.onresult = (event) => {
-      const result = event.results[event.results.length - 1][0].transcript;
-      const spokenLetter = result.trim().toUpperCase().charAt(0);
+    recognition.onresult = (event) => {
+      console.log('Raw results:', event.results);
       
-      setLastSpokenLetter(spokenLetter);
-      
-      const letterPos = Object.entries(letters).find(
-        ([_, letter]) => letter === spokenLetter
-      );
-
-      if (letterPos) {
-        const [posKey] = letterPos;
-        const [x, y] = posKey.split(',').map(Number);
-        moveBeeToPosition({ x, y });
-      } else {
-        setMessage(`Letter "${spokenLetter}" not found. Try: ${Object.values(letters).join(', ')}`);
-      }
-    };
-
-    recognitionRef.current.onerror = (event) => {
-      console.error('Speech recognition error:', event.error);
-      setListening(false);
-      
-      let errorMessage = 'Voice control error: ';
-      switch(event.error) {
-        case 'network':
-          errorMessage = 'Network error. Please check your internet connection.';
-          if (retryCount < 3) {
-            const delay = Math.min(1000 * (2 ** retryCount), 8000);
-            setTimeout(() => {
-              setRetryCount(prev => prev + 1);
-              recognitionRef.current.start();
-            }, delay);
+      const results = event.results[event.results.length - 1];
+      for (let i = 0; i < results.length; i++) {
+        const transcript = results[i].transcript.trim().toLowerCase();
+        console.log(`Alternative ${i}:`, transcript);
+        
+        // Check exact single letter first
+        if (transcript.length === 1 && letterPool.includes(transcript.toUpperCase())) {
+          handleDetectedLetter(transcript.toUpperCase());
+          return;
+        }
+        
+        // Check pronunciation map
+        for (const [word, letter] of Object.entries(letterPronunciationMap)) {
+          if (transcript.includes(word)) {
+            handleDetectedLetter(letter);
             return;
           }
-          break;
-        case 'not-allowed':
-        case 'permission-denied':
-          errorMessage = 'Microphone access denied. Please allow microphone permissions.';
-          break;
-        case 'audio-capture':
-          errorMessage = 'No microphone found. Please check your audio devices.';
-          break;
-        default:
-          errorMessage = `Voice recognition error (${event.error}). Try again later.`;
-      }
-      
-      setMessage(errorMessage);
-    };
-
-    recognitionRef.current.onstart = () => {
-      setRetryCount(0);
-    };
-
-    recognitionRef.current.onend = () => {
-      if (listening) {
-        recognitionRef.current.start();
-      }
-    };
-
-    return () => {
-      if (recognitionRef.current) {
-        recognitionRef.current.stop();
-      }
-    };
-  }, [letters, listening, retryCount]);
-
-  // Keyboard fallback
-  useEffect(() => {
-    const handleKeyPress = (e) => {
-      if (listening) return; // Skip if voice control is active
-      
-      const pressedKey = e.key.toUpperCase();
-      if (letterPool.includes(pressedKey)) {
-        setLastSpokenLetter(pressedKey);
-        
-        const letterPos = Object.entries(letters).find(
-          ([_, letter]) => letter === pressedKey
-        );
-
-        if (letterPos) {
-          const [posKey] = letterPos;
-          const [x, y] = posKey.split(',').map(Number);
-          moveBeeToPosition({ x, y });
-        } else {
-          setMessage(`Letter "${pressedKey}" not found. Try: ${Object.values(letters).join(', ')}`);
         }
       }
+      
+      setMessage(`Didn't catch that. Try saying just the letter clearly`);
     };
 
-    window.addEventListener('keydown', handleKeyPress);
-    return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [letters, listening]);
+    recognition.onerror = (event) => {
+      console.error('Recognition error:', event.error);
+      setMessage(`Error: ${event.error}. Try again.`);
+    };
 
+    recognitionRef.current = recognition;
+
+    return () => {
+      recognition.stop();
+    };
+  }, [handleDetectedLetter]);
+
+  const toggleVoiceControl = () => {
+    if (!recognitionRef.current) return;
+    
+    if (listening) {
+      recognitionRef.current.stop();
+      setListening(false);
+      setMessage('Microphone off');
+    } else {
+      setListening(true);
+      setMessage('Listening... Say a letter clearly');
+      recognitionRef.current.start();
+    }
+  };
+
+  // Maze generation and game logic functions
   const generateMaze = () => {
+    setIsMazeReady(false);
     const size = 17;
     const grid = Array(size).fill().map(() => Array(size).fill(1));
     const newLetters = {};
@@ -169,6 +180,7 @@ const Phase4 = ({ proceed, loseLife, lives: initialLives }) => {
           carve(nx, ny);
         }
       }
+      setIsMazeReady(true);
     };
 
     carve(1, 1);
@@ -323,63 +335,45 @@ const Phase4 = ({ proceed, loseLife, lives: initialLives }) => {
     }
   };
 
-  const toggleVoiceControl = () => {
-    if (!recognitionRef.current) {
-      setMessage('Voice control not supported in your browser');
-      return;
-    }
-
-    // Check network connection
-    if (!navigator.onLine) {
-      setMessage('Network unavailable. Voice control requires internet connection.');
-      return;
-    }
-
-    if (listening) {
-      recognitionRef.current.stop();
-      setListening(false);
-      setMessage('Voice control turned off');
-    } else {
-      try {
-        recognitionRef.current.start();
-        setListening(true);
-        setMessage('Listening... Say a letter to move');
-      } catch (e) {
-        console.error('Failed to start recognition:', e);
-        setMessage('Error starting voice control. Please refresh and try again.');
-      }
-    }
-  };
-
   const renderCell = (cellValue, x, y) => {
-    const isPlayer = x === playerPosition.x && y === playerPosition.y;
-    const isExit = x === exitPosition.x && y === exitPosition.y;
-    const wasVisited = visited.some(pos => pos.x === x && pos.y === y);
-    const hasLetter = letters[`${x},${y}`];
+  console.log(`Rendering cell ${x},${y}`, {
+  cellValue,
+  playerPosition,
+  exitPosition,
+  visited,
+  letters
+});
+  // Add null checks for all position objects
+  const isPlayer = playerPosition && x === playerPosition.x && y === playerPosition.y;
+  const isExit = exitPosition && x === exitPosition.x && y === exitPosition.y;
+  const wasVisited = visited && visited.some(pos => pos && pos.x === x && pos.y === y);
+  const hasLetter = letters && letters[`${x},${y}`];
 
-    return (
-      <div
-        key={`${x}-${y}`}
-        className={`maze-cell ${
-          isPlayer ? 'player' :
-          isExit ? 'exit' :
-          wasVisited ? 'visited' :
-          cellValue === 1 ? 'wall' : 'path'
-        }`}
-      >
-        {isPlayer && <div className="bee">🐝</div>}
-        {isExit && (
-          <>
-            <div className="beehouse">🏡</div>
-            {hasLetter && <div className="maze-letter exit-letter">{hasLetter}</div>}
-          </>
-        )}
-        {!isExit && hasLetter && (
-          <div className="maze-letter">{hasLetter}</div>
-        )}
-      </div>
-    );
-  };
+  if (cellValue === undefined) return null; // Skip rendering if cell is undefined
+
+  return (
+    <div
+      key={`${x}-${y}`}
+      className={`maze-cell ${
+        isPlayer ? 'player' :
+        isExit ? 'exit' :
+        wasVisited ? 'visited' :
+        cellValue === 1 ? 'wall' : 'path'
+      }`}
+    >
+      {isPlayer && <div className="bee">🐝</div>}
+      {isExit && (
+        <>
+          <div className="beehouse">🏡</div>
+          {hasLetter && <div className="maze-letter exit-letter">{hasLetter}</div>}
+        </>
+      )}
+      {!isExit && hasLetter && (
+        <div className="maze-letter">{hasLetter}</div>
+      )}
+    </div>
+  );
+};
 
   return (
     <div className="mobile-maze-container">
@@ -388,11 +382,12 @@ const Phase4 = ({ proceed, loseLife, lives: initialLives }) => {
         <div className="header-info">
           <span>Round: {currentRound}/5</span>
           <span>Time: {timeLeft}s</span>
-          <span>Score: {score}</span>
+          <span>Find its way home</span>
         </div>
       </div>
-      <LivesCounter lives={initialLives} />
-      <h1>🐝 Voice-Controlled Bee Maze 🍯</h1>
+      
+      {/* <LivesCounter lives={initialLives} /> */}
+      <h1>🐝Voice-Controlled Bee Maze🍯</h1>
       
       <div className="message-box">{message}</div>
       
@@ -402,11 +397,23 @@ const Phase4 = ({ proceed, loseLife, lives: initialLives }) => {
             onClick={toggleVoiceControl}
             className={`voice-control-button ${listening ? 'active' : ''}`}
           >
-            {listening ? '🎤 Listening... (Say a letter)' : '🎤 Enable Voice Control'}
+            {listening ? (
+              <>
+                <span className="pulse-dot"></span>
+                Listening... Say a letter
+              </>
+            ) : (
+              '🎤 Enable Voice Control'
+            )}
           </button>
         )}
         <div className="voice-feedback">
-          {lastSpokenLetter && `You said: ${lastSpokenLetter}`}
+          {lastSpokenLetter && (
+            <>
+              <span>You said: </span>
+              <span className="detected-letter">{lastSpokenLetter}</span>
+            </>
+          )}
           <div className="available-letters">
             Available letters: {Object.values(letters).join(', ')}
           </div>
@@ -415,18 +422,22 @@ const Phase4 = ({ proceed, loseLife, lives: initialLives }) => {
       
       <div className="maze-wrapper">
         <div className="maze-grid">
-          {maze.map((row, y) => (
+          {isMazeReady ? (
+          maze.map((row, y) => (
             <div key={y} className="maze-row">
               {row.map((cell, x) => renderCell(cell, x, y))}
             </div>
-          ))}
+          ))
+        ) : (
+          <div className="maze-loading">Loading maze...</div>
+        )}
         </div>
       </div>
 
       <div className="instructions">
         <p><strong>How to Play:</strong></p>
         <ul>
-          <li>{isSpeechSupported ? 'Click the microphone button and say a letter to move' : 'Use your keyboard to type letters (A-Z)'}</li>
+          <li>{isSpeechSupported ? 'Click the microphone button and say a letter clearly' : 'Use your keyboard to type letters (A-Z)'}</li>
           <li>Collect letters (10pts each) and reach the hive 🏡</li>
           <li>Complete all 5 rounds before time runs out!</li>
           {!isSpeechSupported && <li>Voice control is not supported in your browser</li>}

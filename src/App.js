@@ -3,10 +3,13 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import HomePage from './components/HomePage';
 import LoginForm from './components/LoginForm';
 import GameLayout from './components/GameLayout';
-import Phase1 from './components/Phase1';
-import Phase2 from './components/Phase2';
-import Phase3 from './components/Phase3';
-import Phase4 from './components/Phase4'; // Added Phase4 import
+// import Phase1 from './components/Phase1';
+// import Phase2 from './components/Phase2';
+// import Phase3 from './components/Phase3';
+// import Phase4 from './components/Phase4'; // Added Phase4 import
+// import Phase5 from './components/Phase5'; // Added Phase5 import
+// import Phase6 from './components/Phase6'; // Import Phase6
+import Phase7 from './components/Phase7'; // Import Phase7
 import GameOver from './components/GameOver';
 import Success from './components/success'; // Recommended to add a success component
 import { usePersistedState } from './hooks/usePersistedState';
@@ -72,29 +75,32 @@ const App = () => {
     <Router>
       <Routes>
         <Route 
-          path="/game" 
-          element={
-            <GameLayout 
-              user={user} 
-              onLogout={handleLogout}
-              onRestart={resetGame}
-              lives={lives}
-            >
-              {gameOver ? (
-                <GameOver restartGame={resetGame} />
-              ) : gameCompleted ? (
-                <Success restartGame={resetGame} /> // Show success screen when game is completed
-              ) : (
-                <>
-                  {currentPhase === 1 && <Phase1 proceed={() => setCurrentPhase(2)} loseLife={loseLife} />}
-                  {currentPhase === 2 && <Phase2 proceed={() => setCurrentPhase(3)} loseLife={loseLife} />}
-                  {currentPhase === 3 && <Phase3 proceed={() => setCurrentPhase(4)} loseLife={loseLife} />}
-                  {currentPhase === 4 && <Phase4 proceed={completeGame} loseLife={loseLife} />}
-                </>
-              )}
-            </GameLayout>
-          } 
+          // path="/game" 
+          // element={
+          //   <GameLayout 
+          //     user={user} 
+          //     onLogout={handleLogout}
+          //     onRestart={resetGame}
+          //     lives={lives}
+          //   >
+          //     {gameOver ? (
+          //       <GameOver restartGame={resetGame} />
+          //     ) : gameCompleted ? (
+          //       <Success restartGame={resetGame} /> // Show success screen when game is completed
+          //     ) : (
+          //       <>
+          //         {/* {currentPhase === 1 && <Phase1 proceed={() => setCurrentPhase(2)} loseLife={loseLife} />}
+          //         {currentPhase === 2 && <Phase2 proceed={() => setCurrentPhase(3)} loseLife={loseLife} />}
+          //         {currentPhase === 3 && <Phase3 proceed={() => setCurrentPhase(4)} loseLife={loseLife} />}
+          //         {currentPhase === 4 && <Phase4 proceed={completeGame} loseLife={loseLife} />}
+          //         {currentPhase === 5 && <Phase5 proceed={completeGame} loseLife={loseLife} />} */}
+          //       </>
+          //     )}
+          //   </GameLayout>
+          // } 
         />
+        
+        <Route path='/Phase7' element={<Phase7 />} />
         <Route path="/success" element={<Success restartGame={resetGame} />} />
         <Route path="/gameover" element={<GameOver restartGame={resetGame} />} />
         <Route path="*" element={<Navigate to="/game" />} />
