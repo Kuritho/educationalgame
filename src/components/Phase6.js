@@ -316,29 +316,29 @@ const Phase6 = ({ proceed }) => {
   };
 
   return (
-    <div className="phase6-container">
+    <div className="phase6-con">
       <h1>Rhyming Word Bingo!</h1>
-      <div className="hearts">
+      <div className="harts">
         {Array.from({ length: hearts }).map((_, i) => (
-          <span key={i} className="heart">❤️</span>
+          <span key={i} className="hart">❤️</span>
         ))}
       </div>
-      <p className="instructions">
+      <p className="instruct">
         When a word is called, click it on your card if you have it. Get a straight line of rhyming words to win!
       </p>
       
       {!gameStarted ? (
-        <button className="start-button" onClick={startGame}>
+        <button className="strt-button" onClick={startGame}>
           Start Game
         </button>
       ) : (
         <>
-          <div className="message-box">{message}</div>
+          <div className="mssg-box">{message}</div>
           
           {/* Vertical card layout */}
-          <div className="cards-vertical-layout">
+          <div className="c-vert-layout">
             {/* Player Card */}
-            <div className="player-board">
+            <div className="plyr-board">
               <h2>Your Card</h2>
               {renderCard(playerCard, playerSelections, true)}
             </div>

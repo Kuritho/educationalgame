@@ -4,6 +4,8 @@ import Phase2 from './Phase2';
 import Phase3 from './Phase3';
 import Phase4 from './Phase4'; // Import Phase4
 import Phase5 from './Phase5'; // Import Phase5
+import Phase6 from './Phase6'; // Import Phase6
+import Phase7 from './Phase7'; // Import Phase7
 import LivesCounter from './LivesCounter';
 import GameOver from './GameOver';
 import GameComplete from './GameComplete';
@@ -49,14 +51,18 @@ const Game = () => {
         return <Phase2 proceed={proceedToNextPhase} loseLife={loseLife} />;
       case 3:
         return <Phase3 proceed={proceedToNextPhase} loseLife={loseLife} />;
-      case 4:
-  return <Phase4 
-    proceed={proceedToNextPhase} 
-    loseLife={loseLife} 
-    lives={lives}  // Pass the lives prop
-  />;
+  //     case 4:
+  // return <Phase4 
+  //   proceed={proceedToNextPhase} 
+  //   loseLife={loseLife} 
+  //   lives={lives}  // Pass the lives prop
+  // />;
       case 5:
         return <Phase5 proceed={proceedToNextPhase} loseLife={loseLife} />;
+      case 6:
+        return <Phase6 proceed={proceedToNextPhase} loseLife={loseLife} />;
+      case 7:
+        return <Phase7 proceed={proceedToNextPhase} loseLife={loseLife} />;
       default:
         return <GameComplete onRestart={restartGame} />;
     }

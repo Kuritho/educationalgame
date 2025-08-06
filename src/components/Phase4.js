@@ -247,7 +247,7 @@ const Phase4 = ({ proceed, loseLife, lives: initialLives }) => {
 
   const handleReachHive = () => {
     setTimerActive(false);
-    if (currentRound < 5) {
+    if (currentRound < 1) {
       setMessage(`Round ${currentRound} complete! Starting round ${currentRound + 1}`);
       setTimeout(() => {
         setCurrentRound(prev => prev + 1);

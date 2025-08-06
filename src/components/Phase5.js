@@ -248,26 +248,26 @@ function Phase5({ proceed, loseLife }) {
   }
 
   return (
-    <div className="phase-container">
+    <div className="phase-con">
       <h2>SIGHT WORD!</h2> 
-      <h2 className="secondline">Tic Tac Toe</h2>
-      <h2 className="thirline">Round {round} of 5</h2>
-      <div className="score-display">
+      <h2 className="secline">Tic Tac Toe</h2>
+      <h2 className="thline">Round {round} of 5</h2>
+      <div className="display-score">
         <span className="score-x">X: {scores.player1}</span>
         <span className="score-o">O: {scores.player2}</span>
       </div>
       
-      <p className="instructions">Player {playerTurn}'s turn: {listening ? 'Speak now!' : 'Click the mic to speak!'}</p>
+      <p className="details">Player {playerTurn}'s turn: {listening ? 'Speak now!' : 'Click the mic to speak!'}</p>
       
-      <div className="voice-controls">
+      <div className="voice-con">
         <button 
           onClick={toggleListening}
-          className={`listen-button ${listening ? 'active' : ''}`}
+          className={`lst-button ${listening ? 'active' : ''}`}
           disabled={gameWon || gameCompleted}
         >
           {listening ? '🎤 Listening...' : '🎤 Start Speaking'}
         </button>
-        <div className="feedback">{feedback}</div>
+        <div className="fback">{feedback}</div>
       </div>
 
       <div className="tic-tac-toe-game">
