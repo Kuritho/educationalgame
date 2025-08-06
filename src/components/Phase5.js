@@ -230,7 +230,7 @@ function Phase5({ proceed, loseLife }) {
 
   if (gameCompleted) {
     return (
-      <div className="phase-container">
+      <div className="phase-con">
         <h2>Game Complete! 🎊</h2>
         <div className="final-score">
           <div className="score-player">Player X: {scores.player1} wins</div>
