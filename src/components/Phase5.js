@@ -8,9 +8,9 @@ const SQUARE_WORDS = [
 
 function Square({ value, word, isWinning }) {
   return (
-    <div className={`square ${value || 'empty'} ${isWinning ? 'winning-square' : ''}`}>
-      <div className="square-word">{word}</div>
-      {value && <div className="square-mark">{value}</div>}
+    <div className={`squared ${value || 'empty'} ${isWinning ? 'win-square' : ''}`}>
+      <div className="squared-words">{word}</div>
+      {value && <div className="squared-marks">{value}</div>}
       {isWinning && <span className="trophy-icon">🏆</span>}
     </div>
   );
@@ -18,7 +18,7 @@ function Square({ value, word, isWinning }) {
 
 function Board({ squares, spokenWords, winningSquares }) {
   return (
-    <div className="game-board">
+    <div className="game-brd">
       {squares.map((_, i) => (
         <Square
           key={i}
@@ -232,14 +232,14 @@ function Phase5({ proceed, loseLife }) {
     return (
       <div className="phase-con">
         <h2>Game Complete! 🎊</h2>
-        <div className="final-score">
-          <div className="score-player">Player X: {scores.player1} wins</div>
-          <div className="score-player">Player O: {scores.player2} wins</div>
+        <div className="f-score">
+          <div className="s-player">Player X: {scores.player1} wins</div>
+          <div className="s-player">Player O: {scores.player2} wins</div>
         </div>
-        <div className="winner-message">{feedback}</div>
+        <div className="win-message">{feedback}</div>
         <button 
           onClick={resetGame}
-          className="play-again-button"
+          className="retry-button"
         >
           Play Again!
         </button>
@@ -257,7 +257,7 @@ function Phase5({ proceed, loseLife }) {
         <span className="score-o">O: {scores.player2}</span>
       </div>
       
-      <p className="details">Player {playerTurn}'s turn: {listening ? 'Speak now!' : 'Click the mic to speak!'}</p>
+      <p className="dtails">Player {playerTurn}'s turn: {listening ? 'Speak now!' : 'Click the mic to speak!'}</p>
       
       <div className="voice-con">
         <button 
