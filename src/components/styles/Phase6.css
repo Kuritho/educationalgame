@@ -13,7 +13,7 @@
   --card-bg: #FFFFFF;
 }
 
-.phase6-container {
+.phase6-con {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -31,7 +31,7 @@
   width: 95%;
 }
 
-.phase6-container::before {
+.phase6-con::before {
   content: "";
   position: absolute;
   top: 0;
@@ -43,7 +43,7 @@
   z-index: 1;
 }
 
-.phase6-container h1 {
+.phase6-con h1 {
   color: var(--primary);
   font-size: 2.2rem;
   margin: 0.5rem 0;
@@ -53,19 +53,19 @@
   text-align: center;
 }
 
-.hearts {
+.harts {
   display: flex;
   gap: 8px;
   margin-bottom: 0.5rem;
 }
 
-.heart {
+.hart {
   font-size: 1.8rem;
   color: var(--error);
   animation: pulse 1.5s infinite;
 }
 
-.instructions {
+.instruct {
   background: white;
   padding: 0.8rem 1rem; 
   border-radius: 15px;
@@ -78,7 +78,7 @@
   width: 95%;
 }
 
-.message-box {
+.mssge-box {
   background: white;
   padding: 0.8rem;
   border-radius: 12px;
@@ -101,7 +101,7 @@
   width: 100%;
 }
 
-.player-board {
+.plyr-board {
   order: 1;
 }
 
@@ -210,7 +210,7 @@
   gap: 0.5rem;
 }
 
-.start-button, .restart-button {
+.strt-button, .restart-button {
   background: var(--primary);
   color: white;
   font-size: 1.2rem;
@@ -234,12 +234,12 @@
 
 /* Desktop Layout */
 @media (min-width: 768px) {
-  .phase6-container {
+  .phase6-con {
     padding: 2rem;
     min-height: 700px;
   }
   
-  .phase6-container h1 {
+  .phase6-con h1 {
     font-size: 3rem;
   }
   
@@ -343,7 +343,7 @@
   background: #3DBDB4;
   transform: translateY(-2px);
 }
-.cards-vertical-layout {
+.c-vert-layout {
   display: flex;
   flex-direction: column;
   align-items: center;

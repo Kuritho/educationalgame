@@ -1,7 +1,7 @@
 /* Phase 5 - Super Fun Voice Tic Tac Toe - Complete CSS */
 
 /* Main Container - Carnival Theme */
-.phase-container {
+.phase-con {
   text-align: center;
   padding: 2rem;
   background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
@@ -17,7 +17,7 @@
   font-family: 'Comic Sans MS', 'Marker Felt', sans-serif;
 }
 /* Score Display */
-.score-display {
+.display-score {
   display: flex;
   justify-content: space-around;
   margin: 1rem 0;
@@ -44,7 +44,7 @@
 }
 
 /* Final Score Screen */
-.final-score {
+.f-score {
   background: rgba(255,255,255,0.8);
   padding: 1.5rem;
   border-radius: 20px;
@@ -52,13 +52,13 @@
   border: 3px dashed #5d4390;
 }
 
-.score-player {
+.s-player {
   font-size: 1.8rem;
   margin: 0.5rem 0;
   font-weight: bold;
 }
 
-.winner-message {
+.win-message {
   font-size: 1.8rem;
   color: #5d4390;
   margin: 1rem 0;
@@ -66,7 +66,7 @@
   animation: rainbowText 3s infinite;
 }
 
-.play-again-button {
+.retry-button {
   background: linear-gradient(145deg, #4CAF50, #45a049);
   color: white;
   border: none;
@@ -79,7 +79,7 @@
   transition: all 0.3s;
 }
 
-.play-again-button:hover {
+.retry-button:hover {
   transform: scale(1.05);
   box-shadow: 0 8px 20px rgba(0,0,0,0.3);
 }
@@ -106,7 +106,7 @@
 }
 
 /* Animated Background Elements */
-.phase-container::before {
+.phase-con::before {
   content: "";
   position: absolute;
   top: -50%;
@@ -126,7 +126,7 @@
 }
 
 /* Header Styles */
-.phase-container h2 {
+.phase-con h2 {
   color: #5d4390;
   margin-bottom: 1rem;
   font-size: 32px;
@@ -139,13 +139,13 @@
   -webkit-text-fill-color: transparent;
   animation: titleColorShift 8s infinite alternate;
 }
-.secondline {
+.secline {
   font-size: 24px;
   color: #5d4390;
   margin-top: -10px;
   text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
 }
-.thirline {
+.thline {
   font-size: 20px;
   color: #5d4390;
   margin-top: -20px;
@@ -157,7 +157,7 @@
 }
 
 /* Instructions */
-.instructions {
+.dtails {
   color: #5d4390;
   margin-bottom: 1.5rem;
   font-size: 18px;
@@ -172,14 +172,14 @@
 }
 
 /* Voice Control Section - Microphone Button */
-.voice-controls {
+.voice-con {
   margin: 25px 0;
   text-align: center;
   position: relative;
   z-index: 1;
 }
 
-.listen-button {
+.lst-button {
   background: linear-gradient(145deg, #4CAF50, #45a049);
   color: white;
   border: none;
@@ -198,22 +198,22 @@
   letter-spacing: 1px;
 }
 
-.listen-button:hover:not(:disabled) {
+.lst-button:hover:not(:disabled) {
   transform: translateY(-3px) scale(1.05);
   box-shadow: 0 8px 20px rgba(0,0,0,0.25);
 }
 
-.listen-button:active:not(:disabled) {
+.lst-button:active:not(:disabled) {
   transform: translateY(1px);
 }
 
-.listen-button:disabled {
+.lst-button:disabled {
   background: linear-gradient(145deg, #cccccc, #aaaaaa);
   cursor: not-allowed;
   opacity: 0.7;
 }
 
-.listen-button.active {
+.lst-button.active {
   background: linear-gradient(145deg, #f44336, #e53935);
   animation: pulseGlow 1.5s infinite;
 }
@@ -234,7 +234,7 @@
 }
 
 /* Feedback Bubble */
-.feedback {
+.fback {
   margin-top: 15px;
   padding: 12px;
   background-color: rgba(255,255,255,0.9);
@@ -246,7 +246,7 @@
   position: relative;
 }
 
-.feedback::after {
+.fback::after {
   content: "";
   position: absolute;
   top: -10px;
@@ -273,7 +273,7 @@
   border: 3px solid #fff;
 }
 
-.game-board {
+.game-brd {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   grid-template-rows: repeat(3, 1fr);
@@ -284,7 +284,7 @@
 }
 
 /* Squares - Fun Design */
-.square {
+.squared {
   background: rgba(255, 255, 255, 0.95);
   border: none;
   border-radius: 20px;
@@ -303,7 +303,7 @@
   cursor: pointer;
 }
 
-.square::before {
+.squared::before {
   content: "";
   position: absolute;
   top: 0;
@@ -315,12 +315,12 @@
   transition: opacity 0.3s ease;
 }
 
-.square:hover::before {
+.squared:hover::before {
   opacity: 1;
 }
 
 /* Square Content */
-.square-word {
+.squared-words {
   font-size: 16px;
   color: #5d4390;
   margin-bottom: 8px;
@@ -329,7 +329,7 @@
   text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
 }
 
-.square-mark {
+.squared-marks {
   font-size: 42px;
   font-weight: bold;
   line-height: 1;
@@ -356,7 +356,7 @@
   position: relative;
 }
 
-.winning-square::after {
+.win-square::after {
   content: "";
   position: absolute;
   top: -5px;
@@ -439,7 +439,7 @@
 
 /* Responsive Design */
 @media (max-width: 450px) {
-  .phase-container {
+  .phase-con {
     padding: 1.5rem;
     max-width: 340px;
   }
@@ -452,16 +452,16 @@
     font-size: 36px;
   }
   
-  .listen-button {
+  .lst-button {
     padding: 12px 24px;
     font-size: 16px;
   }
   
-  .phase-container h2 {
+  .phase-con h2 {
     font-size: 28px;
   }
   
-  .instructions {
+  .dtails {
     font-size: 16px;
   }
 }

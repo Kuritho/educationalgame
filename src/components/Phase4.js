@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import '../styles/Phase4.css';
+import './styles/Phase4.css';
 import LivesCounter from './LivesCounter';
 
 const Phase4 = ({ proceed, loseLife, lives: initialLives }) => {
@@ -221,8 +221,8 @@ const Phase4 = ({ proceed, loseLife, lives: initialLives }) => {
     setPlayerPosition({ x: 1, y: 1 });
     setExitPosition({ x: exitX, y: exitY });
     setVisited([{ x: 1, y: 1 }]);
-    setMessage(`Find the hive! Round ${currentRound}/5`);
-    setTimeLeft(300);
+    setMessage(`Find the hive! Round ${currentRound}/1`);
+    setTimeLeft(100);
     setTimerActive(true);
     setLastSpokenLetter('');
   };
@@ -247,7 +247,7 @@ const Phase4 = ({ proceed, loseLife, lives: initialLives }) => {
 
   const handleReachHive = () => {
     setTimerActive(false);
-    if (currentRound < 5) {
+    if (currentRound < 1) {
       setMessage(`Round ${currentRound} complete! Starting round ${currentRound + 1}`);
       setTimeout(() => {
         setCurrentRound(prev => prev + 1);
@@ -380,7 +380,7 @@ const Phase4 = ({ proceed, loseLife, lives: initialLives }) => {
       <div className="header">
         <span>Busy Bee Challenge</span>
         <div className="header-info">
-          <span>Round: {currentRound}/5</span>
+          <span>Round: {currentRound}/1</span>
           <span>Time: {timeLeft}s</span>
           <span>Find its way home</span>
         </div>
@@ -438,7 +438,7 @@ const Phase4 = ({ proceed, loseLife, lives: initialLives }) => {
         <p><strong>How to Play:</strong></p>
         <ul>
           <li>{isSpeechSupported ? 'Click the microphone button and say a letter clearly' : 'Use your keyboard to type letters (A-Z)'}</li>
-          <li>Collect letters (10pts each) and reach the hive 🏡</li>
+          <li>Collect letters and reach the hive 🏡</li>
           <li>Complete all 5 rounds before time runs out!</li>
           {!isSpeechSupported && <li>Voice control is not supported in your browser</li>}
         </ul>

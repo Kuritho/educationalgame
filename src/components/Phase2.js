@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { usePersistedState } from '../hooks/usePersistedState';
-import '../styles.css';
+import './styles/Phase2.css';
 
 const Phase2 = ({ proceed, loseLife }) => {
   // Extended word bank with images
@@ -33,11 +33,9 @@ const Phase2 = ({ proceed, loseLife }) => {
     { letter: 'Z', word: 'Zebra', image: 'zebra.png', color: '#FF6B6B' },
   ];
 
-//   const [currentRound, setCurrentRound] = useState(1);
   const [selectedLetters, setSelectedLetters] = useState([]);
   const [selectedPictures, setSelectedPictures] = useState([]);
   const [currentSelection, setCurrentSelection] = useState(null);
-//   const [matchedPairs, setMatchedPairs] = useState([]);
   const [gameItems, setGameItems] = useState([]);
   const [feedback, setFeedback] = useState('');
   const [roundCompleted, setRoundCompleted] = useState(false);
@@ -45,16 +43,38 @@ const Phase2 = ({ proceed, loseLife }) => {
   const [currentRound, setCurrentRound] = usePersistedState('phase2_round', 1);
   const [matchedPairs, setMatchedPairs] = usePersistedState('phase2_matchedPairs', []);
   const [completed, setCompleted] = usePersistedState('phase2_completed', false);
-  const [currentItems, setCurrentItems] = useState([]);
+  const [usedItems, setUsedItems] = usePersistedState('phase2_usedItems', []);
 
   // Initialize each round
   useEffect(() => {
-    const shuffled = [...wordBank].sort(() => 0.5 - Math.random());
-    const roundItems = shuffled.slice(0, 4);
+    // Get items that haven't been used yet
+    const availableItems = wordBank.filter(item => !usedItems.includes(item.letter));
     
-    setGameItems(roundItems);
-    setSelectedLetters(roundItems.map(item => item.letter));
-    setSelectedPictures([...roundItems].sort(() => 0.5 - Math.random()));
+    // Increase difficulty with each round
+    let itemsPerRound = 4;
+    if (currentRound === 2) itemsPerRound = 5;
+    else if (currentRound >= 3) itemsPerRound = 6;
+    
+    // If we don't have enough items for the round, reset the used items
+    if (availableItems.length < itemsPerRound) {
+      setUsedItems([]);
+      const shuffled = [...wordBank].sort(() => 0.5 - Math.random());
+      const roundItems = shuffled.slice(0, itemsPerRound);
+      
+      setGameItems(roundItems);
+      setSelectedLetters(roundItems.map(item => item.letter));
+      setSelectedPictures([...roundItems].sort(() => 0.5 - Math.random()));
+      setUsedItems(roundItems.map(item => item.letter));
+    } else {
+      const shuffled = [...availableItems].sort(() => 0.5 - Math.random());
+      const roundItems = shuffled.slice(0, itemsPerRound);
+      
+      setGameItems(roundItems);
+      setSelectedLetters(roundItems.map(item => item.letter));
+      setSelectedPictures([...roundItems].sort(() => 0.5 - Math.random()));
+      setUsedItems([...usedItems, ...roundItems.map(item => item.letter)]);
+    }
+    
     setMatchedPairs([]);
     setCurrentSelection(null);
     setRoundCompleted(false);
@@ -63,7 +83,8 @@ const Phase2 = ({ proceed, loseLife }) => {
 
   // Check if round is completed
   useEffect(() => {
-    if (matchedPairs.length === 4 && !roundCompleted) {
+    const itemsPerRound = currentRound === 1 ? 4 : currentRound === 2 ? 5 : 6;
+    if (matchedPairs.length === itemsPerRound && !roundCompleted) {
       setRoundCompleted(true);
       setFeedback(`Great job! Round ${currentRound} complete!`);
       setCelebrate(true);
@@ -78,36 +99,37 @@ const Phase2 = ({ proceed, loseLife }) => {
     setFeedback(`Find the ${letter} picture!`);
   };
 
-    const handlePictureClick = (picture) => {
-  if (!currentSelection || roundCompleted) return;
-  
-  const correctItem = gameItems.find(item => item.letter === currentSelection);
-  
-  if (correctItem.word === picture.word) {
-    // Correct match
-    setMatchedPairs([...matchedPairs, currentSelection]);
-    setFeedback(`Yay! ${currentSelection} is for ${picture.word}`);
+  const handlePictureClick = (picture) => {
+    if (!currentSelection || roundCompleted) return;
     
-    // Play pronunciation audio
-    const audio = new Audio(`/sounds/correct.mp3`);
-    audio.play();
-  } else {
-    // Incorrect match
-    loseLife();
-    setFeedback(`Oops! Try again. ${currentSelection} is for ${correctItem.word}`);
-  }
-  
-  setCurrentSelection(null);
-};
+    const correctItem = gameItems.find(item => item.letter === currentSelection);
+    
+    if (correctItem.word === picture.word) {
+      // Correct match
+      setMatchedPairs([...matchedPairs, currentSelection]);
+      setFeedback(`Yay! ${currentSelection} is for ${picture.word}`);
+      
+      // Play pronunciation audio
+      const audio = new Audio(`/sounds/correct.mp3`);
+      audio.play();
+    } else {
+      // Incorrect match
+      loseLife();
+      setFeedback(`Oops! Try again. ${currentSelection} is for ${correctItem.word}`);
+    }
+    
+    setCurrentSelection(null);
+  };
 
   const nextRound = () => {
-    if (currentRound < 3) {
+    if (currentRound < 5) {
       setCurrentRound(currentRound + 1);
     } else {
       // Clear persisted state when game is complete
       localStorage.removeItem('phase2_round');
       localStorage.removeItem('phase2_matchedPairs');
       localStorage.removeItem('phase2_completed');
+      localStorage.removeItem('phase2_usedItems');
       proceed();
     }
   };
@@ -127,7 +149,7 @@ const Phase2 = ({ proceed, loseLife }) => {
       <header className="game-header">
         <h2>Alphabet Matching</h2>
         <div className="progress-tracker">
-          {[1, 2, 3].map(round => (
+          {[1, 2, 3, 4, 5].map(round => (
             <div 
               key={round} 
               className={`progress-circle ${round < currentRound ? 'completed' : ''} ${round === currentRound ? 'current' : ''}`}
@@ -136,7 +158,7 @@ const Phase2 = ({ proceed, loseLife }) => {
             </div>
           ))}
         </div>
-        <p className="round-counter">Round {currentRound} of 3</p>
+        <p className="round-counter">Round {currentRound} of 5</p>
       </header>
       
       <div className="feedback-container">
@@ -211,7 +233,7 @@ const Phase2 = ({ proceed, loseLife }) => {
           onClick={nextRound}
           className="proceed-button"
         >
-          {currentRound < 3 ? (
+          {currentRound < 5 ? (
             <>
               <span className="sparkle">✨</span> Next Round <span className="sparkle">✨</span>
             </>

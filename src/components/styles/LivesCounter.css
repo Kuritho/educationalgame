@@ -1,0 +1,103 @@
+/* LivesCounter.css */
+
+.lives-counter {
+  display: flex;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 8px 16px;
+  border-radius: 50px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(2px);
+}
+
+.heart {
+  width: 24px;
+  height: 24px;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.heart::before,
+.heart::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  width: 12px;
+  height: 20px;
+  border-radius: 12px 12px 0 0;
+  transition: all 0.3s ease;
+}
+
+/* Active heart */
+.heart.active::before,
+.heart.active::after {
+  background: #ff4757;
+}
+
+.heart.active::before {
+  left: 12px;
+  transform: rotate(-45deg);
+  transform-origin: 0 100%;
+}
+
+.heart.active::after {
+  left: 0;
+  transform: rotate(45deg);
+  transform-origin: 100% 100%;
+}
+
+/* Lost heart */
+.heart.lost::before,
+.heart.lost::after {
+  background: #dfe4ea;
+}
+
+.heart.lost::before {
+  left: 12px;
+  transform: rotate(-45deg) scale(0.7);
+  transform-origin: 0 100%;
+}
+
+.heart.lost::after {
+  left: 0;
+  transform: rotate(45deg) scale(0.7);
+  transform-origin: 100% 100%;
+}
+
+/* Animations */
+.heart.active {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.heart.lost {
+  animation: fade 0.5s ease-out;
+}
+
+@keyframes fade {
+  from { opacity: 1; transform: scale(1.1); }
+  to { opacity: 0.7; transform: scale(0.9); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .lives-counter {
+    padding: 6px 12px;
+    gap: 8px;
+  }
+  
+  .heart {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .heart::before,
+  .heart::after {
+    width: 10px;
+    height: 16px;
+  }
+}

@@ -2,17 +2,19 @@ import React, { useState } from 'react';
 import Phase1 from './Phase1';
 import Phase2 from './Phase2';
 import Phase3 from './Phase3';
-import Phase4 from './Phase4'; // Import Phase4
-import Phase5 from './Phase5'; // Import Phase5
+import Phase4 from './Phase4'; 
+import Phase5 from './Phase5'; 
+import Phase6 from './Phase6';
+import Phase7 from './Phase7';
 import LivesCounter from './LivesCounter';
 import GameOver from './GameOver';
 import GameComplete from './GameComplete';
-import './styles.css';
+import './styles/Game.css';
 
 const Game = () => {
-  const [lives, setLives] = useState(5); // Start with 5 lives
+  const [lives, setLives] = useState(5);
   const [currentPhase, setCurrentPhase] = useState(1);
-  const [gameStatus, setGameStatus] = useState('playing'); // 'playing', 'over', or 'complete'
+  const [gameStatus, setGameStatus] = useState('playing');
 
   const loseLife = () => {
     setLives(prevLives => {
@@ -20,7 +22,7 @@ const Game = () => {
       if (newLives <= 0) {
         setGameStatus('over');
       }
-      return Math.max(0, newLives); // Ensure lives don't go negative
+      return Math.max(0, newLives); 
     });
   };
 
@@ -57,6 +59,10 @@ const Game = () => {
   />;
       case 5:
         return <Phase5 proceed={proceedToNextPhase} loseLife={loseLife} />;
+      case 6:
+      return <Phase6 proceed={proceedToNextPhase} loseLife={loseLife} />;
+      case 7:
+      return <Phase7 proceed={proceedToNextPhase} loseLife={loseLife} />;
       default:
         return <GameComplete onRestart={restartGame} />;
     }

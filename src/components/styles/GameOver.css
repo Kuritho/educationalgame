@@ -1,0 +1,176 @@
+/* GameOver.css */
+
+.game-over-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.85);
+  color: white;
+  z-index: 1000;
+  padding: 20px;
+  text-align: center;
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    background: rgba(0, 0, 0, 0);
+  }
+  to {
+    opacity: 1;
+    background: rgba(0, 0, 0, 0.85);
+  }
+}
+
+.game-over-screen h1 {
+  font-size: 3.5rem;
+  margin-bottom: 20px;
+  color: #ff4d4d;
+  text-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+  animation: bounceIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes bounceIn {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.game-over-screen p {
+  font-size: 1.5rem;
+  margin-bottom: 40px;
+  max-width: 500px;
+  line-height: 1.6;
+  animation: slideUp 0.6s 0.3s ease-out both;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.restart-button {
+  padding: 15px 40px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  background: linear-gradient(135deg, #ff416c, #ff4b2b);
+  color: white;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 5px 15px rgba(255, 65, 108, 0.4);
+  animation: fadeInUp 0.6s 0.5s ease-out both;
+  position: relative;
+  overflow: hidden;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.restart-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(255, 65, 108, 0.6);
+}
+
+.restart-button:active {
+  transform: translateY(1px);
+}
+
+.restart-button::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.3));
+  transform: translateX(-100%);
+  transition: transform 0.4s ease;
+}
+
+.restart-button:hover::after {
+  transform: translateX(0);
+}
+
+/* Particle effects */
+.game-over-particle {
+  position: absolute;
+  background-color: rgba(255, 255, 255, 0.7);
+  border-radius: 50%;
+  pointer-events: none;
+  animation: floatUp 3s ease-in-out infinite;
+}
+
+@keyframes floatUp {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-100vh) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .game-over-screen h1 {
+    font-size: 2.5rem;
+  }
+  
+  .game-over-screen p {
+    font-size: 1.2rem;
+    margin-bottom: 30px;
+  }
+  
+  .restart-button {
+    padding: 12px 30px;
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .game-over-screen h1 {
+    font-size: 2rem;
+  }
+  
+  .game-over-screen p {
+    font-size: 1rem;
+    margin-bottom: 25px;
+  }
+  
+  .restart-button {
+    padding: 10px 25px;
+    font-size: 1rem;
+  }
+}

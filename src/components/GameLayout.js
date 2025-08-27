@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import LivesCounter from './LivesCounter';
-import '../styles.css';
+import './styles/GameLayout.css';
 
-const GameLayout = ({ user, onLogout, onRestart, children, lives }) => {  // Add lives prop
+const GameLayout = ({ user, onLogout, onRestart, children, lives }) => {  
   const [showRestartConfirm, setShowRestartConfirm] = useState(false);
 
   const handleRestartClick = () => {
@@ -16,7 +16,7 @@ const GameLayout = ({ user, onLogout, onRestart, children, lives }) => {  // Add
 
   return (
     <div className="game-container">
-      <header className="game-header">
+      <header className="game-header"> 
         <div className="player-info">
           <div className="user-name">{user.name}</div>
           <div className="user-status">
@@ -51,7 +51,7 @@ const GameLayout = ({ user, onLogout, onRestart, children, lives }) => {  // Add
         </div>
 
         <div className="game-status">
-          <LivesCounter lives={lives} />  {/* Use lives prop instead of hardcoded 5 */}
+          <LivesCounter lives={lives} /> 
         </div>
       </header>
 
@@ -62,7 +62,7 @@ const GameLayout = ({ user, onLogout, onRestart, children, lives }) => {  // Add
             <h3>Restart Game?</h3>
             <p>All progress will be reset to Phase 1</p>
             <div className="dialog-buttons">
-              <button 
+              <button
                 onClick={confirmRestart} 
                 className="dialog-button confirm-button"
               >

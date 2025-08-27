@@ -1,0 +1,485 @@
+/* HomePage.css - Forest Theme */
+
+/* Base Styles */
+.forest-theme {
+  position: relative;
+  min-height: 100vh;
+  overflow-x: hidden;
+  font-family: 'Comic Sans MS', 'Arial Rounded MT Bold', sans-serif;
+  color: #2d3436;
+  background: linear-gradient(to bottom, #1e5799 0%, #2989d8 50%, #7db9e8 100%);
+}
+
+/* Forest Background Layers */
+.forest-layer {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: bottom;
+  z-index: -1;
+}
+
+.trees-deep {
+  background: 
+    radial-gradient(circle at 20% 50%, rgba(0,60,0,0.3) 10%, transparent 20%),
+    radial-gradient(circle at 80% 60%, rgba(0,80,0,0.4) 15%, transparent 25%),
+    linear-gradient(to bottom, transparent 70%, rgba(0,40,0,0.2) 100%);
+  opacity: 0.8;
+  animation: parallax 60s linear infinite;
+}
+
+.trees-mid {
+  background: 
+    radial-gradient(circle at 30% 40%, rgba(0,80,0,0.4) 10%, transparent 20%),
+    radial-gradient(circle at 70% 50%, rgba(0,100,0,0.5) 15%, transparent 25%),
+    linear-gradient(to bottom, transparent 60%, rgba(0,60,0,0.3) 100%);
+  opacity: 0.9;
+  animation: parallax 40s linear infinite;
+}
+
+.trees-front {
+  background: 
+    radial-gradient(circle at 40% 60%, rgba(0,100,0,0.6) 10%, transparent 20%),
+    radial-gradient(circle at 60% 40%, rgba(0,120,0,0.7) 15%, transparent 25%),
+    linear-gradient(to bottom, transparent 50%, rgba(0,80,0,0.4) 100%);
+  animation: parallax 20s linear infinite;
+}
+
+.ground {
+  background: 
+    linear-gradient(45deg, #5e3a1e 25%, transparent 25%) 0 0,
+    linear-gradient(-45deg, #5e3a1e 25%, transparent 25%) 0 0,
+    linear-gradient(45deg, transparent 75%, #5e3a1e 75%),
+    linear-gradient(-45deg, transparent 75%, #5e3a1e 75%);
+  background-size: 20px 20px;
+  height: 30vh;
+  bottom: 0;
+  animation: parallax 10s linear infinite;
+}
+
+@keyframes parallax {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
+}
+
+/* Forest Creatures */
+.forest-creature {
+  position: absolute;
+  background-size: contain;
+  background-repeat: no-repeat;
+  z-index: -1;
+}
+
+.owl {
+  width: 120px;
+  height: 120px;
+  background: 
+    radial-gradient(circle at 40% 40%, #8B4513 25%, #A0522D 25%, #A0522D 60%, #8B4513 60%),
+    radial-gradient(circle at 60% 40%, white 15%, #8B4513 15%),
+    radial-gradient(circle at 40% 40%, black 10%, transparent 10%),
+    radial-gradient(circle at 60% 40%, black 10%, transparent 10%);
+  border-radius: 50%;
+  top: 15%;
+  left: 10%;
+}
+
+.fox {
+  width: 150px;
+  height: 100px;
+  background: 
+    radial-gradient(ellipse at 30% 50%, #FF8C00 30%, #FF4500 30%),
+    radial-gradient(ellipse at 70% 50%, #FF8C00 30%, #FF4500 30%),
+    linear-gradient(to bottom, #FF4500 40%, white 40%, white 45%, #FF4500 45%);
+  border-radius: 50% 50% 0 0;
+  bottom: 25%;
+  right: 10%;
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-float-delay {
+  animation: float 7s ease-in-out 1s infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-20px); }
+}
+
+/* Main Container */
+.home-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Hero Section */
+.hero-section {
+  display: flex;
+  align-items: center;
+  min-height: 80vh;
+  padding: 40px 0;
+  position: relative;
+}
+
+.hero-content {
+  flex: 1;
+  padding-right: 40px;
+}
+
+.hero-title {
+  font-size: 4rem;
+  color: #2d3436;
+  margin-bottom: 20px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.hero-subtitle {
+  font-size: 1.5rem;
+  color: #636e72;
+  margin-bottom: 30px;
+}
+
+.animate-pop-in {
+  animation: popIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+}
+
+@keyframes popIn {
+  0% { opacity: 0; transform: scale(0.8); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+/* Call to Action */
+.cta-container {
+  margin-top: 40px;
+}
+
+.start-button {
+  display: inline-flex;
+  align-items: center;
+  padding: 15px 30px;
+  background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+  color: white;
+  border-radius: 50px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  text-decoration: none;
+  box-shadow: 0 5px 15px rgba(108, 92, 231, 0.4);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.start-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(108, 92, 231, 0.6);
+}
+
+.start-button:active {
+  transform: translateY(1px);
+}
+
+.button-icon {
+  margin-left: 10px;
+  font-size: 1.5rem;
+}
+
+/* Feature Bubbles */
+.hero-features {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.feature-bubble {
+  background-color: rgba(255, 255, 255, 0.8);
+  padding: 8px 15px;
+  border-radius: 50px;
+  font-size: 0.9rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Hero Illustration */
+.hero-illustration {
+  flex: 1;
+  min-height: 400px;
+  position: relative;
+}
+
+.reading-bear {
+  width: 300px;
+  height: 300px;
+  background: 
+    radial-gradient(ellipse at 50% 30%, #8B4513 30%, #A0522D 30%),
+    radial-gradient(circle at 35% 25%, white 10%, transparent 10%),
+    radial-gradient(circle at 65% 25%, white 10%, transparent 10%),
+    radial-gradient(circle at 35% 25%, black 5%, transparent 5%),
+    radial-gradient(circle at 65% 25%, black 5%, transparent 5%),
+    radial-gradient(ellipse at 50% 60%, white 15%, #8B4513 15%);
+  border-radius: 50%;
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  animation: bounce 2s ease-in-out infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-20px); }
+}
+
+/* Game Description Section */
+.forest-section {
+  background-color: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(5px);
+  border-radius: 20px;
+  padding: 40px;
+  margin: 60px 0;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.section-title {
+  font-size: 2.5rem;
+  color: #2d3436;
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.8s ease-out both;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.steps-container {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.step-card {
+  flex: 1;
+  min-width: 200px; /* Reduced from 250px */
+  max-width: 280px; /* Reduced from 300px */
+  background-color: white;
+  border-radius: 15px;
+  padding: 20px; /* Reduced from 30px */
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+
+.step-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.animate-card-1 { animation-delay: 0.2s; }
+.animate-card-2 { animation-delay: 0.4s; }
+.animate-card-3 { animation-delay: 0.6s; }
+
+.step-icon {
+  width: 50px;
+  height: 50px;
+  background-color: #6c5ce7;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.step-card h3 {
+  font-size: 1.3rem; /* Slightly reduced */
+  margin-bottom: 12px;
+  color: #2d3436;
+}
+
+.step-card p {
+  color: #636e72;
+  line-height: 1.5;
+  font-size: 0.95rem; /* Slightly reduced */
+  margin-bottom: 10px;
+}
+
+.card-decoration {
+  position: absolute;
+  opacity: 0.1;
+  z-index: -1;
+}
+
+.acorn {
+  width: 100px;
+  height: 100px;
+  background: 
+    radial-gradient(ellipse at 50% 30%, #8B4513 40%, #A0522D 40%),
+    radial-gradient(ellipse at 50% 80%, #5e3a1e 50%, transparent 50%);
+  border-radius: 50% 50% 40% 40%;
+  bottom: -20px;
+  right: -20px;
+}
+
+.leaf {
+  width: 120px;
+  height: 120px;
+  background: 
+    radial-gradient(ellipse at 30% 50%, #2e8b57 40%, transparent 40%),
+    radial-gradient(ellipse at 70% 50%, #2e8b57 40%, transparent 40%),
+    linear-gradient(to bottom, transparent 40%, #2e8b57 40%, #2e8b57 60%, transparent 60%);
+  border-radius: 50%;
+  top: -30px;
+  left: -30px;
+  transform: rotate(45deg);
+}
+
+.berry {
+  width: 80px;
+  height: 80px;
+  background: radial-gradient(circle at 50% 50%, #ff0000 40%, #8b0000 40%);
+  border-radius: 50%;
+  bottom: -10px;
+  left: -10px;
+}
+
+/* Testimonial Section */
+.testimonial-card {
+  max-width: 600px;
+  margin: 0 auto;
+  background-color: white;
+  border-radius: 15px;
+  padding: 30px;
+  position: relative;
+  text-align: center;
+}
+
+.testimonial-card p {
+  font-size: 1.2rem;
+  font-style: italic;
+  color: #2d3436;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.testimonial-author {
+  font-weight: bold;
+  color: #6c5ce7;
+}
+
+.testimonial-decoration {
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  background: 
+    radial-gradient(circle at 30% 30%, #2e8b57 20%, transparent 20%),
+    radial-gradient(circle at 70% 30%, #2e8b57 20%, transparent 20%),
+    radial-gradient(circle at 50% 70%, #2e8b57 30%, transparent 30%);
+  top: -50px;
+  left: -50px;
+  z-index: -1;
+  opacity: 0.3;
+  transform: rotate(45deg);
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+  .hero-section {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .hero-content {
+    padding-right: 0;
+    margin-bottom: 40px;
+  }
+  
+  .hero-features {
+    justify-content: center;
+  }
+  
+  .hero-illustration {
+    width: 100%;
+  }
+  
+  .reading-bear {
+    position: relative;
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: 3rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 1.2rem;
+  }
+  
+  .section-title {
+    font-size: 2rem;
+  }
+  
+  .steps-container {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .step-card {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-title {
+    font-size: 2.2rem;
+  }
+  
+  .start-button {
+    padding: 12px 24px;
+    font-size: 1rem;
+  }
+  
+  .forest-section {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .steps-container {
+    gap: 15px;
+  }
+  
+  .step-card {
+    min-width: 160px;
+    max-width: 100%;
+    padding: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .step-card {
+    min-width: 100%;
+    margin-bottom: 15px;
+  }
+  
+  .step-card h3 {
+    font-size: 1.2rem;
+  }
+}

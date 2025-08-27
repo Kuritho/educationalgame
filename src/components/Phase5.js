@@ -6,25 +6,31 @@ const SQUARE_WORDS = [
   'flower', 'giraffe', 'house', 'ice cream'
 ];
 
-function Square({ value, word, isWinning }) {
+function Square({ value, word, isWinning, onClick, isTeacherMode, isTeacherTurn }) {
   return (
-    <div className={`square ${value || 'empty'} ${isWinning ? 'winning-square' : ''}`}>
-      <div className="square-word">{word}</div>
-      {value && <div className="square-mark">{value}</div>}
+    <div 
+      className={`squared ${value || 'empty'} ${isWinning ? 'win-square' : ''} ${isTeacherMode && isTeacherTurn && !value ? 'teacher-active' : ''}`}
+      onClick={onClick}
+    >
+      <div className="squared-words">{word}</div>
+      {value && <div className="squared-marks">{value}</div>}
       {isWinning && <span className="trophy-icon">🏆</span>}
     </div>
   );
 }
 
-function Board({ squares, spokenWords, winningSquares }) {
+function Board({ squares, spokenWords, winningSquares, onSquareClick, isTeacherMode, isTeacherTurn }) {
   return (
-    <div className="game-board">
+    <div className="game-brd">
       {squares.map((_, i) => (
         <Square
           key={i}
           value={squares[i]}
           word={spokenWords[i]}
           isWinning={winningSquares.includes(i)}
+          onClick={() => onSquareClick(i)}
+          isTeacherMode={isTeacherMode}
+          isTeacherTurn={isTeacherTurn}
         />
       ))}
     </div>
@@ -48,6 +54,10 @@ function Phase5({ proceed, loseLife }) {
   const [round, setRound] = useState(1);
   const [scores, setScores] = useState({ player1: 0, player2: 0 });
   const [gameCompleted, setGameCompleted] = useState(false);
+  
+  // Teacher mode state
+  const [isTeacherMode, setIsTeacherMode] = useState(true);
+  const [isTeacherTurn, setIsTeacherTurn] = useState(false);
 
   useEffect(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -80,6 +90,16 @@ function Phase5({ proceed, loseLife }) {
     };
   }, [currentSquares]);
 
+  // Teacher's turn logic
+  useEffect(() => {
+    if (isTeacherMode && !xIsNext && !gameWon && currentSquares.includes(null) && !gameCompleted) {
+      setIsTeacherTurn(true);
+      setFeedback("Teacher's turn - click on a square");
+    } else {
+      setIsTeacherTurn(false);
+    }
+  }, [xIsNext, gameWon, currentSquares, gameCompleted, isTeacherMode]);
+
   const calculateWinner = (squares) => {
     const lines = [
       [0, 1, 2], [3, 4, 5], [6, 7, 8],
@@ -96,7 +116,64 @@ function Phase5({ proceed, loseLife }) {
     return null;
   };
 
+  const handleSquareClick = (i) => {
+    // Only process clicks if it's teacher's turn and the square is empty
+    if (!isTeacherTurn || currentSquares[i] || gameWon || gameCompleted) return;
+    
+    const nextSquares = currentSquares.slice();
+    nextSquares[i] = 'O';
+    
+    const nextHistory = [...history.slice(0, currentMove + 1), nextSquares];
+    setHistory(nextHistory);
+    setCurrentMove(nextHistory.length - 1);
+    setFeedback(`Teacher chose: ${spokenWords[i]}`);
+    setPlayerTurn(1);
+    setIsTeacherTurn(false);
+
+    const winner = calculateWinner(nextSquares);
+    if (winner) {
+      setGameWon(true);
+      // Update scores
+      const winnerKey = winner === 'X' ? 'player1' : 'player2';
+      setScores(prev => ({
+        ...prev,
+        [winnerKey]: prev[winnerKey] + 1
+      }));
+      
+      speak(`Player ${winner} wins this round!`);
+      
+      // If teacher wins, player loses a life
+      if (winner === 'O') {
+        loseLife();
+      }
+      
+      // Check if game is complete (5 rounds)
+      if (round >= 1) {
+        setTimeout(() => {
+          declareOverallWinner();
+        }, 2000);
+      } else {
+        setTimeout(() => {
+          nextRound();
+        }, 2000);
+      }
+    } else if (!nextSquares.includes(null)) {
+      // Draw
+      speak("It's a draw! No points this round.");
+      setTimeout(() => {
+        if (round >= 1) {
+          declareOverallWinner();
+        } else {
+          nextRound();
+        }
+      }, 1500);
+    }
+  };
+
   const handleVoiceCommand = (spokenWord) => {
+    // Only process voice commands if it's the player's turn
+    if (playerTurn !== 1 || gameWon || gameCompleted) return;
+    
     const wordIndex = spokenWords.findIndex(word => 
       word.toLowerCase() === spokenWord.toLowerCase()
     );
@@ -112,13 +189,13 @@ function Phase5({ proceed, loseLife }) {
     }
 
     const nextSquares = currentSquares.slice();
-    nextSquares[wordIndex] = xIsNext ? 'X' : 'O';
+    nextSquares[wordIndex] = 'X';
     
     const nextHistory = [...history.slice(0, currentMove + 1), nextSquares];
     setHistory(nextHistory);
     setCurrentMove(nextHistory.length - 1);
-    setFeedback(`Player ${playerTurn} chose: ${spokenWords[wordIndex]}`);
-    setPlayerTurn(playerTurn === 1 ? 2 : 1);
+    setFeedback(`You chose: ${spokenWords[wordIndex]}`);
+    setPlayerTurn(2); // Switch to teacher's turn
 
     const winner = calculateWinner(nextSquares);
     if (winner) {
@@ -132,8 +209,13 @@ function Phase5({ proceed, loseLife }) {
       
       speak(`Player ${winner} wins this round!`);
       
+      // If teacher wins, player loses a life
+      if (winner === 'O') {
+        loseLife();
+      }
+      
       // Check if game is complete (5 rounds)
-      if (round >= 5) {
+      if (round >= 1) {
         setTimeout(() => {
           declareOverallWinner();
         }, 2000);
@@ -146,14 +228,12 @@ function Phase5({ proceed, loseLife }) {
       // Draw
       speak("It's a draw! No points this round.");
       setTimeout(() => {
-        if (round >= 5) {
+        if (round >= 1) {
           declareOverallWinner();
         } else {
           nextRound();
         }
       }, 1500);
-    } else {
-      speak(`Player ${playerTurn === 1 ? 2 : 1}, click the microphone to speak!`);
     }
   };
 
@@ -161,9 +241,9 @@ function Phase5({ proceed, loseLife }) {
     setGameCompleted(true);
     let winnerMessage = "";
     if (scores.player1 > scores.player2) {
-      winnerMessage = `Player X wins the game ${scores.player1}-${scores.player2}! 🎉`;
+      winnerMessage = `You win the game ${scores.player1}-${scores.player2}! 🎉`;
     } else if (scores.player2 > scores.player1) {
-      winnerMessage = `Player O wins the game ${scores.player2}-${scores.player1}! 🎉`;
+      winnerMessage = `Teacher wins the game ${scores.player2}-${scores.player1}!`;
     } else {
       winnerMessage = `It's a tie! ${scores.player1}-${scores.player2}`;
     }
@@ -174,7 +254,7 @@ function Phase5({ proceed, loseLife }) {
   const nextRound = () => {
     setRound(prev => prev + 1);
     resetBoard();
-    speak(`Round ${round + 1}! Player 1's turn first.`);
+    speak(`Round ${round + 1}! Your turn first.`);
     setPlayerTurn(1);
   };
 
@@ -184,24 +264,26 @@ function Phase5({ proceed, loseLife }) {
     setGameWon(false);
     setWinningSquares([]);
     setSpokenWords([...SQUARE_WORDS].sort(() => Math.random() - 0.5));
-    setFeedback(`Round ${round + 1} of 5 - Player 1's turn!`);
+    setFeedback(`Round ${round + 1} of 5 - Your turn!`);
   };
 
   const speak = (text) => {
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.rate = 0.9;
-    utterance.pitch = 1.2; // More playful voice
-    window.speechSynthesis.speak(utterance);
+    if ('speechSynthesis' in window) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 0.9;
+      utterance.pitch = 1.2;
+      window.speechSynthesis.speak(utterance);
+    }
   };
 
   const startListening = () => {
-    if (recognitionRef.current && !gameWon && !gameCompleted) {
+    if (recognitionRef.current && !gameWon && !gameCompleted && playerTurn === 1) {
       recognitionRef.current.stop();
       setTimeout(() => {
         recognitionRef.current.start();
         setListening(true);
-        setFeedback(`Player ${playerTurn}, say a word...`);
-        speak(`Player ${playerTurn}, say a word from the board`);
+        setFeedback(`Say a word...`);
+        speak(`Say a word from the board`);
       }, 300);
     }
   };
@@ -221,53 +303,46 @@ function Phase5({ proceed, loseLife }) {
     }
   };
 
-  const resetGame = () => {
-    setRound(1);
-    setScores({ player1: 0, player2: 0 });
-    setGameCompleted(false);
-    resetBoard();
+  const handleProceedToNextPhase = () => {
+    proceed(); // This will advance to Phase6
   };
 
-  if (gameCompleted) {
-    return (
-      <div className="phase-container">
-        <h2>Game Complete! 🎊</h2>
-        <div className="final-score">
-          <div className="score-player">Player X: {scores.player1} wins</div>
-          <div className="score-player">Player O: {scores.player2} wins</div>
-        </div>
-        <div className="winner-message">{feedback}</div>
-        <button 
-          onClick={resetGame}
-          className="play-again-button"
-        >
-          Play Again!
-        </button>
-      </div>
-    );
-  }
+  const toggleTeacherMode = () => {
+    setIsTeacherMode(!isTeacherMode);
+    setFeedback(isTeacherMode ? "AI mode activated" : "Teacher mode activated");
+  };
 
   return (
-    <div className="phase-container">
-      <h2>SIGHT WORD!</h2> 
-      <h2 className="secondline">Tic Tac Toe</h2>
-      <h2 className="thirline">Round {round} of 5</h2>
-      <div className="score-display">
-        <span className="score-x">X: {scores.player1}</span>
-        <span className="score-o">O: {scores.player2}</span>
+    <div className="phase-con">
+      <h2>SIGHT WORD TIC TAC TOE</h2>
+      <h2 className="thline">Round {round} of 1</h2>
+      <div className="display-score">
+        <span className="score-x">You: {scores.player1}</span>
+        <span className="score-o">Teacher: {scores.player2}</span>
       </div>
       
-      <p className="instructions">Player {playerTurn}'s turn: {listening ? 'Speak now!' : 'Click the mic to speak!'}</p>
+      <div className="mode-toggle">
+        <button onClick={toggleTeacherMode} className="mode-toggle-btn">
+          {isTeacherMode ? "Switch to AI" : "Switch to Teacher"}
+        </button>
+      </div>
       
-      <div className="voice-controls">
+      <p className="dtails">
+        {playerTurn === 1 ? 
+          (listening ? 'Speak now!' : 'Click the mic to speak!') : 
+          (isTeacherMode ? 'Teacher\'s turn - click on a square' : 'AI\'s turn')
+        }
+      </p>
+      
+      <div className="voice-con">
         <button 
           onClick={toggleListening}
-          className={`listen-button ${listening ? 'active' : ''}`}
-          disabled={gameWon || gameCompleted}
+          className={`lst-button ${listening ? 'active' : ''}`}
+          disabled={gameWon || gameCompleted || playerTurn !== 1}
         >
           {listening ? '🎤 Listening...' : '🎤 Start Speaking'}
         </button>
-        <div className="feedback">{feedback}</div>
+        <div className="fback">{feedback}</div>
       </div>
 
       <div className="tic-tac-toe-game">
@@ -275,8 +350,30 @@ function Phase5({ proceed, loseLife }) {
           squares={currentSquares}
           spokenWords={spokenWords}
           winningSquares={winningSquares}
+          onSquareClick={handleSquareClick}
+          isTeacherMode={isTeacherMode}
+          isTeacherTurn={isTeacherTurn}
         />
       </div>
+
+      {gameCompleted && (
+        <div className="game-complete-overlay">
+          <div className="game-complete-content">
+            <h2>Game Complete! 🎊</h2>
+            <div className="f-score">
+              <div className="s-player">You: {scores.player1} wins</div>
+              <div className="s-player">Teacher: {scores.player2} wins</div>
+            </div>
+            <div className="win-message">{feedback}</div>
+            <button 
+              onClick={handleProceedToNextPhase}
+              className="proceed-button"
+            >
+              Proceed to Next Phase →
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
