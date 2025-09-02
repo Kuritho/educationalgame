@@ -2,6 +2,10 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import './styles/Phase4.css';
 import LivesCounter from './LivesCounter';
 
+// Import sound files (you'll need to add these to your project)
+import backgroundMusic from '../components/sounds/bee.mp3';
+import successSound from '../components/sounds/success.mp3';
+
 const Phase4 = ({ proceed, loseLife, lives: initialLives }) => {
   // State declarations
   const [maze, setMaze] = useState([[]]);
@@ -18,8 +22,11 @@ const Phase4 = ({ proceed, loseLife, lives: initialLives }) => {
   const [lastSpokenLetter, setLastSpokenLetter] = useState('');
   const [retryCount, setRetryCount] = useState(0);
   const [isSpeechSupported, setIsSpeechSupported] = useState(true);
+  const [showTutorial, setShowTutorial] = useState(true);
   const recognitionRef = useRef(null);
   const [isMazeReady, setIsMazeReady] = useState(false);
+  const audioRef = useRef(null);
+  const successAudioRef = useRef(null);
 
   const letterPool = ['B', 'C', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 
                      'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'X', 'Y', 'Z'];
@@ -51,6 +58,45 @@ const Phase4 = ({ proceed, loseLife, lives: initialLives }) => {
     'ex': 'X', 'x-ray': 'X',
     'why': 'Y', 'yankee': 'Y', 'yes': 'Y', 'yellow': 'Y',
     'zee': 'Z', 'zed': 'Z', 'zulu': 'Z', 'zoo': 'Z'
+  };
+
+  // Initialize audio elements
+  useEffect(() => {
+    audioRef.current = new Audio(backgroundMusic);
+    audioRef.current.loop = true;
+    audioRef.current.volume = 0.3; // Set volume to 30%
+    
+    successAudioRef.current = new Audio(successSound);
+    successAudioRef.current.volume = 0.5;
+    
+    // Automatically start playing background music
+    const playBackgroundMusic = async () => {
+      try {
+        await audioRef.current.play();
+        console.log('Background music started');
+      } catch (error) {
+        console.log('Background music play failed:', error);
+        // Some browsers require user interaction first
+      }
+    };
+    
+    playBackgroundMusic();
+    
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+    };
+  }, []);
+
+  // Play success sound
+  const playSuccessSound = () => {
+    if (successAudioRef.current) {
+      successAudioRef.current.currentTime = 0;
+      successAudioRef.current.play().catch(error => {
+        console.log('Success sound play failed:', error);
+      });
+    }
   };
 
   // Generate initial maze
@@ -88,8 +134,11 @@ const Phase4 = ({ proceed, loseLife, lives: initialLives }) => {
     }
   }, [letters]);
 
-  // Speech recognition setup
+  // Voice recognition setup
   useEffect(() => {
+    // Check if we're in a browser environment
+    if (typeof window === 'undefined') return;
+    
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     
     if (!SpeechRecognition) {
@@ -138,7 +187,9 @@ const Phase4 = ({ proceed, loseLife, lives: initialLives }) => {
     recognitionRef.current = recognition;
 
     return () => {
-      recognition.stop();
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
     };
   }, [handleDetectedLetter]);
 
@@ -152,11 +203,16 @@ const Phase4 = ({ proceed, loseLife, lives: initialLives }) => {
     } else {
       setListening(true);
       setMessage('Listening... Say a letter clearly');
-      recognitionRef.current.start();
+      try {
+        recognitionRef.current.start();
+      } catch (error) {
+        console.error('Failed to start recognition:', error);
+        setMessage('Error starting voice recognition. Try refreshing the page.');
+        setListening(false);
+      }
     }
   };
 
-  // Maze generation and game logic functions
   const generateMaze = () => {
     setIsMazeReady(false);
     const size = 17;
@@ -222,7 +278,7 @@ const Phase4 = ({ proceed, loseLife, lives: initialLives }) => {
     setExitPosition({ x: exitX, y: exitY });
     setVisited([{ x: 1, y: 1 }]);
     setMessage(`Find the hive! Round ${currentRound}/1`);
-    setTimeLeft(100);
+    setTimeLeft(500);
     setTimerActive(true);
     setLastSpokenLetter('');
   };
@@ -247,6 +303,9 @@ const Phase4 = ({ proceed, loseLife, lives: initialLives }) => {
 
   const handleReachHive = () => {
     setTimerActive(false);
+    // Play success sound when reaching the final letter
+    playSuccessSound();
+    
     if (currentRound < 1) {
       setMessage(`Round ${currentRound} complete! Starting round ${currentRound + 1}`);
       setTimeout(() => {
@@ -312,6 +371,11 @@ const Phase4 = ({ proceed, loseLife, lives: initialLives }) => {
           delete updatedLetters[posKey];
           setLetters(updatedLetters);
           setScore(prev => prev + 10);
+          
+          // Play success sound when collecting a letter
+          if (posKey === `${exitPosition.x},${exitPosition.y}`) {
+            playSuccessSound();
+          }
         }
 
         if (path[i].x === exitPosition.x && path[i].y === exitPosition.y) {
@@ -336,47 +400,80 @@ const Phase4 = ({ proceed, loseLife, lives: initialLives }) => {
   };
 
   const renderCell = (cellValue, x, y) => {
-  console.log(`Rendering cell ${x},${y}`, {
-  cellValue,
-  playerPosition,
-  exitPosition,
-  visited,
-  letters
-});
-  // Add null checks for all position objects
-  const isPlayer = playerPosition && x === playerPosition.x && y === playerPosition.y;
-  const isExit = exitPosition && x === exitPosition.x && y === exitPosition.y;
-  const wasVisited = visited && visited.some(pos => pos && pos.x === x && pos.y === y);
-  const hasLetter = letters && letters[`${x},${y}`];
+    console.log(`Rendering cell ${x},${y}`, {
+      cellValue,
+      playerPosition,
+      exitPosition,
+      visited,
+      letters
+    });
+    
+    const isPlayer = playerPosition && x === playerPosition.x && y === playerPosition.y;
+    const isExit = exitPosition && x === exitPosition.x && y === exitPosition.y;
+    const wasVisited = visited && visited.some(pos => pos && pos.x === x && pos.y === y);
+    const hasLetter = letters && letters[`${x},${y}`];
 
-  if (cellValue === undefined) return null; // Skip rendering if cell is undefined
+    if (cellValue === undefined) return null; 
 
-  return (
-    <div
-      key={`${x}-${y}`}
-      className={`maze-cell ${
-        isPlayer ? 'player' :
-        isExit ? 'exit' :
-        wasVisited ? 'visited' :
-        cellValue === 1 ? 'wall' : 'path'
-      }`}
-    >
-      {isPlayer && <div className="bee">🐝</div>}
-      {isExit && (
-        <>
-          <div className="beehouse">🏡</div>
-          {hasLetter && <div className="maze-letter exit-letter">{hasLetter}</div>}
-        </>
-      )}
-      {!isExit && hasLetter && (
-        <div className="maze-letter">{hasLetter}</div>
-      )}
-    </div>
-  );
-};
+    return (
+      <div
+        key={`${x}-${y}`}
+        className={`maze-cell ${
+          isPlayer ? 'player' :
+          isExit ? 'exit' :
+          wasVisited ? 'visited' :
+          cellValue === 1 ? 'wall' : 'path'
+        }`}
+      >
+        {isPlayer && <div className="bee">🐝</div>}
+        {isExit && (
+          <>
+            <div className="beehouse">🏡</div>
+            {hasLetter && <div className="maze-letter exit-letter">{hasLetter}</div>}
+          </>
+        )}
+        {!isExit && hasLetter && (
+          <div className="maze-letter">{hasLetter}</div>
+        )}
+      </div>
+    );
+  };
+
+  const skipTutorial = () => {
+    setShowTutorial(false);
+  };
 
   return (
     <div className="mobile-maze-container">
+      {showTutorial && (
+        <div className="tutorial-overlay">
+          <div className="tutorial-content">
+            <h2>Welcome to Voice-Controlled Bee Maze! 🐝</h2>
+            <div className="tutorial-steps">
+              <div className="tutorial-step">
+                <span className="step-number">1</span>
+                <p>Click the microphone button to enable voice control 🎤</p>
+              </div>
+              <div className="tutorial-step">
+                <span className="step-number">2</span>
+                <p>Say a letter clearly to guide the bee to that letter 🗣️</p>
+              </div>
+              <div className="tutorial-step">
+                <span className="step-number">3</span>
+                <p>Collect letters and reach the hive 🏡</p>
+              </div>
+              <div className="tutorial-step">
+                <span className="step-number">4</span>
+                <p>Complete before time runs out! ⏱️</p>
+              </div>
+            </div>
+            <button onClick={skipTutorial} className="start-playing-btn">
+              Start Playing!
+            </button>
+          </div>
+        </div>
+      )}
+      
       <div className="header">
         <span>Busy Bee Challenge</span>
         <div className="header-info">
@@ -386,7 +483,6 @@ const Phase4 = ({ proceed, loseLife, lives: initialLives }) => {
         </div>
       </div>
       
-      {/* <LivesCounter lives={initialLives} /> */}
       <h1>🐝Voice-Controlled Bee Maze🍯</h1>
       
       <div className="message-box">{message}</div>
@@ -396,6 +492,7 @@ const Phase4 = ({ proceed, loseLife, lives: initialLives }) => {
           <button 
             onClick={toggleVoiceControl}
             className={`voice-control-button ${listening ? 'active' : ''}`}
+            disabled={showTutorial}
           >
             {listening ? (
               <>
@@ -423,14 +520,14 @@ const Phase4 = ({ proceed, loseLife, lives: initialLives }) => {
       <div className="maze-wrapper">
         <div className="maze-grid">
           {isMazeReady ? (
-          maze.map((row, y) => (
-            <div key={y} className="maze-row">
-              {row.map((cell, x) => renderCell(cell, x, y))}
-            </div>
-          ))
-        ) : (
-          <div className="maze-loading">Loading maze...</div>
-        )}
+            maze.map((row, y) => (
+              <div key={y} className="maze-row">
+                {row.map((cell, x) => renderCell(cell, x, y))}
+              </div>
+            ))
+          ) : (
+            <div className="maze-loading">Loading maze...</div>
+          )}
         </div>
       </div>
 

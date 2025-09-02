@@ -1,8 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { usePersistedState } from '../hooks/usePersistedState';
 import './styles/Phase3.css';
 
 const Phase3 = ({ proceed, loseLife}) => {
+  // Audio reference
+  const audioRef = useRef(null);
+  
   // Extended word bank with correct answers and distractors
   const wordBank = [
     { image: 'bat.png', correct: 'bat', distractors: ['fat', 'mat'] },
@@ -48,6 +51,43 @@ const Phase3 = ({ proceed, loseLife}) => {
   const [usedItems, setUsedItems] = usePersistedState('phase3_usedItems', []);
   const [roundCompleted, setRoundCompleted] = useState(false);
   const [feedback, setFeedback] = useState('');
+  const [showTutorial, setShowTutorial] = useState(true);
+
+  // Initialize audio on component mount
+  useEffect(() => {
+    // Create and configure audio
+    audioRef.current = new Audio('/sounds/bgm.mp3');
+    audioRef.current.loop = true;
+    
+    // Attempt to play audio
+    const playAudio = () => {
+      audioRef.current.play().catch(error => {
+        console.log("Audio play failed, may require user interaction:", error);
+      });
+    };
+    
+    // Try to play immediately
+    playAudio();
+    
+    // Also try to play on a user interaction event
+    const handleUserInteraction = () => {
+      playAudio();
+      document.removeEventListener('click', handleUserInteraction);
+      document.removeEventListener('keydown', handleUserInteraction);
+    };
+    
+    document.addEventListener('click', handleUserInteraction);
+    document.addEventListener('keydown', handleUserInteraction);
+    
+    // Cleanup function to pause audio when component unmounts
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+      document.removeEventListener('click', handleUserInteraction);
+      document.removeEventListener('keydown', handleUserInteraction);
+    };
+  }, []);
 
   // Initialize each round with random items that haven't been used yet
   useEffect(() => {
@@ -106,12 +146,12 @@ const Phase3 = ({ proceed, loseLife}) => {
     if (completedItems.length === itemsPerRound && !roundCompleted) {
       setRoundCompleted(true);
       setFeedback(`Round ${currentRound} completed!`);
-      // new Audio('/audio/success.mp3').play();
+      new Audio('/sounds/success.mp3').play();
     }
   }, [completedItems, currentRound, roundCompleted]);
 
   const handleOptionClick = (rowIndex, option, correctAnswer) => {
-    if (roundCompleted || completedItems.includes(rowIndex)) return;
+    if (roundCompleted || completedItems.includes(rowIndex) || showTutorial) return;
 
     const isCorrect = option === correctAnswer;
     const cellKey = `${currentRound}-${rowIndex}-${option}`;
@@ -139,8 +179,18 @@ const Phase3 = ({ proceed, loseLife}) => {
       localStorage.removeItem('phase3_selectedCells');
       localStorage.removeItem('phase3_completedItems');
       localStorage.removeItem('phase3_usedItems');
+      
+      // Stop the background music before proceeding
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+      
       proceed();
     }
+  };
+
+  const skipTutorial = () => {
+    setShowTutorial(false);
   };
 
   // Add restart function
@@ -155,14 +205,36 @@ const Phase3 = ({ proceed, loseLife}) => {
 
   return (
     <div className="phase3-container">
-      <h2>Level 2: Sight Word Safari</h2>
+      {showTutorial && (
+        <div className="tutorial-overlay">
+          <div className="tutorial-content">
+            <h2>Welcome to Sight Word Safari! 🦁</h2>
+            <div className="tutorial-steps">
+              <div className="tutorial-step">
+                <span className="step-number">1</span>
+                <p>Look at the picture in the first column 👀</p>
+              </div>
+              <div className="tutorial-step">
+                <span className="step-number">2</span>
+                <p>Choose the correct word that matches the picture 📝</p>
+              </div>
+              <div className="tutorial-step">
+                <span className="step-number">3</span>
+                <p>Complete all matches to finish the round 🎯</p>
+              </div>
+              <div className="tutorial-step">
+                <span className="step-number">4</span>
+                <p>There are 5 rounds with increasing difficulty! 📈</p>
+              </div>
+            </div>
+            <button onClick={skipTutorial} className="start-playing-btn">
+              Start Playing!
+            </button>
+          </div>
+        </div>
+      )}
       
-      {/* <div className="controls">
-        <button onClick={restartGame} className="restart-button">
-          Restart Game
-        </button>
-      </div> */}
-      
+      <h2>Level 2: Sight Word Safari</h2>    
       <div className="round-tracker">
         {[1, 2, 3, 4, 5].map(round => (
           <div 
@@ -208,7 +280,7 @@ const Phase3 = ({ proceed, loseLife}) => {
                           completedItems.includes(rowIndex) && isCorrectAnswer ? 'correct' : ''
                         }`}
                         onClick={() => handleOptionClick(rowIndex, option, item.correct)}
-                        disabled={completedItems.includes(rowIndex) || roundCompleted}
+                        disabled={completedItems.includes(rowIndex) || roundCompleted || showTutorial}
                       >
                         {option}
                         {completedItems.includes(rowIndex) && isCorrectAnswer && (
@@ -225,7 +297,7 @@ const Phase3 = ({ proceed, loseLife}) => {
       </div>
 
       {roundCompleted && (
-        <button onClick={nextRound} className="proceed-button">
+        <button onClick={nextRound} className="proceed-button" disabled={showTutorial}>
           {currentRound < 5 ? `Start Round ${currentRound + 1}` : "Great Job! Go to Phase 4"}
         </button>
       )}

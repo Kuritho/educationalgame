@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { usePersistedState } from '../hooks/usePersistedState';
 import './styles/Phase2.css';
 
@@ -44,6 +44,47 @@ const Phase2 = ({ proceed, loseLife }) => {
   const [matchedPairs, setMatchedPairs] = usePersistedState('phase2_matchedPairs', []);
   const [completed, setCompleted] = usePersistedState('phase2_completed', false);
   const [usedItems, setUsedItems] = usePersistedState('phase2_usedItems', []);
+  const [showTutorial, setShowTutorial] = useState(true);
+  
+  const audioRef = useRef(null);
+
+  // Initialize audio and start playing
+  useEffect(() => {
+    // Create audio element
+    const audio = new Audio('/sounds/bgm2.mp3');
+    audio.loop = true;
+    audio.volume = 0.1; 
+    audioRef.current = audio;
+
+    // Attempt to play audio
+    const playAudio = () => {
+      audio.play().catch(error => {
+        console.log("Autoplay prevented:", error);
+      });
+    };
+
+    // Try to play immediately
+    playAudio();
+
+    // Set up a user interaction listener to try playing again
+    const handleUserInteraction = () => {
+      playAudio();
+      document.removeEventListener('click', handleUserInteraction);
+      document.removeEventListener('touchstart', handleUserInteraction);
+    };
+
+    document.addEventListener('click', handleUserInteraction);
+    document.addEventListener('touchstart', handleUserInteraction);
+
+    // Cleanup function
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+      document.removeEventListener('click', handleUserInteraction);
+      document.removeEventListener('touchstart', handleUserInteraction);
+    };
+  }, []);
 
   // Initialize each round
   useEffect(() => {
@@ -93,14 +134,14 @@ const Phase2 = ({ proceed, loseLife }) => {
   }, [matchedPairs, currentRound, roundCompleted]);
 
   const handleLetterClick = (letter) => {
-    if (matchedPairs.includes(letter) || roundCompleted) return;
+    if (matchedPairs.includes(letter) || roundCompleted || showTutorial) return;
     
     setCurrentSelection(letter);
     setFeedback(`Find the ${letter} picture!`);
   };
 
   const handlePictureClick = (picture) => {
-    if (!currentSelection || roundCompleted) return;
+    if (!currentSelection || roundCompleted || showTutorial) return;
     
     const correctItem = gameItems.find(item => item.letter === currentSelection);
     
@@ -111,6 +152,7 @@ const Phase2 = ({ proceed, loseLife }) => {
       
       // Play pronunciation audio
       const audio = new Audio(`/sounds/correct.mp3`);
+      audio.volume = 0.9; // Set volume for correct sound effect
       audio.play();
     } else {
       // Incorrect match
@@ -130,6 +172,12 @@ const Phase2 = ({ proceed, loseLife }) => {
       localStorage.removeItem('phase2_matchedPairs');
       localStorage.removeItem('phase2_completed');
       localStorage.removeItem('phase2_usedItems');
+      
+      // Stop the background music
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+      
       proceed();
     }
   };
@@ -139,8 +187,37 @@ const Phase2 = ({ proceed, loseLife }) => {
     return item ? item.color : '#4a6fa5';
   };
 
+  const skipTutorial = () => {
+    setShowTutorial(false);
+  };
+
   return (
     <div className={`phase2-container ${celebrate ? 'celebrate' : ''}`}>
+      {showTutorial && (
+        <div className="tutorial-overlay">
+          <div className="tutorial-content">
+            <h2>Welcome to Alphabet Matching! 🎯</h2>
+            <div className="tutorial-steps">
+              <div className="tutorial-step">
+                <span className="step-number">1</span>
+                <p>Click on a letter from the left side ✨</p>
+              </div>
+              <div className="tutorial-step">
+                <span className="step-number">2</span>
+                <p>Find and click the matching picture 🖼️</p>
+              </div>
+              <div className="tutorial-step">
+                <span className="step-number">3</span>
+                <p>Complete all matches to finish the round 🎉</p>
+              </div>
+            </div>
+            <button onClick={skipTutorial} className="start-playing-btn">
+              Start Playing!
+            </button>
+          </div>
+        </div>
+      )}
+      
       {/* Animated background elements */}
       <div className="bubbles">
         {[...Array(10)].map((_, i) => <div key={i} className="bubble"></div>)}
@@ -181,7 +258,7 @@ const Phase2 = ({ proceed, loseLife }) => {
                   key={index}
                   className={`letter-btn ${currentSelection === letter ? 'selected' : ''} ${matchedPairs.includes(letter) ? 'matched' : ''}`}
                   onClick={() => handleLetterClick(letter)}
-                  disabled={matchedPairs.includes(letter) || roundCompleted}
+                  disabled={matchedPairs.includes(letter) || roundCompleted || showTutorial}
                   style={{
                     backgroundColor: matchedPairs.includes(letter) ? '#4CAF50' : color,
                     transform: currentSelection === letter ? 'scale(1.1)' : 'scale(1)'
@@ -205,7 +282,7 @@ const Phase2 = ({ proceed, loseLife }) => {
                   key={index}
                   className={`picture-btn ${matched ? 'matched' : ''}`}
                   onClick={() => handlePictureClick(picture)}
-                  disabled={matched || !currentSelection || roundCompleted}
+                  disabled={matched || !currentSelection || roundCompleted || showTutorial}
                   style={{
                     borderColor: item?.color || '#ddd',
                     transform: matched ? 'rotate(0)' : ''
@@ -232,6 +309,7 @@ const Phase2 = ({ proceed, loseLife }) => {
         <button
           onClick={nextRound}
           className="proceed-button"
+          disabled={showTutorial}
         >
           {currentRound < 5 ? (
             <>

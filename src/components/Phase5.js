@@ -6,6 +6,10 @@ const SQUARE_WORDS = [
   'flower', 'giraffe', 'house', 'ice cream'
 ];
 
+const WIN_SOUND = '/sounds/success.mp3';
+const LOSE_SOUND = '/sounds/lose.mp3';
+const BACKGROUND_MUSIC = '/sounds/bgm.mp3';
+
 function Square({ value, word, isWinning, onClick, isTeacherMode, isTeacherTurn }) {
   return (
     <div 
@@ -49,48 +53,94 @@ function Phase5({ proceed, loseLife }) {
   const [spokenWords, setSpokenWords] = useState([...SQUARE_WORDS].sort(() => Math.random() - 0.5));
   const [feedback, setFeedback] = useState('');
   const [playerTurn, setPlayerTurn] = useState(1);
+  const [showTutorial, setShowTutorial] = useState(true);
+  const [isSpeechSupported, setIsSpeechSupported] = useState(true);
   
-  // Game round tracking
   const [round, setRound] = useState(1);
   const [scores, setScores] = useState({ player1: 0, player2: 0 });
   const [gameCompleted, setGameCompleted] = useState(false);
   
-  // Teacher mode state
   const [isTeacherMode, setIsTeacherMode] = useState(true);
   const [isTeacherTurn, setIsTeacherTurn] = useState(false);
 
+  const winSoundRef = useRef(null);
+  const loseSoundRef = useRef(null);
+  const backgroundMusicRef = useRef(null);
+
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (SpeechRecognition) {
-      recognitionRef.current = new SpeechRecognition();
-      recognitionRef.current.continuous = false;
-      recognitionRef.current.interimResults = false;
-      recognitionRef.current.lang = 'en-US';
-
-      recognitionRef.current.onresult = (event) => {
-        const spokenWord = event.results[0][0].transcript.trim().toLowerCase();
-        handleVoiceCommand(spokenWord);
-      };
-
-      recognitionRef.current.onend = () => {
-        setListening(false);
-      };
-
-      recognitionRef.current.onerror = (event) => {
-        console.error('Speech recognition error', event.error);
-        setFeedback(`Oops! Didn't catch that. Try again!`);
-        setListening(false);
-      };
+    
+    if (!SpeechRecognition) {
+      setIsSpeechSupported(false);
+      setFeedback('Voice control not supported. Click squares instead.');
+      return;
     }
+
+    recognitionRef.current = new SpeechRecognition();
+    recognitionRef.current.continuous = false;
+    recognitionRef.current.interimResults = false;
+    recognitionRef.current.lang = 'en-US';
+
+    recognitionRef.current.onresult = (event) => {
+      const spokenWord = event.results[0][0].transcript.trim().toLowerCase();
+      handleVoiceCommand(spokenWord);
+    };
+
+    recognitionRef.current.onend = () => {
+      setListening(false);
+    };
+
+    recognitionRef.current.onerror = (event) => {
+      console.error('Speech recognition error', event.error);
+      setFeedback(`Oops! Didn't catch that. Try again!`);
+      setListening(false);
+    };
+
+    winSoundRef.current = new Audio(WIN_SOUND);
+    loseSoundRef.current = new Audio(LOSE_SOUND);
+    backgroundMusicRef.current = new Audio(BACKGROUND_MUSIC);
+    backgroundMusicRef.current.loop = true;
+    backgroundMusicRef.current.volume = 0.3;
+
+    const playBackgroundMusic = () => {
+      if (backgroundMusicRef.current) {
+        backgroundMusicRef.current.play().catch(error => {
+          console.log("Background music play failed, trying again after user interaction:", error);
+        });
+      }
+    };
+
+    playBackgroundMusic();
+
+    const handleFirstInteraction = () => {
+      playBackgroundMusic();
+      document.removeEventListener('click', handleFirstInteraction);
+      document.removeEventListener('keydown', handleFirstInteraction);
+      document.removeEventListener('touchstart', handleFirstInteraction);
+    };
+
+    document.addEventListener('click', handleFirstInteraction);
+    document.addEventListener('keydown', handleFirstInteraction);
+    document.addEventListener('touchstart', handleFirstInteraction);
 
     return () => {
       if (recognitionRef.current) {
         recognitionRef.current.stop();
       }
+  
+      if (backgroundMusicRef.current) {
+        backgroundMusicRef.current.pause();
+      }
+   
+      document.removeEventListener('click', handleFirstInteraction);
+      document.removeEventListener('keydown', handleFirstInteraction);
+      document.removeEventListener('touchstart', handleFirstInteraction);
     };
   }, [currentSquares]);
 
-  // Teacher's turn logic
+ 
   useEffect(() => {
     if (isTeacherMode && !xIsNext && !gameWon && currentSquares.includes(null) && !gameCompleted) {
       setIsTeacherTurn(true);
@@ -116,8 +166,16 @@ function Phase5({ proceed, loseLife }) {
     return null;
   };
 
+  const playSound = (soundRef) => {
+    if (soundRef.current) {
+      soundRef.current.currentTime = 0;
+      soundRef.current.play().catch(error => {
+        console.log("Audio play failed:", error);
+      });
+    }
+  };
+
   const handleSquareClick = (i) => {
-    // Only process clicks if it's teacher's turn and the square is empty
     if (!isTeacherTurn || currentSquares[i] || gameWon || gameCompleted) return;
     
     const nextSquares = currentSquares.slice();
@@ -133,22 +191,24 @@ function Phase5({ proceed, loseLife }) {
     const winner = calculateWinner(nextSquares);
     if (winner) {
       setGameWon(true);
-      // Update scores
       const winnerKey = winner === 'X' ? 'player1' : 'player2';
       setScores(prev => ({
         ...prev,
         [winnerKey]: prev[winnerKey] + 1
       }));
       
-      speak(`Player ${winner} wins this round!`);
-      
-      // If teacher wins, player loses a life
+
+      if (winner === 'X') {
+        playSound(winSoundRef);
+      } else {
+        playSound(loseSoundRef);
+      }
+ 
       if (winner === 'O') {
         loseLife();
       }
-      
-      // Check if game is complete (5 rounds)
-      if (round >= 1) {
+  
+      if (round >= 5) {
         setTimeout(() => {
           declareOverallWinner();
         }, 2000);
@@ -158,10 +218,9 @@ function Phase5({ proceed, loseLife }) {
         }, 2000);
       }
     } else if (!nextSquares.includes(null)) {
-      // Draw
-      speak("It's a draw! No points this round.");
+     
       setTimeout(() => {
-        if (round >= 1) {
+        if (round >= 5) {
           declareOverallWinner();
         } else {
           nextRound();
@@ -171,7 +230,6 @@ function Phase5({ proceed, loseLife }) {
   };
 
   const handleVoiceCommand = (spokenWord) => {
-    // Only process voice commands if it's the player's turn
     if (playerTurn !== 1 || gameWon || gameCompleted) return;
     
     const wordIndex = spokenWords.findIndex(word => 
@@ -195,27 +253,28 @@ function Phase5({ proceed, loseLife }) {
     setHistory(nextHistory);
     setCurrentMove(nextHistory.length - 1);
     setFeedback(`You chose: ${spokenWords[wordIndex]}`);
-    setPlayerTurn(2); // Switch to teacher's turn
+    setPlayerTurn(2); 
 
     const winner = calculateWinner(nextSquares);
     if (winner) {
       setGameWon(true);
-      // Update scores
       const winnerKey = winner === 'X' ? 'player1' : 'player2';
       setScores(prev => ({
         ...prev,
         [winnerKey]: prev[winnerKey] + 1
       }));
       
-      speak(`Player ${winner} wins this round!`);
+      if (winner === 'X') {
+        playSound(winSoundRef);
+      } else {
+        playSound(loseSoundRef);
+      }
       
-      // If teacher wins, player loses a life
       if (winner === 'O') {
         loseLife();
       }
       
-      // Check if game is complete (5 rounds)
-      if (round >= 1) {
+      if (round >= 5) {
         setTimeout(() => {
           declareOverallWinner();
         }, 2000);
@@ -225,10 +284,8 @@ function Phase5({ proceed, loseLife }) {
         }, 2000);
       }
     } else if (!nextSquares.includes(null)) {
-      // Draw
-      speak("It's a draw! No points this round.");
       setTimeout(() => {
-        if (round >= 1) {
+        if (round >= 5) {
           declareOverallWinner();
         } else {
           nextRound();
@@ -242,19 +299,20 @@ function Phase5({ proceed, loseLife }) {
     let winnerMessage = "";
     if (scores.player1 > scores.player2) {
       winnerMessage = `You win the game ${scores.player1}-${scores.player2}! 🎉`;
+      playSound(winSoundRef);
     } else if (scores.player2 > scores.player1) {
       winnerMessage = `Teacher wins the game ${scores.player2}-${scores.player1}!`;
+      playSound(loseSoundRef);
     } else {
       winnerMessage = `It's a tie! ${scores.player1}-${scores.player2}`;
     }
-    speak(winnerMessage);
     setFeedback(winnerMessage);
   };
 
   const nextRound = () => {
     setRound(prev => prev + 1);
     resetBoard();
-    speak(`Round ${round + 1}! Your turn first.`);
+    setFeedback(`Round ${round + 1}! Your turn first.`);
     setPlayerTurn(1);
   };
 
@@ -267,24 +325,19 @@ function Phase5({ proceed, loseLife }) {
     setFeedback(`Round ${round + 1} of 5 - Your turn!`);
   };
 
-  const speak = (text) => {
-    if ('speechSynthesis' in window) {
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.rate = 0.9;
-      utterance.pitch = 1.2;
-      window.speechSynthesis.speak(utterance);
-    }
-  };
-
   const startListening = () => {
     if (recognitionRef.current && !gameWon && !gameCompleted && playerTurn === 1) {
-      recognitionRef.current.stop();
-      setTimeout(() => {
-        recognitionRef.current.start();
-        setListening(true);
-        setFeedback(`Say a word...`);
-        speak(`Say a word from the board`);
-      }, 300);
+      try {
+        recognitionRef.current.stop();
+        setTimeout(() => {
+          recognitionRef.current.start();
+          setListening(true);
+          setFeedback(`Say a word...`);
+        }, 300);
+      } catch (error) {
+        console.error('Error starting speech recognition:', error);
+        setFeedback('Error starting voice control. Try clicking squares instead.');
+      }
     }
   };
 
@@ -304,7 +357,10 @@ function Phase5({ proceed, loseLife }) {
   };
 
   const handleProceedToNextPhase = () => {
-    proceed(); // This will advance to Phase6
+    if (backgroundMusicRef.current) {
+      backgroundMusicRef.current.pause();
+    }
+    proceed();
   };
 
   const toggleTeacherMode = () => {
@@ -312,19 +368,46 @@ function Phase5({ proceed, loseLife }) {
     setFeedback(isTeacherMode ? "AI mode activated" : "Teacher mode activated");
   };
 
+  const skipTutorial = () => {
+    setShowTutorial(false);
+  };
+
   return (
     <div className="phase-con">
+      {showTutorial && (
+        <div className="tutorial-overlay">
+          <div className="tutorial-content">
+            <h2>Welcome to Sight Word Tic Tac Toe! 🎯</h2>
+            <div className="tutorial-steps">
+              <div className="tutorial-step">
+                <span className="step-number">1</span>
+                <p>Click the microphone button to speak words 🎤</p>
+              </div>
+              <div className="tutorial-step">
+                <span className="step-number">2</span>
+                <p>Say a word from the board to claim that square 🗣️</p>
+              </div>
+              <div className="tutorial-step">
+                <span className="step-number">3</span>
+                <p>Get three in a row to win the round 📊</p>
+              </div>
+              <div className="tutorial-step">
+                <span className="step-number">4</span>
+                <p>Beat the teacher in 5 rounds to win! 🏆</p>
+              </div>
+            </div>
+            <button onClick={skipTutorial} className="start-playing-btn">
+              Start Playing!
+            </button>
+          </div>
+        </div>
+      )}
+      
       <h2>SIGHT WORD TIC TAC TOE</h2>
-      <h2 className="thline">Round {round} of 1</h2>
+      <h2 className="thline">Round {round} of 5</h2>
       <div className="display-score">
         <span className="score-x">You: {scores.player1}</span>
         <span className="score-o">Teacher: {scores.player2}</span>
-      </div>
-      
-      <div className="mode-toggle">
-        <button onClick={toggleTeacherMode} className="mode-toggle-btn">
-          {isTeacherMode ? "Switch to AI" : "Switch to Teacher"}
-        </button>
       </div>
       
       <p className="dtails">
@@ -335,13 +418,15 @@ function Phase5({ proceed, loseLife }) {
       </p>
       
       <div className="voice-con">
-        <button 
-          onClick={toggleListening}
-          className={`lst-button ${listening ? 'active' : ''}`}
-          disabled={gameWon || gameCompleted || playerTurn !== 1}
-        >
-          {listening ? '🎤 Listening...' : '🎤 Start Speaking'}
-        </button>
+        {isSpeechSupported && (
+          <button 
+            onClick={toggleListening}
+            className={`lst-button ${listening ? 'active' : ''}`}
+            disabled={gameWon || gameCompleted || playerTurn !== 1 || showTutorial}
+          >
+            {listening ? '🎤 Listening...' : '🎤 Start Speaking'}
+          </button>
+        )}
         <div className="fback">{feedback}</div>
       </div>
 

@@ -1,40 +1,74 @@
 /* Phase1.css */
-
 .phase-container {
   max-width: 800px;
   margin: 0 auto;
   padding: 20px;
-  font-family: 'Arial', sans-serif;
   text-align: center;
-  background-color: #f5f5f5;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  font-family: 'Comic Sans MS', cursive, sans-serif;
+  background-color: #f0f8ff;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
-.phase-container h2 {
-  color: #2c3e50;
+h2 {
+  color: #4a6fa5;
   margin-bottom: 10px;
 }
 
-.phase-container p {
-  color: #7f8c8d;
+p {
+  color: #666;
   margin-bottom: 20px;
 }
 
-.browser-warning {
-  background-color: #ffeaa7;
-  border-left: 4px solid #fdcb6e;
-  padding: 10px;
-  margin-bottom: 20px;
-  border-radius: 4px;
-  text-align: left;
+/* Tutorial overlay styles */
+.tutorial-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.85);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
 }
 
-.browser-warning p {
-  margin: 0;
-  color: #d35400;
+.tutorial-content {
+  background: linear-gradient(135deg, #6e8efb, #a777e3);
+  padding: 30px;
+  border-radius: 15px;
+  text-align: center;
+  max-width: 500px;
+  color: white;
+  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.3);
 }
 
+.tutorial-content h2 {
+  color: white;
+  margin-bottom: 15px;
+  font-size: 28px;
+}
+
+.skip-tutorial-btn {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: #ff6b6b;
+  color: white;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+  transition: all 0.3s;
+}
+
+.skip-tutorial-btn:hover {
+  background-color: #ff5252;
+  transform: scale(1.05);
+}
+
+/* Alphabet grid */
 .alphabet-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
@@ -43,44 +77,42 @@
 }
 
 .letter-btn {
-  padding: 15px;
+  padding: 15px 5px;
   font-size: 20px;
   font-weight: bold;
-  background-color: #3498db;
+  background: linear-gradient(to bottom, #6e8efb, #4a6fa5);
   color: white;
   border: none;
-  border-radius: 5px;
+  border-radius: 10px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s;
 }
 
-.letter-btn:hover {
-  background-color: #2980b9;
-  transform: scale(1.05);
+.letter-btn:hover:not(.disabled) {
+  background: linear-gradient(to bottom, #a777e3, #6e8efb);
+  transform: translateY(-3px);
 }
 
 .letter-btn.active {
-  background-color: #e74c3c;
-  transform: scale(1.1);
+  background: linear-gradient(to bottom, #ff6b6b, #c53d3d);
+  transform: scale(1.05);
 }
 
+.letter-btn.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Items grid */
 .items-container {
   margin: 30px 0;
-  padding: 20px;
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.items-container h3 {
-  color: #2c3e50;
-  margin-bottom: 15px;
 }
 
 .items-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 15px;
+  margin-top: 15px;
 }
 
 .item-btn {
@@ -88,114 +120,132 @@
   flex-direction: column;
   align-items: center;
   padding: 15px;
-  background-color: #ecf0f1;
-  border: none;
-  border-radius: 8px;
+  background: linear-gradient(to bottom, #fff, #f0f8ff);
+  border: 2px solid #6e8efb;
+  border-radius: 10px;
   cursor: pointer;
-  transition: all 0.2s ease;
-  position: relative;
+  transition: all 0.2s;
 }
 
-.item-btn:hover:not(:disabled) {
-  background-color: #bdc3c7;
+.item-btn:hover:not(.disabled) {
+  background: linear-gradient(to bottom, #f0f8ff, #e0f0ff);
   transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(110, 142, 251, 0.3);
 }
 
-.item-btn:disabled, .item-btn.disabled {
-  opacity: 0.6;
+.item-btn.disabled {
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
 .item-image-placeholder {
-  width: 80px;
-  height: 80px;
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #3498db, #2ecc71);
+  background: linear-gradient(135deg, #6e8efb, #a777e3);
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 32px;
+  font-size: 24px;
   font-weight: bold;
   color: white;
   margin-bottom: 10px;
 }
 
 .speaker-icon {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  color: #7f8c8d;
+  margin-top: 10px;
+  font-size: 20px;
 }
 
+/* Audio playing indicator */
 .audio-playing {
   margin: 20px 0;
   padding: 15px;
-  background-color: #2ecc71;
-  color: white;
-  border-radius: 5px;
-  animation: pulse 2s infinite;
-}
-
-.audio-wave {
-  height: 30px;
-  background: url('data:image/svg+xml;utf8,<svg viewBox="0 0 100 20" xmlns="http://www.w3.org/2000/svg"><path d="M0 10 Q 5 5 10 10 T 20 10 T 30 10 T 40 10 T 50 10 T 60 10 T 70 10 T 80 10 T 90 10 T 100 10" stroke="white" fill="none" stroke-width="2"/></svg>') repeat-x;
-  background-size: 100px 20px;
-  margin: 10px 0;
+  background-color: #e0f0ff;
+  border-radius: 10px;
+  border-left: 5px solid #6e8efb;
 }
 
 .stop-audio-btn {
-  background-color: white;
-  color: #2ecc71;
+  margin-top: 10px;
+  padding: 8px 16px;
+  background-color: #ff6b6b;
+  color: white;
   border: none;
-  padding: 5px 15px;
   border-radius: 20px;
   cursor: pointer;
-  font-weight: bold;
+  transition: all 0.2s;
 }
 
 .stop-audio-btn:hover {
-  background-color: #f5f5f5;
+  background-color: #ff5252;
 }
 
+/* Proceed button */
 .proceed-button {
-  padding: 12px 25px;
-  font-size: 16px;
-  background-color: #2ecc71;
+  margin-top: 30px;
+  padding: 15px 30px;
+  font-size: 18px;
+  font-weight: bold;
+  background: linear-gradient(to right, #6e8efb, #a777e3);
   color: white;
   border: none;
-  border-radius: 5px;
+  border-radius: 30px;
   cursor: pointer;
-  transition: all 0.3s ease;
-  margin-top: 20px;
+  transition: all 0.3s;
 }
 
 .proceed-button:hover:not(:disabled) {
-  background-color: #27ae60;
-  transform: scale(1.05);
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(110, 142, 251, 0.4);
 }
 
 .proceed-button:disabled {
-  background-color: #95a5a6;
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
-button {
-  outline: none;
+/* Audio wave animation */
+.audio-wave {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 50px;
+  margin: 15px 0;
 }
 
-@keyframes pulse {
-  0% {
-    box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.7);
+.audio-wave:before {
+  content: "";
+  display: block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #4ecdc4;
+  animation: audio-wave 1.5s infinite ease-in-out;
+}
+
+@keyframes audio-wave {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
   }
-  70% {
-    box-shadow: 0 0 0 10px rgba(46, 204, 113, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(46, 204, 113, 0);
+  50% {
+    transform: scale(1.5);
+    opacity: 0.7;
   }
 }
 
-/* Responsive adjustments */
+/* Error message */
+.audio-error {
+  background-color: #ffe6e6;
+  color: #d33;
+  padding: 10px;
+  border-radius: 5px;
+  margin: 10px 0;
+  border-left: 4px solid #d33;
+}
+
+/* Responsive design */
 @media (max-width: 768px) {
   .alphabet-grid {
     grid-template-columns: repeat(5, 1fr);
@@ -203,6 +253,10 @@ button {
   
   .items-grid {
     grid-template-columns: 1fr;
+  }
+  
+  .phase-container {
+    padding: 15px;
   }
 }
 
@@ -212,7 +266,7 @@ button {
   }
   
   .letter-btn {
-    padding: 10px;
-    font-size: 16px;
+    padding: 12px 5px;
+    font-size: 18px;
   }
 }

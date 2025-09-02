@@ -1,10 +1,66 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './styles/HomePage.css';
 
 const HomePage = () => {
+  const audioRef = useRef(null);
+
+  useEffect(() => {
+    // Function to handle audio play with user interaction requirement
+    const attemptPlay = () => {
+      if (audioRef.current) {
+        const playPromise = audioRef.current.play();
+        
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              // Audio started successfully
+              console.log("Audio is playing");
+            })
+            .catch(error => {
+              // Auto-play was prevented, require user interaction
+              console.log("Playback failed:", error);
+              document.addEventListener('click', handleFirstInteraction);
+            });
+        }
+      }
+    };
+
+    // Handle first user interaction to start audio
+    const handleFirstInteraction = () => {
+      if (audioRef.current) {
+        audioRef.current.play()
+          .then(() => {
+            console.log("Audio started after user interaction");
+          })
+          .catch(error => {
+            console.error("Audio play failed even after interaction:", error);
+          });
+      }
+      document.removeEventListener('click', handleFirstInteraction);
+    };
+
+    // Set initial volume and attempt to play
+    if (audioRef.current) {
+      audioRef.current.volume = 0.4; // Set to 40% volume to be less intrusive
+      attemptPlay();
+    }
+
+    // Cleanup function
+    return () => {
+      document.removeEventListener('click', handleFirstInteraction);
+    };
+  }, []);
+
   return (
     <div className="forest-theme">
+      {/* Audio element - hidden and auto-playing */}
+      <audio 
+        ref={audioRef} 
+        loop 
+        src="/sounds/bgm.mp3" 
+      />
+      
       {/* Forest background layers */}
       <div className="forest-layer trees-deep"></div>
       <div className="forest-layer trees-mid"></div>
