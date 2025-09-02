@@ -152,9 +152,18 @@ p {
   margin-bottom: 10px;
 }
 
+/* Changed text color to violet for better visibility */
+.item-btn span {
+  color: #6a0dad; /* Violet color */
+  font-weight: bold;
+  margin-top: 5px;
+  font-size: 16px;
+}
+
 .speaker-icon {
   margin-top: 10px;
   font-size: 20px;
+  color: #6a0dad; /* Matching violet color */
 }
 
 /* Audio playing indicator */
@@ -264,35 +273,6 @@ p {
   border-left: 4px solid #0dcaf0;
 }
 
-/* Responsive design */
-@media (max-width: 768px) {
-  .alphabet-grid {
-    grid-template-columns: repeat(5, 1fr);
-  }
-  
-  .items-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .phase-container {
-    padding: 15px;
-  }
-}
-
-@media (max-width: 480px) {
-  .alphabet-grid {
-    grid-template-columns: repeat(4, 1fr);
-  }
-  
-  .letter-btn {
-    padding: 12px 5px;
-    font-size: 18px;
-  }
-}
-
-
-
-
 .android-audio-note {
   background-color: #fff3cd;
   border: 1px solid #ffeaa7;
@@ -334,8 +314,31 @@ p {
   }
 }
 
-/* Better mobile responsiveness */
+/* Responsive design */
+@media (max-width: 768px) {
+  .alphabet-grid {
+    grid-template-columns: repeat(5, 1fr);
+  }
+  
+  .items-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .phase-container {
+    padding: 15px;
+  }
+}
+
 @media (max-width: 480px) {
+  .alphabet-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  
+  .letter-btn {
+    padding: 12px 5px;
+    font-size: 18px;
+  }
+  
   .tutorial-content {
     padding: 20px;
     margin: 20px;
