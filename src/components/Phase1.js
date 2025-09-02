@@ -12,9 +12,11 @@ const Phase1 = ({ proceed, loseLife }) => {
   const [tutorialAudioReady, setTutorialAudioReady] = useState(false);
   const [availableVoices, setAvailableVoices] = useState([]);
   const [userInteracted, setUserInteracted] = useState(false);
+  const [audioContextAllowed, setAudioContextAllowed] = useState(false);
   
   const audioRef = useRef(null);
   const tutorialAudioRef = useRef(null);
+  const interactionAttempted = useRef(false);
 
   const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 
@@ -50,9 +52,21 @@ const Phase1 = ({ proceed, loseLife }) => {
   // Handle initial user interaction for audio
   useEffect(() => {
     const handleUserInteraction = () => {
-      setUserInteracted(true);
-      document.removeEventListener('click', handleUserInteraction);
-      document.removeEventListener('touchstart', handleUserInteraction);
+      if (!interactionAttempted.current) {
+        setUserInteracted(true);
+        interactionAttempted.current = true;
+        
+        // Try to unlock audio context on iOS
+        if (window.AudioContext) {
+          const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+          const oscillator = audioContext.createOscillator();
+          oscillator.connect(audioContext.destination);
+          oscillator.start();
+          oscillator.stop();
+          audioContext.close();
+          setAudioContextAllowed(true);
+        }
+      }
     };
 
     document.addEventListener('click', handleUserInteraction);
@@ -68,13 +82,15 @@ const Phase1 = ({ proceed, loseLife }) => {
   useEffect(() => {
     const loadVoices = () => {
       const voices = speechSynthesis.getVoices();
-      const childFriendlyVoices = voices.filter(voice => 
-        voice.lang.startsWith('en-') && // English voices
-        !voice.name.toLowerCase().includes('compact') && // Exclude compact voices
-        !voice.name.toLowerCase().includes('enhanced') // Exclude enhanced voices
-      );
-      
-      setAvailableVoices(childFriendlyVoices);
+      if (voices.length > 0) {
+        const childFriendlyVoices = voices.filter(voice => 
+          voice.lang.startsWith('en-') && // English voices
+          !voice.name.toLowerCase().includes('compact') && // Exclude compact voices
+          !voice.name.toLowerCase().includes('enhanced') // Exclude enhanced voices
+        );
+        
+        setAvailableVoices(childFriendlyVoices);
+      }
     };
 
     // Load voices when they become available
@@ -82,17 +98,22 @@ const Phase1 = ({ proceed, loseLife }) => {
       speechSynthesis.onvoiceschanged = loadVoices;
     }
 
-    loadVoices(); // Initial load
+    // Initial load with timeout for mobile browsers
+    const voiceTimer = setTimeout(loadVoices, 1000);
+    
+    return () => clearTimeout(voiceTimer);
   }, []);
 
   // Get the best voice for children
   const getChildFriendlyVoice = () => {
+    if (availableVoices.length === 0) return null;
+    
     // Prefer female voices as they're often clearer for children
     const preferredVoices = availableVoices.filter(voice =>
       voice.name.toLowerCase().includes('female') ||
       voice.name.toLowerCase().includes('woman') ||
       voice.name.toLowerCase().includes('samantha') || // Common clear voice
-      voice.name.toLowerCase().includes('karen') || // Common clear voice
+      voice.name.toLowerCase().includes('karen') || // Common clear voice (Australian English)
       voice.name.toLowerCase().includes('victoria') // Common clear voice
     );
 
@@ -102,6 +123,13 @@ const Phase1 = ({ proceed, loseLife }) => {
 
   // Preload tutorial audio with better error handling
   useEffect(() => {
+    // Skip audio preloading on mobile to save bandwidth
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    if (isMobile) {
+      setTutorialAudioReady(true);
+      return;
+    }
+
     const testAudioUrl = (url) => {
       return new Promise((resolve) => {
         const audio = new Audio();
@@ -172,6 +200,15 @@ const Phase1 = ({ proceed, loseLife }) => {
       const playTutorial = async () => {
         try {
           setPlayingAudio(true);
+          
+          // On mobile, we'll skip the tutorial audio and show text instead
+          const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+          if (isMobile) {
+            setAudioError(true); // This will trigger the text tutorial
+            setPlayingAudio(false);
+            return;
+          }
+          
           await tutorialAudioRef.current.play();
           
           tutorialAudioRef.current.onended = () => {
@@ -205,6 +242,7 @@ const Phase1 = ({ proceed, loseLife }) => {
     try {
       setPlayingAudio(true);
       
+      // Check if speech synthesis is available and allowed
       if ('speechSynthesis' in window && availableVoices.length > 0) {
         const utterance = new SpeechSynthesisUtterance(item);
         
@@ -227,7 +265,8 @@ const Phase1 = ({ proceed, loseLife }) => {
           setPlayingAudio(false);
         };
         
-        utterance.onerror = () => {
+        utterance.onerror = (e) => {
+          console.error('Speech synthesis error:', e);
           setPlayingAudio(false);
         };
         
@@ -236,7 +275,10 @@ const Phase1 = ({ proceed, loseLife }) => {
           window.speechSynthesis.cancel();
         }
         
-        window.speechSynthesis.speak(utterance);
+        // Add a small delay for mobile devices
+        setTimeout(() => {
+          window.speechSynthesis.speak(utterance);
+        }, 100);
       } else {
         // Fallback: visual feedback with longer delay for multi-word items
         const delay = item.includes(' ') ? 1500 : 1000;
@@ -245,6 +287,7 @@ const Phase1 = ({ proceed, loseLife }) => {
         }, delay);
       }
     } catch (error) {
+      console.error('Error with speech synthesis:', error);
       setPlayingAudio(false);
     }
   };
