@@ -4,7 +4,7 @@
   margin: 0 auto;
   padding: 20px;
   text-align: center;
-  font-family: 'Comic Sans MS', cursive, sans-serif;
+  font-family: 'Arial', 'Helvetica', sans-serif;
   background-color: #f0f8ff;
   border-radius: 15px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
@@ -243,6 +243,25 @@ p {
   border-radius: 5px;
   margin: 10px 0;
   border-left: 4px solid #d33;
+}
+
+/* Warning and info messages */
+.audio-warning, .audio-info {
+  padding: 10px;
+  border-radius: 5px;
+  margin: 10px 0;
+}
+
+.audio-warning {
+  background-color: #fff3cd;
+  color: #856404;
+  border-left: 4px solid #ffc107;
+}
+
+.audio-info {
+  background-color: #d1ecf1;
+  color: #0c5460;
+  border-left: 4px solid #0dcaf0;
 }
 
 /* Responsive design */

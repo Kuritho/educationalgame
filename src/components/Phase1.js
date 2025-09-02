@@ -11,6 +11,7 @@ const Phase1 = ({ proceed, loseLife }) => {
   const [audioError, setAudioError] = useState(false);
   const [tutorialAudioReady, setTutorialAudioReady] = useState(false);
   const [availableVoices, setAvailableVoices] = useState([]);
+  const [userInteracted, setUserInteracted] = useState(false);
   
   const audioRef = useRef(null);
   const tutorialAudioRef = useRef(null);
@@ -45,6 +46,23 @@ const Phase1 = ({ proceed, loseLife }) => {
     Y: ['Yak', 'Yacht', 'Yo-yo', 'Yogurt'],
     Z: ['Zebra', 'Zipper', 'Zoo', 'Zucchini']
   };
+
+  // Handle initial user interaction for audio
+  useEffect(() => {
+    const handleUserInteraction = () => {
+      setUserInteracted(true);
+      document.removeEventListener('click', handleUserInteraction);
+      document.removeEventListener('touchstart', handleUserInteraction);
+    };
+
+    document.addEventListener('click', handleUserInteraction);
+    document.addEventListener('touchstart', handleUserInteraction);
+
+    return () => {
+      document.removeEventListener('click', handleUserInteraction);
+      document.removeEventListener('touchstart', handleUserInteraction);
+    };
+  }, []);
 
   // Get available voices and filter for child-friendly ones
   useEffect(() => {
@@ -150,7 +168,7 @@ const Phase1 = ({ proceed, loseLife }) => {
 
   // Play tutorial audio when ready
   useEffect(() => {
-    if (showTutorial && tutorialAudioReady && tutorialAudioRef.current && !audioError) {
+    if (showTutorial && tutorialAudioReady && tutorialAudioRef.current && !audioError && userInteracted) {
       const playTutorial = async () => {
         try {
           setPlayingAudio(true);
@@ -168,7 +186,7 @@ const Phase1 = ({ proceed, loseLife }) => {
       
       playTutorial();
     }
-  }, [showTutorial, tutorialAudioReady, audioError]);
+  }, [showTutorial, tutorialAudioReady, audioError, userInteracted]);
 
   const handleComplete = () => {
     setCompleted(true);
@@ -182,7 +200,7 @@ const Phase1 = ({ proceed, loseLife }) => {
   };
 
   const handleItemClick = (item) => {
-    if (showTutorial || playingAudio) return;
+    if (showTutorial || playingAudio || !userInteracted) return;
     
     try {
       setPlayingAudio(true);
@@ -287,6 +305,12 @@ const Phase1 = ({ proceed, loseLife }) => {
       <h2>Exercise: Alphabet Adventure 🎓</h2>
       <p>Click a letter to see items that start with it! 👇</p>
       
+      {!userInteracted && (
+        <div className="audio-info">
+          <p>👆 Tap anywhere to enable audio features</p>
+        </div>
+      )}
+      
       {audioError && availableVoices.length === 0 && (
         <div className="audio-warning">
           <p>🔈 Text-to-speech not available. Click items to see their names!</p>
@@ -319,9 +343,9 @@ const Phase1 = ({ proceed, loseLife }) => {
             {items.map(item => (
               <button
                 key={item}
-                className={`item-btn ${playingAudio ? 'disabled' : ''} ${showTutorial ? 'disabled' : ''}`}
+                className={`item-btn ${playingAudio ? 'disabled' : ''} ${showTutorial ? 'disabled' : ''} ${!userInteracted ? 'disabled' : ''}`}
                 onClick={() => handleItemClick(item)}
-                disabled={playingAudio || showTutorial}
+                disabled={playingAudio || showTutorial || !userInteracted}
               >
                 <div className="item-image-placeholder">
                   {item.charAt(0)}
