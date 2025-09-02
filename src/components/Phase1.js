@@ -13,6 +13,7 @@ const Phase1 = ({ proceed, loseLife }) => {
   const [availableVoices, setAvailableVoices] = useState([]);
   const [userInteracted, setUserInteracted] = useState(false);
   const [audioContextAllowed, setAudioContextAllowed] = useState(false);
+  const [isAndroid, setIsAndroid] = useState(false);
   
   const audioRef = useRef(null);
   const tutorialAudioRef = useRef(null);
@@ -49,6 +50,12 @@ const Phase1 = ({ proceed, loseLife }) => {
     Z: ['Zebra', 'Zipper', 'Zoo', 'Zucchini']
   };
 
+  // Detect Android browser
+  useEffect(() => {
+    const userAgent = navigator.userAgent.toLowerCase();
+    setIsAndroid(/android/.test(userAgent));
+  }, []);
+
   // Handle initial user interaction for audio
   useEffect(() => {
     const handleUserInteraction = () => {
@@ -56,15 +63,31 @@ const Phase1 = ({ proceed, loseLife }) => {
         setUserInteracted(true);
         interactionAttempted.current = true;
         
-        // Try to unlock audio context on iOS
+        // Try to unlock audio context on all devices
         if (window.AudioContext) {
           const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-          const oscillator = audioContext.createOscillator();
-          oscillator.connect(audioContext.destination);
-          oscillator.start();
-          oscillator.stop();
-          audioContext.close();
-          setAudioContextAllowed(true);
+          
+          // Create an empty buffer and play it to unlock audio
+          const buffer = audioContext.createBuffer(1, 1, 22050);
+          const source = audioContext.createBufferSource();
+          source.buffer = buffer;
+          source.connect(audioContext.destination);
+          source.start();
+          
+          // Resume the audio context (required after user interaction)
+          if (audioContext.state === 'suspended') {
+            audioContext.resume().then(() => {
+              setAudioContextAllowed(true);
+            });
+          } else {
+            setAudioContextAllowed(true);
+          }
+          
+          // Close the context after a short time
+          setTimeout(() => {
+            source.stop();
+            audioContext.close();
+          }, 100);
         }
       }
     };
@@ -90,6 +113,13 @@ const Phase1 = ({ proceed, loseLife }) => {
         );
         
         setAvailableVoices(childFriendlyVoices);
+        
+        // On Android, we need to handle the limited voice availability
+        if (isAndroid && childFriendlyVoices.length === 0 && voices.length > 0) {
+          // Use any available English voice on Android
+          const englishVoices = voices.filter(voice => voice.lang.startsWith('en-'));
+          setAvailableVoices(englishVoices.length > 0 ? englishVoices : [voices[0]]);
+        }
       }
     };
 
@@ -99,14 +129,20 @@ const Phase1 = ({ proceed, loseLife }) => {
     }
 
     // Initial load with timeout for mobile browsers
+    loadVoices();
     const voiceTimer = setTimeout(loadVoices, 1000);
     
     return () => clearTimeout(voiceTimer);
-  }, []);
+  }, [isAndroid]);
 
   // Get the best voice for children
   const getChildFriendlyVoice = () => {
     if (availableVoices.length === 0) return null;
+    
+    // On Android, use the first available voice
+    if (isAndroid) {
+      return availableVoices[0];
+    }
     
     // Prefer female voices as they're often clearer for children
     const preferredVoices = availableVoices.filter(voice =>
@@ -201,9 +237,8 @@ const Phase1 = ({ proceed, loseLife }) => {
         try {
           setPlayingAudio(true);
           
-          // On mobile, we'll skip the tutorial audio and show text instead
-          const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-          if (isMobile) {
+          // On Android, we'll skip the tutorial audio and show text instead
+          if (isAndroid) {
             setAudioError(true); // This will trigger the text tutorial
             setPlayingAudio(false);
             return;
@@ -223,7 +258,7 @@ const Phase1 = ({ proceed, loseLife }) => {
       
       playTutorial();
     }
-  }, [showTutorial, tutorialAudioReady, audioError, userInteracted]);
+  }, [showTutorial, tutorialAudioReady, audioError, userInteracted, isAndroid]);
 
   const handleComplete = () => {
     setCompleted(true);
@@ -268,6 +303,17 @@ const Phase1 = ({ proceed, loseLife }) => {
         utterance.onerror = (e) => {
           console.error('Speech synthesis error:', e);
           setPlayingAudio(false);
+          
+          // On Android, try a fallback approach
+          if (isAndroid) {
+            // Try to use a different approach for Android
+            setTimeout(() => {
+              const fallbackUtterance = new SpeechSynthesisUtterance(item);
+              fallbackUtterance.rate = 0.8;
+              fallbackUtterance.pitch = 1.0;
+              window.speechSynthesis.speak(fallbackUtterance);
+            }, 100);
+          }
         };
         
         // Cancel any ongoing speech before starting new one
@@ -275,9 +321,14 @@ const Phase1 = ({ proceed, loseLife }) => {
           window.speechSynthesis.cancel();
         }
         
-        // Add a small delay for mobile devices
+        // Add a small delay for all devices
         setTimeout(() => {
-          window.speechSynthesis.speak(utterance);
+          try {
+            window.speechSynthesis.speak(utterance);
+          } catch (error) {
+            console.error('Error speaking utterance:', error);
+            setPlayingAudio(false);
+          }
         }, 100);
       } else {
         // Fallback: visual feedback with longer delay for multi-word items
@@ -322,7 +373,7 @@ const Phase1 = ({ proceed, loseLife }) => {
         <div className="tutorial-overlay">
           <div className="tutorial-content">
             <h2>Welcome to Alphabet Adventure! 🎉</h2>
-            {audioError ? (
+            {audioError || isAndroid ? (
               <div>
                 <p>Let's learn about letters and words! 📚</p>
                 <ol style={{textAlign: 'left', margin: '15px 0', paddingLeft: '20px', fontSize: '16px', lineHeight: '1.6'}}>
@@ -331,6 +382,11 @@ const Phase1 = ({ proceed, loseLife }) => {
                   <li>🔤 Explore all the letters from A to Z!</li>
                   <li>🎯 Have fun learning!</li>
                 </ol>
+                {isAndroid && (
+                  <div className="android-audio-note">
+                    <p>🔊 <strong>Note for Android users:</strong> Make sure your device volume is turned up and you've given permission for audio playback.</p>
+                  </div>
+                )}
               </div>
             ) : (
               <div>
@@ -339,7 +395,7 @@ const Phase1 = ({ proceed, loseLife }) => {
               </div>
             )}
             <button onClick={skipTutorial} className="skip-tutorial-btn">
-              {audioError ? 'Start Playing! 🚀' : 'Skip Tutorial'}
+              {audioError || isAndroid ? 'Start Playing! 🚀' : 'Skip Tutorial'}
             </button>
           </div>
         </div>
