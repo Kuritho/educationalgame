@@ -120,11 +120,11 @@ const HomePage = () => {
         </div>
         
         <div className="section testimonial-section forest-section">
-          <h2 className="section-title animate-slide-up">What Players Say</h2>
+          {/* <h2 className="section-title animate-slide-up">What Players Say</h2> */}
           <div className="testimonial-card animate-pop-in forest-card">
             <div className="testimonial-decoration"></div>
-            <p>"My child improved their reading skills dramatically!"</p>
-            <div className="testimonial-author">- Kurt</div>
+            <p>"Because every child deserves the joy of learning."</p>
+            <div className="testimonial-author">© 2025 Babes T. Terania</div>
           </div>
         </div>
       </div>

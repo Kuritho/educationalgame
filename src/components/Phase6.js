@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './styles/Phase6.css';
 
-// All rhyming sets for BINGO - now with emojis!
+// All rhyming sets for BINGO
 const rhymingSets = [
   ['cat', 'hat', 'bat', 'mat', 'rat', 'sat', 'fat', 'pat'],
   ['dog', 'log', 'fog', 'jog', 'hog', 'bog', 'cog', 'sog'],
@@ -14,8 +14,8 @@ const rhymingSets = [
   ['goat', 'boat', 'coat', 'float', 'note', 'quote', 'remote', 'wrote'],
   ['fish', 'dish', 'wish', 'swish', 'squish', 'bliss', 'kiss', 'miss'],
   ['mouse', 'house', 'spouse', 'louse', 'douse', 'rouse', 'grouse', 'carouse']
-
 ];
+
 // All possible rhyming words (flat)
 const allRhymingWords = rhymingSets.flat();
 
@@ -65,32 +65,7 @@ function generateCardWithRhymingLine() {
     }
   }
   return { card, rhymeWords, rhymeSet, lineType, linePos };
-}
-
-// Generate a 4x4 card with NO rhyming straight line (not winnable)
-function generateUnwinnableCard() {
-  // Fill with random words, but never a full rhyming line
-  let card = Array(4).fill(null).map(() => Array(4).fill(null));
-  let used = [];
-  for (let row = 0; row < 4; row++) {
-    for (let col = 0; col < 4; col++) {
-      let word;
-      do {
-        word = allRhymingWords[Math.floor(Math.random() * allRhymingWords.length)];
-      } while (
-        used.includes(word) ||
-        // Prevent any row, col, diag from being all from the same set
-        (row === 3 &&
-          [0, 1, 2].every(r => rhymingSets.some(set => set.includes(card[r][col])) && rhymingSets.some(set => set.includes(word)) && rhymingSets.find(set => set.includes(card[0][col])) === rhymingSets.find(set => set.includes(word)))) ||
-        (col === 3 &&
-          [0, 1, 2].every(c => rhymingSets.some(set => set.includes(card[row][c])) && rhymingSets.some(set => set.includes(word)) && rhymingSets.find(set => set.includes(card[row][0])) === rhymingSets.find(set => set.includes(word))))
-      );
-      card[row][col] = word;
-      used.push(word);
-    }
-  }
-  return { card };
-}
+};
 
 // Helper: get rhyme set for a line
 const getRhymeSet = (lineWords) => {
@@ -134,17 +109,18 @@ const checkBingo = (selections, card) => {
   return false;
 };
 
-const Phase6 = ({ proceed }) => {
+const Phase6 = ({ proceed, loseLife }) => {
   const navigate = useNavigate();
   const [gameStarted, setGameStarted] = useState(false);
   const [currentWord, setCurrentWord] = useState('');
   const [calledWords, setCalledWords] = useState([]);
   const [message, setMessage] = useState('');
   const [winner, setWinner] = useState(null);
-  const [hearts, setHearts] = useState(5);
+  const audioRef = useRef(null);
+  const [showWinScreen, setShowWinScreen] = useState(false);
 
   // Player's Bingo card (4x4 grid)
-   const [playerCard, setPlayerCard] = useState([]);
+  const [playerCard, setPlayerCard] = useState([]);
   const [playerSelections, setPlayerSelections] = useState([]);
   const [aiCard, setAiCard] = useState([]);
   const [aiSelections, setAiSelections] = useState([]);
@@ -165,11 +141,24 @@ const Phase6 = ({ proceed }) => {
     setGameStarted(true);
     setMessage("Game started! Find the called words on your card!");
     setWinner(null);
+    setShowWinScreen(false);
     setCalledWords([]);
     setCurrentWord('');
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
+    // Auto-play background music when component mounts
+    if (audioRef.current) {
+      const playAudio = async () => {
+        try {
+          await audioRef.current.play();
+        } catch (error) {
+          console.log("Autoplay prevented:", error);
+        }
+      };
+      playAudio();
+    }
+
     if (
       gameStarted &&
       playerCard.length === 4 &&
@@ -199,8 +188,10 @@ const Phase6 = ({ proceed }) => {
     setCalledWords([...calledWords, newWord]);
     setMessage(`Find: ${newWord}`);
 
-    // AI automatically checks its card
-    checkAiCard(newWord);
+    // AI automatically checks its card with 80% probability (reduced from 100%)
+    if (Math.random() < 0.8) {
+      checkAiCard(newWord);
+    }
   };
 
   // AI checks its card for the called word
@@ -213,29 +204,15 @@ const Phase6 = ({ proceed }) => {
 
           if (checkBingo(newSelections, aiCard)) {
             setWinner('AI');
-            setMessage("AI got BINGO with a rhyming line! Try again!");
+            setMessage("AI got BINGO with a rhyming line!");
+            setShowWinScreen(true);
+            // Call the loseLife function from props
             loseLife();
             return;
           }
         }
       }
     }
-  };
-
-  // Lose a life (heart) if player loses
-  const loseLife = () => {
-    setTimeout(() => {
-      setHearts(h => {
-        if (h > 1) {
-          startGame();
-          return h - 1;
-        } else {
-          setMessage("Game Over! Out of hearts.");
-          setGameStarted(false);
-          return 0;
-        }
-      });
-    }, 1500);
   };
 
   // Player clicks a word on their card
@@ -248,11 +225,16 @@ const Phase6 = ({ proceed }) => {
       const newSelections = [...playerSelections, { row, col }];
       setPlayerSelections(newSelections);
 
+      // Check for BINGO immediately after player selects a word
       if (checkBingo(newSelections, playerCard)) {
         setWinner('Player');
         setMessage("You got BINGO with a rhyming line! You win!");
-        proceed && proceed();
+        // Proceed to next round after a short delay
+        setTimeout(() => {
+          proceed && proceed();
+        }, 1500);
       } else {
+        // Only call next word if player didn't win
         setTimeout(callNextWord, 1000);
       }
     } else if (word !== currentWord) {
@@ -261,7 +243,7 @@ const Phase6 = ({ proceed }) => {
   };
 
   // Render a Bingo card
- const renderCard = (card, selections, isPlayer = false) => {
+  const renderCard = (card, selections, isPlayer = false) => {
     return (
       <div className={`bingo-card ${isPlayer ? 'player-card' : 'ai-card'}`}>
         {card.map((row, rowIndex) => (
@@ -285,23 +267,11 @@ const Phase6 = ({ proceed }) => {
       </div>
     );
   };
-// Helper: is current word on a card and not selected
-  const isCurrentWordAvailable = (card, selections) => {
-    for (let i = 0; i < 4; i++) {
-      for (let j = 0; j < 4; j++) {
-        if (
-          card[i][j] === currentWord &&
-          !selections.some(sel => sel.row === i && sel.col === j)
-        ) {
-          return true;
-        }
-      }
-    }
-    return false;
-  };
 
   // Add this function to get the next random word
   const handleNextWord = () => {
+    if (winner) return;
+    
     const availableWords = allRhymingWords.filter(word => !calledWords.includes(word));
     if (availableWords.length === 0) {
       setMessage("No more words to call! It's a tie!");
@@ -312,20 +282,36 @@ const Phase6 = ({ proceed }) => {
     setCurrentWord(newWord);
     setCalledWords([...calledWords, newWord]);
     setMessage(`Find: ${newWord}`);
-    checkAiCard(newWord);
+    
+    // AI checks with 80% probability (reduced from 100%)
+    if (Math.random() < 0.8) {
+      checkAiCard(newWord);
+    }
   };
 
   return (
     <div className="phase6-container">
+      {/* Background music - auto plays without controls */}
+      <audio ref={audioRef} loop autoPlay>
+        <source src="/sounds/bgm2.mp3" type="audio/mpeg" />
+        Your browser does not support the audio element.
+      </audio>
+      
       <h1>Rhyming Word Bingo!</h1>
-      <div className="hearts">
-        {Array.from({ length: hearts }).map((_, i) => (
-          <span key={i} className="heart">❤️</span>
-        ))}
-      </div>
       <p className="instructions">
         When a word is called, click it on your card if you have it. Get a straight line of rhyming words to win!
       </p>
+      
+      {/* AI Win Screen */}
+      {showWinScreen && (
+        <div className="win-screen">
+          <h2>AI Wins!</h2>
+          <p>The AI got BINGO before you did!</p>
+          <button className="try-again-button" onClick={startGame}>
+            Try Again
+          </button>
+        </div>
+      )}
       
       {!gameStarted ? (
         <button className="start-button" onClick={startGame}>
@@ -335,47 +321,49 @@ const Phase6 = ({ proceed }) => {
         <>
           <div className="message-box">{message}</div>
           
-          {/* Vertical card layout */}
-          <div className="cards-vertical-layout">
-            {/* Player Card */}
-            <div className="player-board">
-              <h2>Your Card</h2>
-              {renderCard(playerCard, playerSelections, true)}
-            </div>
-            
-            {/* Current Word */}
-            <div className="current-word-display">
-              {currentWord && `Find: ${currentWord}`}
-            </div>
+          {/* Only show game content if no win screen is shown */}
+          {!showWinScreen && (
+            <>
+              {/* Vertical card layout */}
+              <div className="cards-vertical-layout">
+                {/* Player Card */}
+                <div className="player-board">
+                  <h2>Your Card</h2>
+                  {renderCard(playerCard, playerSelections, true)}
+                </div>
+                
+                {/* Current Word */}
+                <div className="current-word-display">
+                  {currentWord && `Find: ${currentWord}`}
+                </div>
 
-            {/* Next Word Button */}
-            {gameStarted && currentWord && 
-              !isCurrentWordAvailable(playerCard, playerSelections) &&
-              !isCurrentWordAvailable(aiCard, aiSelections) &&
-              !winner && (
-                <button className="next-word-button" onClick={handleNextWord}>
-                  Next Word
+                {/* Next Word Button - Always visible when game is active */}
+                {gameStarted && !winner && (
+                  <button className="next-word-button" onClick={handleNextWord}>
+                    Next Word
+                  </button>
+                )}
+
+                {/* AI Card */}
+                <div className="ai-board">
+                  <h2>AI's Card</h2>
+                  {renderCard(aiCard, aiSelections)}
+                </div>
+              </div>
+
+              {/* Bottom buttons */}
+              <div className="action-buttons">
+                {winner && winner !== 'AI' && (
+                  <button className="restart-button" onClick={startGame}>
+                    Play Again
+                  </button>
+                )}
+                <button className="exit-button" onClick={() => navigate('/game')}>
+                  Exit Game
                 </button>
-            )}
-
-            {/* AI Card */}
-            <div className="ai-board">
-              <h2>AI's Card</h2>
-              {renderCard(aiCard, aiSelections)}
-            </div>
-          </div>
-
-          {/* Bottom buttons */}
-          <div className="action-buttons">
-            {winner && (
-              <button className="restart-button" onClick={startGame}>
-                Play Again
-              </button>
-            )}
-            <button className="exit-button" onClick={() => navigate('/game')}>
-              Exit Game
-            </button>
-          </div>
+              </div>
+            </>
+          )}
         </>
       )}
     </div>

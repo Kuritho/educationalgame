@@ -249,51 +249,42 @@ const Phase3 = ({ proceed, loseLife}) => {
       <p className="round-feedback">{feedback}</p>
       
       <div className="matching-grid">
-        <table>
-          <thead>
-            <tr>
-              <th>Picture</th>
-              <th>Option 1</th>
-              <th>Option 2</th>
-              <th>Option 3</th>
-            </tr>
-          </thead>
-          <tbody>
-            {currentItems.map((item, rowIndex) => (
-              <tr key={rowIndex}>
-                <td className="picture-cell">
-                  <img 
-                    src={`/images/${item.image}`} 
-                    alt={item.correct} 
-                    className={`picture ${completedItems.includes(rowIndex) ? 'completed' : ''}`}
-                  />
-                </td>
+        <div className="matching-table">
+          {currentItems.map((item, rowIndex) => (
+            <div key={rowIndex} className="matching-row">
+              <div className="picture-cell">
+                <img 
+                  src={`/images/${item.image}`} 
+                  alt={item.correct} 
+                  className={`picture ${completedItems.includes(rowIndex) ? 'completed' : ''}`}
+                />
+              </div>
+              <div className="options-container">
                 {item.options.map((option, optionIndex) => {
                   const cellKey = `${currentRound}-${rowIndex}-${option}`;
                   const isSelected = selectedCells[cellKey];
                   const isCorrectAnswer = option === item.correct;
                   
                   return (
-                    <td key={optionIndex}>
-                      <button
-                        className={`option-btn ${isSelected || ''} ${
-                          completedItems.includes(rowIndex) && isCorrectAnswer ? 'correct' : ''
-                        }`}
-                        onClick={() => handleOptionClick(rowIndex, option, item.correct)}
-                        disabled={completedItems.includes(rowIndex) || roundCompleted || showTutorial}
-                      >
-                        {option}
-                        {completedItems.includes(rowIndex) && isCorrectAnswer && (
-                          <span className="check-mark">✓</span>
-                        )}
-                      </button>
-                    </td>
+                    <button
+                      key={optionIndex}
+                      className={`option-btn ${isSelected || ''} ${
+                        completedItems.includes(rowIndex) && isCorrectAnswer ? 'correct' : ''
+                      }`}
+                      onClick={() => handleOptionClick(rowIndex, option, item.correct)}
+                      disabled={completedItems.includes(rowIndex) || roundCompleted || showTutorial}
+                    >
+                      {option}
+                      {completedItems.includes(rowIndex) && isCorrectAnswer && (
+                        <span className="check-mark">✓</span>
+                      )}
+                    </button>
                   );
                 })}
-              </tr>
-            ))}
-          </tbody>
-        </table>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
       {roundCompleted && (

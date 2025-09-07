@@ -152,9 +152,18 @@ p {
   margin-bottom: 10px;
 }
 
+/* Changed text color to violet for better visibility */
+.item-btn span {
+  color: #6a0dad; /* Violet color */
+  font-weight: bold;
+  margin-top: 5px;
+  font-size: 16px;
+}
+
 .speaker-icon {
   margin-top: 10px;
   font-size: 20px;
+  color: #6a0dad; /* Matching violet color */
 }
 
 /* Audio playing indicator */
@@ -264,6 +273,47 @@ p {
   border-left: 4px solid #0dcaf0;
 }
 
+.android-audio-note {
+  background-color: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 5px;
+  padding: 10px;
+  margin: 10px 0;
+  font-size: 14px;
+}
+
+.android-audio-note p {
+  margin: 0;
+  color: #856404;
+}
+
+/* Improved audio wave animation */
+.audio-wave {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 50px;
+  margin: 15px 0;
+}
+
+.audio-wave:before {
+  content: "🎵";
+  display: block;
+  font-size: 24px;
+  animation: audio-wave 1.5s infinite ease-in-out;
+}
+
+@keyframes audio-wave {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.5);
+    opacity: 0.7;
+  }
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
   .alphabet-grid {
@@ -287,5 +337,15 @@ p {
   .letter-btn {
     padding: 12px 5px;
     font-size: 18px;
+  }
+  
+  .tutorial-content {
+    padding: 20px;
+    margin: 20px;
+  }
+  
+  .android-audio-note {
+    font-size: 12px;
+    padding: 8px;
   }
 }

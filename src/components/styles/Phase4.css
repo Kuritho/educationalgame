@@ -1,29 +1,22 @@
-/* Phase4.css */
+/* Phase4.css - Mobile Responsive */
 
 .mobile-maze-container {
-  max-width: 1200px; /* Increased from 100% to 1200px */
-  margin: 0 0 0 20px; /* Top: 0, Right: 0, Bottom: 0, Left: 20px */
-  padding: 25px; /* Increased from 15px to 25px */
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 15px;
   font-family: 'Comic Sans MS', 'Arial Rounded MT Bold', sans-serif;
   background-color: #fff9e6;
-  border-radius: 15px;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-  position: relative;
-  overflow: hidden;
-}
-@media (max-width: 767px) {
-  .mobile-maze-container {
-    max-width: 110%; /* Scales down on mobile */
-    width: 106%; 
-    margin: 10px auto; /* Centers on mobile */
-    padding: 20px; /* Slightly less padding on mobile */
-    margin: 0 0 10px -28px;
-  }
+  border-radius: 0;
+  box-sizing: border-box;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 .header {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
   align-items: center;
   padding: 10px;
   background-color: #ffd700;
@@ -32,18 +25,28 @@
   font-weight: bold;
   color: #8b4513;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  text-align: center;
 }
 
 .header-info {
   display: flex;
-  gap: 15px;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
   font-size: 0.9rem;
+  margin-top: 5px;
+}
+
+.header-info span {
+  padding: 3px 8px;
+  background-color: rgba(139, 69, 19, 0.1);
+  border-radius: 15px;
 }
 
 h1 {
   color: #8b4513;
   text-align: center;
-  margin: 10px 0 20px;
+  margin: 10px 0 15px;
   font-size: 1.5rem;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
 }
@@ -61,10 +64,11 @@ h1 {
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 0.9rem;
 }
 
 .voice-control-panel {
-  margin: 20px 0;
+  margin: 15px 0;
   padding: 15px;
   background-color: #f0f8ff;
   border-radius: 10px;
@@ -86,6 +90,9 @@ h1 {
   gap: 8px;
   margin: 0 auto 15px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  width: 100%;
+  max-width: 300px;
+  font-size: 0.9rem;
 }
 
 .voice-control-button:hover {
@@ -149,16 +156,22 @@ h1 {
   border-radius: 5px;
   font-weight: bold;
   color: #2c3e50;
+  font-size: 0.8rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .maze-wrapper {
   width: 100%;
   overflow: auto;
-  margin: 20px 0;
+  margin: 15px 0;
   padding: 10px;
   background-color: #f5f5dc;
   border-radius: 10px;
   box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
+  flex: 1;
+  display: flex;
+  justify-content: center;
 }
 
 .maze-grid {
@@ -166,6 +179,7 @@ h1 {
   border: 3px solid #8b4513;
   background-color: #f5f5dc;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  max-width: 100%;
 }
 
 .maze-row {
@@ -173,13 +187,13 @@ h1 {
 }
 
 .maze-cell {
-  width: 25px;
-  height: 25px;
+  width: 18px;
+  height: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
-  font-size: 0.8rem;
+  font-size: 0.7rem;
   font-weight: bold;
 }
 
@@ -211,7 +225,7 @@ h1 {
 }
 
 .bee {
-  font-size: 1.2rem;
+  font-size: 0.9rem;
   animation: float 2s infinite ease-in-out;
 }
 
@@ -220,12 +234,12 @@ h1 {
     transform: translateY(0);
   }
   50% {
-    transform: translateY(-5px);
+    transform: translateY(-3px);
   }
 }
 
 .beehouse {
-  font-size: 1.2rem;
+  font-size: 0.9rem;
   position: relative;
   z-index: 1;
 }
@@ -239,7 +253,7 @@ h1 {
   justify-content: center;
   color: #e74c3c;
   font-weight: bold;
-  font-size: 1rem;
+  font-size: 0.8rem;
   animation: bounce 1s infinite alternate;
   z-index: 2;
 }
@@ -254,16 +268,16 @@ h1 {
     transform: translateY(0);
   }
   100% {
-    transform: translateY(-5px);
+    transform: translateY(-3px);
   }
 }
 
 .instructions {
-  margin-top: 20px;
+  margin-top: 15px;
   padding: 15px;
   background-color: #f0f8ff;
   border-radius: 10px;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   line-height: 1.5;
 }
 
@@ -271,6 +285,7 @@ h1 {
   margin-bottom: 10px;
   font-weight: bold;
   color: #2c3e50;
+  text-align: center;
 }
 
 .instructions ul {
@@ -282,47 +297,94 @@ h1 {
   margin-bottom: 8px;
 }
 
-/* Responsive adjustments */
-@media (min-width: 768px) {
-  .mobile-maze-container {
-    max-width: 800px;
-    padding: 25px;
-  }
-  
-  .maze-cell {
-    width: 30px;
-    height: 30px;
-  }
-  
-  h1 {
-    font-size: 2rem;
-  }
+/* Tutorial Overlay */
+.tutorial-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.85);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  color: white;
+  padding: 15px;
+  box-sizing: border-box;
 }
 
-@media (max-width: 480px) {
-  .header {
-    flex-direction: column;
-    gap: 8px;
-  }
-  
-  .header-info {
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-  
-  .maze-cell {
-    width: 20px;
-    height: 20px;
-    font-size: 0.7rem;
-  }
-  
-  .bee, .beehouse {
-    font-size: 1rem;
-  }
-  
-  .maze-letter {
-    font-size: 0.8rem;
-  }
+.tutorial-content {
+  background: linear-gradient(135deg, #b875ff 0%, #71a5ff 100%);
+  padding: 20px;
+  border-radius: 15px;
+  text-align: center;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.tutorial-content h2 {
+  margin-bottom: 15px;
+  color: #fff;
+  font-size: 1.5rem;
+}
+
+.tutorial-steps {
+  margin: 15px 0;
+}
+
+.tutorial-step {
+  display: flex;
+  align-items: center;
+  margin: 15px 0;
+  text-align: left;
+}
+
+.step-number {
+  background-color: white;
+  color: #6a11cb;
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  margin-right: 10px;
+  flex-shrink: 0;
+  font-size: 0.9rem;
+}
+
+.tutorial-step p {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.start-playing-btn {
+  padding: 12px 25px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 50px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 10px;
+  width: 100%;
+}
+
+.start-playing-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(76, 175, 80, 0.6);
+}
+
+/* Ensure the game content is not interactive during tutorial */
+.tutorial-overlay ~ * {
+  filter: blur(2px);
+  pointer-events: none;
 }
 
 /* Accessibility focus styles */
@@ -348,89 +410,62 @@ button:focus {
   animation: moveBee 0.3s ease-in-out;
 }
 
-
-/* Tutorial Overlay */
-.tutorial-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.85);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-  color: white;
+/* Landscape orientation adjustments */
+@media (max-height: 500px) and (orientation: landscape) {
+  .mobile-maze-container {
+    padding: 10px;
+  }
+  
+  .maze-wrapper {
+    max-height: 60vh;
+  }
+  
+  .header {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+  
+  .header-info {
+    margin-top: 0;
+  }
 }
 
-.tutorial-content {
-  background: linear-gradient(135deg, #b875ff 0%, #71a5ff 100%);
-  padding: 30px;
-  border-radius: 20px;
-  text-align: center;
-  max-width: 500px;
-  width: 90%;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+/* Tablet adjustments */
+@media (min-width: 768px) {
+  .mobile-maze-container {
+    padding: 20px;
+    max-width: 90%;
+    margin: 0 auto;
+    border-radius: 15px;
+  }
+  
+  .maze-cell {
+    width: 25px;
+    height: 25px;
+    font-size: 0.9rem;
+  }
+  
+  .bee, .beehouse {
+    font-size: 1.1rem;
+  }
+  
+  .maze-letter {
+    font-size: 0.9rem;
+  }
+  
+  h1 {
+    font-size: 2rem;
+  }
 }
 
-.tutorial-content h2 {
-  margin-bottom: 25px;
-  color: #fff;
-  font-size: 28px;
-}
-
-.tutorial-steps {
-  margin: 25px 0;
-}
-
-.tutorial-step {
-  display: flex;
-  align-items: center;
-  margin: 20px 0;
-  text-align: left;
-}
-
-.step-number {
-  background-color: white;
-  color: #6a11cb;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-weight: bold;
-  margin-right: 15px;
-  flex-shrink: 0;
-}
-
-.tutorial-step p {
-  margin: 0;
-  font-size: 18px;
-  line-height: 1.4;
-}
-
-.start-playing-btn {
-  padding: 12px 30px;
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  border-radius: 50px;
-  font-size: 18px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  margin-top: 10px;
-}
-
-.start-playing-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(76, 175, 80, 0.6);
-}
-
-/* Ensure the game content is not interactive during tutorial */
-.tutorial-overlay ~ * {
-  filter: blur(2px);
-  pointer-events: none;
+/* Desktop adjustments */
+@media (min-width: 1024px) {
+  .mobile-maze-container {
+    max-width: 1000px;
+  }
+  
+  .maze-cell {
+    width: 30px;
+    height: 30px;
+  }
 }

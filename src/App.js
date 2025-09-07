@@ -107,6 +107,7 @@ const App = () => {
               </GameLayout>
             } 
           />
+          <Route path='/Phase4' element={<Phase4 />} />
           <Route path='/Phase5' element={<Phase5 />} />
           <Route path='/Phase6' element={<Phase6 />} />
           <Route path='/Phase7' element={<Phase7 />} />

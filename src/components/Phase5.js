@@ -395,6 +395,10 @@ function Phase5({ proceed, loseLife }) {
                 <span className="step-number">4</span>
                 <p>Beat the teacher in 5 rounds to win! 🏆</p>
               </div>
+              <div className="tutorial-step">
+                <span className="step-number">4</span>
+                <p>You can only proceed to the next phase if you scored higher than your teacher🏆</p>
+              </div>
             </div>
             <button onClick={skipTutorial} className="start-playing-btn">
               Start Playing!
@@ -446,10 +450,10 @@ function Phase5({ proceed, loseLife }) {
           <div className="game-complete-content">
             <h2>Game Complete! 🎊</h2>
             <div className="f-score">
-              <div className="s-player">You: {scores.player1} wins</div>
-              <div className="s-player">Teacher: {scores.player2} wins</div>
+              <div className="s-player">You: {scores.player1}</div>
+              <div className="s-player">Teacher: {scores.player2}</div>
             </div>
-            <div className="win-message">{feedback}</div>
+            {/* <div className="win-message">{feedback}</div> */}
             <button 
               onClick={handleProceedToNextPhase}
               className="proceed-button"

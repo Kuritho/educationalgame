@@ -1,29 +1,48 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './styles/Phase7.css';
-import thecat from  './images/cat.png';
-import puppy from  './images/puppy.png';
-import rabbit from  './images/rabbit.png';
-import pig from  './images/pig.png';
-import pumpkin from  './images/pumpkin.png';
+import thecat from './images/cat.png';
+import puppy from './images/puppy.png';
+import rabbit from './images/rabbit.png';
+import pig from './images/pig.png';
+import pumpkin from './images/pumpkin.png';
 
 const Phase7 = ({ proceed, loseLife }) => {
   const [currentStoryIndex, setCurrentStoryIndex] = useState(0);
   const [answers, setAnswers] = useState({});
   const [submitted, setSubmitted] = useState(false);
   const [score, setScore] = useState(0);
+  const [showInstructions, setShowInstructions] = useState(true);
+
+  // Background music effect
+  useEffect(() => {
+    const audio = new Audio('/sounds/bgm2.mp3');
+    audio.loop = true;
+    audio.volume = 0.5; // Set volume to 50%
+    
+    // Play audio when component mounts
+    audio.play().catch(error => {
+      console.log("Audio play failed:", error);
+      // Some browsers require user interaction before playing audio
+    });
+    
+    // Cleanup function to pause audio when component unmounts
+    return () => {
+      audio.pause();
+    };
+  }, []);
 
   const stories = [
     {
       id: 1,
       title: "MY CAT TITO",
       image: thecat,
+      color: "#FF9E80", // Soft coral
       content: [
         "My cat is called Tito.",
         "Tito is small and orange.",
         "Tito likes playing with its yarn ball.",
         "I love Tito."
       ],
-      
       questions: [
         {
           id: 'name',
@@ -43,6 +62,7 @@ const Phase7 = ({ proceed, loseLife }) => {
       id: 2,
       title: "THE LOST PUPPY",
       image: puppy,
+      color: "#81D4FA", // Light blue
       content: [
         "Max the puppy got lost in the park.",
         "He was scared but then he smelled cookies.",
@@ -68,6 +88,7 @@ const Phase7 = ({ proceed, loseLife }) => {
       id: 3,
       title: "THE RABBIT",
       image: rabbit,
+      color: "#C5E1A5", // Light green
       content: [
         "The rabbit hopped in the field.",
         "It found a carrot",
@@ -92,11 +113,11 @@ const Phase7 = ({ proceed, loseLife }) => {
       id: 4,
       title: "THE PINK PIG",
       image: pig,
+      color: "#F48FB1", // Pink
       content: [
         "The pig rolled in the mud.",
         "It was happy and pink.",
         "The mud is soft.",
-        
       ],
       questions: [
         {
@@ -117,6 +138,7 @@ const Phase7 = ({ proceed, loseLife }) => {
       id: 5,
       title: "BEN'S GIANT VEGETABLES",
       image: pumpkin,
+      color: "#FFCC80", // Light orange
       content: [
         "Ben planted special seeds from his grandpa.",
         "The vegetables grew bigger than Ben!",
@@ -181,13 +203,51 @@ const Phase7 = ({ proceed, loseLife }) => {
     }
   };
 
+  const startGame = () => {
+    setShowInstructions(false);
+  };
+
   const allQuestionsAnswered = currentStory.questions.every(q => answers[q.id]);
 
+  // Show instructions screen
+  if (showInstructions) {
+    return (
+      <div className="instructions-screen">
+        <div className="instructions-content">
+          <h1>Reading Comprehension Game</h1>
+          <div className="instructions-list">
+            <h2>How to Play:</h2>
+            <ol>
+              <li>Read the story carefully</li>
+              <li>Answer the questions about the story</li>
+              <li>Select one answer for each question</li>
+              <li>Click "Check Answers" when you're done</li>
+              <li>Get all answers right to move to the next story!</li>
+            </ol>
+            <div className="tips">
+              <h3>Tips:</h3>
+              <ul>
+                <li>Read the story more than once if needed</li>
+                <li>Pay attention to details like names and colors</li>
+                <li>Take your time - there's no rush!</li>
+              </ul>
+            </div>
+          </div>
+          <button onClick={startGame} className="start-button">
+            Start Game
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="story-quiz">
-      <h1>{currentStory.title}</h1>
-      <div className="story-progress">
-        Story {currentStoryIndex + 1} of {stories.length}
+    <div className="story-quiz" style={{ "--theme-color": currentStory.color }}>
+      <div className="story-header">
+        <h1>{currentStory.title}</h1>
+        <div className="story-progress">
+          Story {currentStoryIndex + 1} of {stories.length}
+        </div>
       </div>
       
       <div className="story-content-container">
@@ -198,17 +258,16 @@ const Phase7 = ({ proceed, loseLife }) => {
         </div>
         <img 
           src={currentStory.image} 
-          alt={currentStory.altText} 
+          alt={currentStory.title} 
           className="story-image"
         />
       </div>
-
 
       <div className="instructions">
         <p>Read the story and mark the correct option.</p>
       </div>
 
-       <div className="questions">
+      <div className="questions">
         {currentStory.questions.map((q) => (
           <div key={q.id} className="question">
             <p>{q.question}</p>
@@ -239,6 +298,7 @@ const Phase7 = ({ proceed, loseLife }) => {
         <button 
           onClick={checkAnswers} 
           disabled={!allQuestionsAnswered}
+          className="check-answers-btn"
         >
           Check Answers
         </button>
@@ -248,14 +308,14 @@ const Phase7 = ({ proceed, loseLife }) => {
           {score === currentStory.questions.length ? (
             <>
               <p className="success">Great job! You got all answers right!</p>
-              <button onClick={nextStory}>
+              <button onClick={nextStory} className="next-btn">
                 {currentStoryIndex < stories.length - 1 ? 'Next Story' : 'Finish'}
               </button>
             </>
           ) : (
             <>
               <p className="try-again">Try again to get all answers correct!</p>
-              <button onClick={() => setSubmitted(false)}>Try Again</button>
+              <button onClick={() => setSubmitted(false)} className="try-again-btn">Try Again</button>
             </>
           )}
         </div>
