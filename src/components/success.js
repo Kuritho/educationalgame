@@ -24,7 +24,7 @@ const Success = ({ restartGame }) => {
           <button onClick={restartGame} className="success-button play-again-button">
             Play Again
           </button>
-          <button onClick={() => navigate('/success')} className="success-button home-button">
+          <button onClick={() => navigate('/')} className="success-button home-button">
             Back to Homepage
           </button>
         </div>
