@@ -111,7 +111,6 @@ const App = () => {
   }
 
   return (
-    <AudioProvider>
       <Router>
         <ErrorBoundary>
           <Routes>
@@ -148,7 +147,6 @@ const App = () => {
           </Routes>
         </ErrorBoundary>
       </Router>
-    </AudioProvider>
   );
 };
 
