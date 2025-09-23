@@ -14,6 +14,7 @@ const Phase1 = ({ proceed, loseLife }) => {
   const [userInteracted, setUserInteracted] = useState(false);
   const [audioContextAllowed, setAudioContextAllowed] = useState(false);
   const [isAndroid, setIsAndroid] = useState(false);
+  const [isIOS, setIsIOS] = useState(false);
   
   const audioRef = useRef(null);
   const tutorialAudioRef = useRef(null);
@@ -50,10 +51,11 @@ const Phase1 = ({ proceed, loseLife }) => {
     Z: ['Zebra', 'Zipper', 'Zoo', 'Zucchini']
   };
 
-  // Detect Android browser
+  // Detect Android and iOS browsers
   useEffect(() => {
     const userAgent = navigator.userAgent.toLowerCase();
     setIsAndroid(/android/.test(userAgent));
+    setIsIOS(/iphone|ipad|ipod/.test(userAgent));
   }, []);
 
   // Handle initial user interaction for audio
@@ -78,6 +80,8 @@ const Phase1 = ({ proceed, loseLife }) => {
           if (audioContext.state === 'suspended') {
             audioContext.resume().then(() => {
               setAudioContextAllowed(true);
+            }).catch(err => {
+              console.log("Audio context resume failed:", err);
             });
           } else {
             setAudioContextAllowed(true);
@@ -85,8 +89,12 @@ const Phase1 = ({ proceed, loseLife }) => {
           
           // Close the context after a short time
           setTimeout(() => {
-            source.stop();
-            audioContext.close();
+            try {
+              source.stop();
+              audioContext.close();
+            } catch (e) {
+              console.log("Error closing audio context:", e);
+            }
           }, 100);
         }
       }
@@ -104,6 +112,13 @@ const Phase1 = ({ proceed, loseLife }) => {
   // Get available voices and filter for child-friendly ones
   useEffect(() => {
     const loadVoices = () => {
+      // Check if speech synthesis is available
+      if (!('speechSynthesis' in window)) {
+        console.log("Speech synthesis not supported");
+        setAudioError(true);
+        return;
+      }
+      
       const voices = speechSynthesis.getVoices();
       if (voices.length > 0) {
         const childFriendlyVoices = voices.filter(voice => 
@@ -120,6 +135,14 @@ const Phase1 = ({ proceed, loseLife }) => {
           const englishVoices = voices.filter(voice => voice.lang.startsWith('en-'));
           setAvailableVoices(englishVoices.length > 0 ? englishVoices : [voices[0]]);
         }
+        
+        // If no voices available at all, mark audio as error
+        if (voices.length === 0) {
+          setAudioError(true);
+        }
+      } else {
+        // Try again after a delay if no voices are loaded yet
+        setTimeout(loadVoices, 500);
       }
     };
 
@@ -130,7 +153,7 @@ const Phase1 = ({ proceed, loseLife }) => {
 
     // Initial load with timeout for mobile browsers
     loadVoices();
-    const voiceTimer = setTimeout(loadVoices, 1000);
+    const voiceTimer = setTimeout(loadVoices, 2000);
     
     return () => clearTimeout(voiceTimer);
   }, [isAndroid]);
@@ -279,6 +302,11 @@ const Phase1 = ({ proceed, loseLife }) => {
       
       // Check if speech synthesis is available and allowed
       if ('speechSynthesis' in window && availableVoices.length > 0) {
+        // Cancel any ongoing speech before starting new one
+        if (window.speechSynthesis.speaking) {
+          window.speechSynthesis.cancel();
+        }
+        
         const utterance = new SpeechSynthesisUtterance(item);
         
         // Configure for child-friendly speech
@@ -308,18 +336,18 @@ const Phase1 = ({ proceed, loseLife }) => {
           if (isAndroid) {
             // Try to use a different approach for Android
             setTimeout(() => {
-              const fallbackUtterance = new SpeechSynthesisUtterance(item);
-              fallbackUtterance.rate = 0.8;
-              fallbackUtterance.pitch = 1.0;
-              window.speechSynthesis.speak(fallbackUtterance);
+              try {
+                const fallbackUtterance = new SpeechSynthesisUtterance(item);
+                fallbackUtterance.rate = 0.8;
+                fallbackUtterance.pitch = 1.0;
+                window.speechSynthesis.speak(fallbackUtterance);
+              } catch (err) {
+                console.error("Fallback speech synthesis failed:", err);
+                setPlayingAudio(false);
+              }
             }, 100);
           }
         };
-        
-        // Cancel any ongoing speech before starting new one
-        if (window.speechSynthesis.speaking) {
-          window.speechSynthesis.cancel();
-        }
         
         // Add a small delay for all devices
         setTimeout(() => {

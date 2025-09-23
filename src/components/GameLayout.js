@@ -4,6 +4,7 @@ import './styles/GameLayout.css';
 
 const GameLayout = ({ user, onLogout, onRestart, children, lives }) => {  
   const [showRestartConfirm, setShowRestartConfirm] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const handleRestartClick = () => {
     setShowRestartConfirm(true);
@@ -12,6 +13,15 @@ const GameLayout = ({ user, onLogout, onRestart, children, lives }) => {
   const confirmRestart = () => {
     onRestart();
     setShowRestartConfirm(false);
+  };
+
+  const handleLogoutClick = () => {
+    setShowLogoutConfirm(true);
+  };
+
+  const confirmLogout = () => {
+    onLogout();
+    setShowLogoutConfirm(false);
   };
 
   return (
@@ -48,17 +58,18 @@ const GameLayout = ({ user, onLogout, onRestart, children, lives }) => {
           </div>
           
           <button 
-            onClick={onLogout} 
+            onClick={handleLogoutClick} 
             className="action-button logout-button"
           >
             <svg className="button-icon" viewBox="0 0 24 24">
               <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
             </svg>
-           
+            
           </button>
         </div>
       </header>
 
+      {/* Restart Confirmation Dialog */}
       {showRestartConfirm && (
         <div className="confirmation-overlay">
           <div className="confirmation-dialog">
@@ -74,6 +85,31 @@ const GameLayout = ({ user, onLogout, onRestart, children, lives }) => {
               </button>
               <button 
                 onClick={() => setShowRestartConfirm(false)} 
+                className="dialog-button cancel-button"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Logout Confirmation Dialog */}
+      {showLogoutConfirm && (
+        <div className="confirmation-overlay">
+          <div className="confirmation-dialog">
+            <div className="dialog-icon">🚪</div>
+            <h3>Log Out?</h3>
+            <p>Are you sure you want to log out?{user.isGuest && " Guest progress may be lost."}</p>
+            <div className="dialog-buttons">
+              <button
+                onClick={confirmLogout} 
+                className="dialog-button confirm-button"
+              >
+                Yes, Log Out
+              </button>
+              <button 
+                onClick={() => setShowLogoutConfirm(false)} 
                 className="dialog-button cancel-button"
               >
                 Cancel

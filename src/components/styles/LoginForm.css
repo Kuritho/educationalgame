@@ -18,6 +18,7 @@
   max-width: 400px;
   text-align: center;
   animation: fadeIn 0.5s ease-out;
+  position: relative;
 }
 
 .login-form h2 {
@@ -48,7 +49,7 @@
   color: #a0aec0;
 }
 
-.login-button, .guest-button {
+.login-button, .guest-button, .home-button {
   width: 100%;
   padding: 0.8rem;
   border: none;
@@ -81,6 +82,40 @@
   transform: translateY(-2px);
 }
 
+.home-button {
+  background-color: #f8f9fa;
+  color: #718096;
+  border: 2px solid #e2e8f0;
+}
+
+.home-button:hover {
+  background-color: #edf2f7;
+  color: #4a5568;
+  border-color: #cbd5e0;
+  transform: translateY(-2px);
+}
+
+/* Security badge styles */
+.security-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 1.5rem;
+  padding: 0.8rem;
+  background-color: #f0f9ff;
+  border: 1px solid #e0f2fe;
+  border-radius: 8px;
+  color: #0369a1;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.shield-icon {
+  font-size: 1.1rem;
+  animation: pulse 2s infinite;
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -92,6 +127,18 @@
   }
 }
 
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
 /* Responsive adjustments */
 @media (max-width: 480px) {
   .login-form {
@@ -100,5 +147,14 @@
   
   .login-form h2 {
     font-size: 1.5rem;
+  }
+  
+  .security-badge {
+    font-size: 0.85rem;
+    padding: 0.6rem;
+  }
+  
+  .shield-icon {
+    font-size: 1rem;
   }
 }

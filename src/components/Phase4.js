@@ -50,7 +50,7 @@ const Phase4 = ({ proceed, loseLife, lives: initialLives }) => {
     'pee': 'P', 'papa': 'P', 'pet': 'P', 'park': 'P',
     'cue': 'Q', 'quebec': 'Q', 'queen': 'Q', 'quick': 'Q',
     'are': 'R', 'romeo': 'R', 'red': 'R', 'run': 'R',
-    'ess': 'S', 'sierra': 'S', 'sun': 'S', 'sea': 'S',
+    'ess': 'S', 'sierra': 'S', 'sun': 'S', 'soap': 'S',
     'tee': 'T', 'tango': 'T', 'top': 'T', 'talk': 'T',
     'you': 'U', 'uniform': 'U', 'up': 'U', 'under': 'U',
     'vee': 'V', 'victor': 'V', 'van': 'V', 'voice': 'V',
@@ -514,7 +514,7 @@ const Phase4 = ({ proceed, loseLife, lives: initialLives }) => {
           <div className="available-letters">
             Available letters: {Object.values(letters).join(', ')}
           </div>
-        </div>
+        </div> 
       </div>
       
       <div className="maze-wrapper">

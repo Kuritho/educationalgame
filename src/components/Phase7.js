@@ -17,15 +17,13 @@ const Phase7 = ({ proceed, loseLife }) => {
   useEffect(() => {
     const audio = new Audio('/sounds/bgm2.mp3');
     audio.loop = true;
-    audio.volume = 0.5; // Set volume to 50%
+    audio.volume = 0.5;
     
-    // Play audio when component mounts
+   
     audio.play().catch(error => {
       console.log("Audio play failed:", error);
-      // Some browsers require user interaction before playing audio
     });
     
-    // Cleanup function to pause audio when component unmounts
     return () => {
       audio.pause();
     };

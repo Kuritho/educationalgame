@@ -1,4 +1,4 @@
-/* Phase1.css */
+/* Phase1.css - Android Enhanced Version */
 .phase-container {
   max-width: 800px;
   margin: 0 auto;
@@ -8,16 +8,32 @@
   background-color: #f0f8ff;
   border-radius: 15px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  /* Prevent text selection on Android */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  /* Prevent browser text size adjustment */
+  text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%;
+  -moz-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
 }
 
 h2 {
   color: #4a6fa5;
   margin-bottom: 10px;
+  /* Prevent font boosting on Android */
+  max-height: 100%;
+  -webkit-text-size-adjust: 100%;
 }
 
 p {
   color: #666;
   margin-bottom: 20px;
+  /* Prevent font boosting on Android */
+  max-height: 100%;
+  -webkit-text-size-adjust: 100%;
 }
 
 /* Tutorial overlay styles */
@@ -32,6 +48,9 @@ p {
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  /* Fix for Android scrolling issues */
+  overflow: hidden;
+  touch-action: none;
 }
 
 .tutorial-content {
@@ -42,6 +61,9 @@ p {
   max-width: 500px;
   color: white;
   box-shadow: 0 5px 25px rgba(0, 0, 0, 0.3);
+  /* Prevent content shifting on Android */
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 .tutorial-content h2 {
@@ -61,6 +83,9 @@ p {
   font-size: 16px;
   font-weight: bold;
   transition: all 0.3s;
+  /* Android touch improvements */
+  min-height: 44px; /* Minimum touch target size */
+  -webkit-tap-highlight-color: transparent;
 }
 
 .skip-tutorial-btn:hover {
@@ -86,6 +111,12 @@ p {
   border-radius: 10px;
   cursor: pointer;
   transition: all 0.2s;
+  /* Android touch improvements */
+  min-height: 50px; /* Minimum touch target size */
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  /* Prevent font boosting */
+  -webkit-text-size-adjust: 100%;
 }
 
 .letter-btn:hover:not(.disabled) {
@@ -125,6 +156,10 @@ p {
   border-radius: 10px;
   cursor: pointer;
   transition: all 0.2s;
+  /* Android touch improvements */
+  min-height: 120px; /* Minimum touch target size */
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
 .item-btn:hover:not(.disabled) {
@@ -150,6 +185,8 @@ p {
   font-weight: bold;
   color: white;
   margin-bottom: 10px;
+  /* Prevent flickering on Android */
+  transform: translateZ(0);
 }
 
 /* Changed text color to violet for better visibility */
@@ -158,6 +195,8 @@ p {
   font-weight: bold;
   margin-top: 5px;
   font-size: 16px;
+  /* Prevent font boosting */
+  -webkit-text-size-adjust: 100%;
 }
 
 .speaker-icon {
@@ -184,6 +223,9 @@ p {
   border-radius: 20px;
   cursor: pointer;
   transition: all 0.2s;
+  /* Android touch improvements */
+  min-height: 36px; /* Minimum touch target size */
+  -webkit-tap-highlight-color: transparent;
 }
 
 .stop-audio-btn:hover {
@@ -202,6 +244,9 @@ p {
   border-radius: 30px;
   cursor: pointer;
   transition: all 0.3s;
+  /* Android touch improvements */
+  min-height: 50px; /* Minimum touch target size */
+  -webkit-tap-highlight-color: transparent;
 }
 
 .proceed-button:hover:not(:disabled) {
@@ -224,12 +269,9 @@ p {
 }
 
 .audio-wave:before {
-  content: "";
+  content: "🎵";
   display: block;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background-color: #4ecdc4;
+  font-size: 24px;
   animation: audio-wave 1.5s infinite ease-in-out;
 }
 
@@ -314,6 +356,34 @@ p {
   }
 }
 
+/* Android-specific media queries */
+@media screen and (-webkit-min-device-pixel-ratio:0) and (max-device-width: 1024px) {
+  /* Additional Android-specific styles */
+  .letter-btn, .item-btn, .proceed-button, .skip-tutorial-btn {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+  
+  .letter-btn:active, .item-btn:active {
+    transform: scale(0.95);
+  }
+  
+  /* Prevent zoom on focus on Android */
+  select:focus, textarea:focus, input:focus {
+    font-size: 16px;
+  }
+}
+
+/* Prevent the ugly outline on Android */
+*:focus {
+  outline: none;
+}
+
+/* Fix for Android button active states */
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
   .alphabet-grid {
@@ -327,16 +397,29 @@ p {
   .phase-container {
     padding: 15px;
   }
+  
+  /* Android-specific adjustments for smaller screens */
+  .letter-btn {
+    min-height: 45px;
+    font-size: 18px;
+    padding: 12px 5px;
+  }
+  
+  .item-btn {
+    min-height: 110px;
+  }
 }
 
 @media (max-width: 480px) {
   .alphabet-grid {
     grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
   }
   
   .letter-btn {
-    padding: 12px 5px;
-    font-size: 18px;
+    padding: 10px 5px;
+    font-size: 16px;
+    min-height: 40px;
   }
   
   .tutorial-content {
@@ -346,6 +429,54 @@ p {
   
   .android-audio-note {
     font-size: 12px;
+    padding: 8px;
+  }
+  
+  /* Extra small device adjustments */
+  .item-btn {
+    min-height: 100px;
+    padding: 10px;
+  }
+  
+  .item-image-placeholder {
+    width: 50px;
+    height: 50px;
+    font-size: 20px;
+  }
+  
+  .proceed-button {
+    padding: 12px 24px;
+    font-size: 16px;
+    min-height: 44px;
+  }
+}
+
+/* High DPI Android devices */
+@media (-webkit-min-device-pixel-ratio: 2) {
+  .letter-btn, .item-btn {
+    border-width: 0.5px;
+  }
+}
+
+/* Orientation changes */
+@media (max-height: 500px) and (orientation: landscape) {
+  .phase-container {
+    padding: 10px;
+  }
+  
+  .alphabet-grid {
+    grid-template-columns: repeat(8, 1fr);
+    gap: 5px;
+    margin: 10px 0;
+  }
+  
+  .items-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  
+  .item-btn {
+    min-height: 90px;
     padding: 8px;
   }
 }

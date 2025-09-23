@@ -19,6 +19,10 @@ const LoginForm = ({ setUser }) => {
     navigate('/game');
   };
 
+  const handleBackToHome = () => {
+    navigate('/');
+  };
+
   return (
     <div className="login-container">
       <form onSubmit={handleSubmit} className="login-form">
@@ -41,6 +45,19 @@ const LoginForm = ({ setUser }) => {
         >
           Play as Guest
         </button>
+        <button 
+          type="button" 
+          onClick={handleBackToHome}
+          className="home-button"
+        >
+          Back to Homepage
+        </button>
+        
+        {/* Security badge */}
+        <div className="security-badge">
+          <div className="shield-icon">🛡️</div>
+          <span>Secured by KRTnetwork</span>
+        </div>
       </form>
     </div>
   );

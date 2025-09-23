@@ -6,7 +6,6 @@ const HomePage = () => {
   const audioRef = useRef(null);
 
   useEffect(() => {
-    // Function to handle audio play with user interaction requirement
     const attemptPlay = () => {
       if (audioRef.current) {
         const playPromise = audioRef.current.play();
@@ -14,11 +13,9 @@ const HomePage = () => {
         if (playPromise !== undefined) {
           playPromise
             .then(() => {
-              // Audio started successfully
               console.log("Audio is playing");
             })
             .catch(error => {
-              // Auto-play was prevented, require user interaction
               console.log("Playback failed:", error);
               document.addEventListener('click', handleFirstInteraction);
             });
@@ -26,7 +23,6 @@ const HomePage = () => {
       }
     };
 
-    // Handle first user interaction to start audio
     const handleFirstInteraction = () => {
       if (audioRef.current) {
         audioRef.current.play()
@@ -40,9 +36,8 @@ const HomePage = () => {
       document.removeEventListener('click', handleFirstInteraction);
     };
 
-    // Set initial volume and attempt to play
     if (audioRef.current) {
-      audioRef.current.volume = 0.4; // Set to 40% volume to be less intrusive
+      audioRef.current.volume = 0.4;
       attemptPlay();
     }
 

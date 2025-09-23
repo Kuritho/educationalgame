@@ -15,18 +15,18 @@ const Success = ({ restartGame }) => {
         <div className="celebration-animation">🎉</div>
         <h1>Congratulations! You've Won! 🏆</h1>
         <p className="success-message">You've successfully completed all phases of Reading Adventure!</p>
-        <p className="reward-message">Claim your reward for your achievement!</p>
+        {/* <p className="reward-message">Claim your reward for your achievement!</p> */}
         
         <div className="button-group">
-          <button onClick={handleClaimReward} className="success-button reward-button">
+          {/* <button onClick={handleClaimReward} className="success-button reward-button">
             Claim Your Reward
-          </button>
+          </button> */}
           <button onClick={restartGame} className="success-button play-again-button">
             Play Again
           </button>
-          <button onClick={() => navigate('/success')} className="success-button home-button">
+          {/* <button onClick={() => navigate('/login')} className="success-button home-button">
             Back to Homepage
-          </button>
+          </button> */}
         </div>
       </div>
     </div>
