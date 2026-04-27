@@ -1142,3 +1142,53 @@ button {
 .tutorial-overlay {
   -webkit-overflow-scrolling: touch;
 }
+
+/* Add to your Phase1.css */
+
+/* Loading Spinner */
+.loading-spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  margin-left: 10px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Voice Ready Badge */
+.voice-quality-badge {
+  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+  border-radius: 25px;
+  padding: 10px 20px;
+  margin: 10px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: white;
+  font-weight: bold;
+}
+
+.voice-quality-badge span {
+  background: rgba(0, 0, 0, 0.2);
+  padding: 4px 12px;
+  border-radius: 15px;
+  font-size: 14px;
+}
+
+/* Disabled button styles */
+.pronunciation-btn:disabled,
+.letter-btn:disabled,
+.item-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+}
