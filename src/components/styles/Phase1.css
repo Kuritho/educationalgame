@@ -1192,3 +1192,65 @@ button {
   cursor: not-allowed;
   transform: none !important;
 }
+
+  /* Add to Phase1.css */
+
+/* Cross-browser compatibility */
+.phase-container {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Fallback speech message */
+.fallback-speech-message {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 50px;
+  z-index: 10001;
+  animation: slideUp 0.3s ease;
+  font-size: 16px;
+  font-weight: bold;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  font-family: 'Arial', 'Helvetica', sans-serif;
+  white-space: nowrap;
+  max-width: 90%;
+  overflow-x: auto;
+  text-align: center;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateX(-50%) translateY(100px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Samsung Internet Browser fixes */
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+  .letter-btn, .item-btn, .song-btn {
+    cursor: pointer;
+  }
+}
+
+/* Firefox specific */
+@-moz-document url-prefix() {
+  .letter-btn, .item-btn {
+    cursor: pointer;
+  }
+}
+
+/* Edge browser fixes */
+@supports (-ms-ime-align: auto) {
+  .letter-btn, .item-btn {
+    cursor: pointer;
+  }
+}
