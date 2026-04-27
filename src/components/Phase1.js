@@ -16,9 +16,93 @@ const Phase1 = ({ proceed, loseLife }) => {
   const [isAndroid, setIsAndroid] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
   
+  // Song and pronunciation state
+  const [selectedSongSet, setSelectedSongSet] = useState(0);
+  const [selectedPronunciation, setSelectedPronunciation] = useState(0);
+  const [isPlayingSong, setIsPlayingSong] = useState(false);
+  const [currentSong, setCurrentSong] = useState(null);
+  const [showSongPlayer, setShowSongPlayer] = useState(true);
+  const [selectedVoice, setSelectedVoice] = useState(null);
+  const [availableChildVoices, setAvailableChildVoices] = useState([]);
+  const [showVideoModal, setShowVideoModal] = useState(false);
+  const [videoUrl, setVideoUrl] = useState('');
+  const [videoTitle, setVideoTitle] = useState('');
+  
   const audioRef = useRef(null);
   const tutorialAudioRef = useRef(null);
   const interactionAttempted = useRef(false);
+  const videoRef = useRef(null);
+  const currentUtteranceRef = useRef(null);
+
+  // MP4 Video URLs - Place your MP4 files in the public/videos folder
+  // Option 1: Using local MP4 files in public folder
+  const songVideos = {
+    song1: {
+      name: "Classic ABC Song 🎵",
+      videoUrl: "/videos/abc-song.mp4", // Path to your MP4 file
+      thumbnail: "/thumbnails/abc-thumb.jpg", // Optional thumbnail
+      lyrics: [
+        "A, B, C, D, E, F, G",
+        "H, I, J, K, L, M, N, O, P",
+        "Q, R, S, T, U, V",
+        "W, X, Y, and Z",
+        "Now I know my ABC's,",
+        "Next time won't you sing with me?"
+      ],
+      duration: 60
+    },
+    song2: {
+      name: "Phonics Fun Song 🎓",
+      videoUrl: "/videos/phonics-song.mp4", // Path to your MP4 file
+      thumbnail: "/thumbnails/phonics-thumb.jpg",
+      lyrics: [
+        "A says ah, A says ah, Every letter makes a sound!",
+        "B says buh, B says buh, Let's all sing along!",
+        "C says kuh, C says kuh, Learning is so fun!",
+        "D says duh, D says duh, We've only just begun!"
+      ],
+      duration: 45
+    },
+    song3: {
+      name: "Alphabet Adventure 🎪",
+      videoUrl: "/videos/alphabet-adventure.mp4", // Path to your MP4 file
+      thumbnail: "/thumbnails/adventure-thumb.jpg",
+      lyrics: [
+        "Come along and sing with me,",
+        "Learning letters, A to Z!",
+        "Every letter has a sound,",
+        "Let's explore and dance around!",
+        "A is for Apple, B is for Ball,",
+        "Learning letters, standing tall!"
+      ],
+      duration: 50
+    }
+  };
+
+  // Alternative: Using YouTube URLs (if you prefer YouTube videos)
+  // const songVideos = {
+  //   song1: {
+  //     name: "Classic ABC Song 🎵",
+  //     videoUrl: "https://www.youtube.com/embed/5XEN4cVY5Xs", // YouTube embed URL
+  //     isYouTube: true,
+  //     lyrics: [...],
+  //     duration: 60
+  //   },
+  //   song2: {
+  //     name: "Phonics Fun Song 🎓",
+  //     videoUrl: "https://www.youtube.com/embed/BELlZKpi1Zs",
+  //     isYouTube: true,
+  //     lyrics: [...],
+  //     duration: 45
+  //   },
+  //   song3: {
+  //     name: "Alphabet Adventure 🎪",
+  //     videoUrl: "https://www.youtube.com/embed/1dkPkL_F8G8",
+  //     isYouTube: true,
+  //     lyrics: [...],
+  //     duration: 50
+  //   }
+  // };
 
   const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 
@@ -51,6 +135,140 @@ const Phase1 = ({ proceed, loseLife }) => {
     Z: ['Zebra', 'Zipper', 'Zoo', 'Zucchini']
   };
 
+  // Enhanced clear pronunciations for children
+  const letterPronunciations = {
+    A: [
+      { name: "Standard", sound: "A", clearSound: "AY", example: "Apple", slowSound: "Aaaay" },
+      { name: "Phonics", sound: "Ah", clearSound: "AH", example: "Ant", slowSound: "Aaaah" },
+      { name: "Musical", sound: "A", clearSound: "AY-EE", example: "Amazing", slowSound: "Aaaaaa" }
+    ],
+    B: [
+      { name: "Standard", sound: "Bee", clearSound: "BEE", example: "Ball", slowSound: "Beee" },
+      { name: "Phonics", sound: "Buh", clearSound: "BUH", example: "Bear", slowSound: "Buh-buh" },
+      { name: "Musical", sound: "B", clearSound: "BEE-OH", example: "Bumblebee", slowSound: "Bbbbee" }
+    ],
+    C: [
+      { name: "Standard", sound: "See", clearSound: "SEE", example: "Cat", slowSound: "Seee" },
+      { name: "Phonics", sound: "Kuh", clearSound: "KUH", example: "Car", slowSound: "Kuh-kuh" },
+      { name: "Musical", sound: "C", clearSound: "SEE-EE", example: "Circus", slowSound: "Cccsee" }
+    ],
+    D: [
+      { name: "Standard", sound: "Dee", clearSound: "DEE", example: "Dog", slowSound: "Deee" },
+      { name: "Phonics", sound: "Duh", clearSound: "DUH", example: "Duck", slowSound: "Duh-duh" },
+      { name: "Musical", sound: "D", clearSound: "DEE-OH", example: "Drum", slowSound: "Ddddee" }
+    ],
+    E: [
+      { name: "Standard", sound: "Ee", clearSound: "EE", example: "Elephant", slowSound: "Eeee" },
+      { name: "Phonics", sound: "Eh", clearSound: "EH", example: "Egg", slowSound: "Ehh-eh" },
+      { name: "Musical", sound: "E", clearSound: "EE-EE", example: "Echo", slowSound: "Eeeeee" }
+    ],
+    F: [
+      { name: "Standard", sound: "Eff", clearSound: "EFF", example: "Fish", slowSound: "Efff" },
+      { name: "Phonics", sound: "Fff", clearSound: "FFF", example: "Frog", slowSound: "Fff-fff" },
+      { name: "Musical", sound: "F", clearSound: "EFF-OH", example: "Flute", slowSound: "Fffeff" }
+    ],
+    G: [
+      { name: "Standard", sound: "Jee", clearSound: "JEE", example: "Giraffe", slowSound: "Jeee" },
+      { name: "Phonics", sound: "Guh", clearSound: "GUH", example: "Grapes", slowSound: "Guh-guh" },
+      { name: "Musical", sound: "G", clearSound: "JEE-OH", example: "Guitar", slowSound: "Gggjee" }
+    ],
+    H: [
+      { name: "Standard", sound: "Aych", clearSound: "AYCH", example: "House", slowSound: "Aychh" },
+      { name: "Phonics", sound: "Huh", clearSound: "HUH", example: "Heart", slowSound: "Huh-huh" },
+      { name: "Musical", sound: "H", clearSound: "AYCH-OH", example: "Harmony", slowSound: "Hhhaych" }
+    ],
+    I: [
+      { name: "Standard", sound: "Eye", clearSound: "EYE", example: "Ice cream", slowSound: "Iii" },
+      { name: "Phonics", sound: "Ih", clearSound: "IH", example: "Igloo", slowSound: "Ih-ih" },
+      { name: "Musical", sound: "I", clearSound: "EYE-EE", example: "Island", slowSound: "Iiiiii" }
+    ],
+    J: [
+      { name: "Standard", sound: "Jay", clearSound: "JAY", example: "Jellyfish", slowSound: "Jayy" },
+      { name: "Phonics", sound: "Juh", clearSound: "JUH", example: "Jaguar", slowSound: "Juh-juh" },
+      { name: "Musical", sound: "J", clearSound: "JAY-OH", example: "Jazz", slowSound: "Jjjay" }
+    ],
+    K: [
+      { name: "Standard", sound: "Kay", clearSound: "KAY", example: "Kangaroo", slowSound: "Kayy" },
+      { name: "Phonics", sound: "Kuh", clearSound: "KUH", example: "Key", slowSound: "Kuh-kuh" },
+      { name: "Musical", sound: "K", clearSound: "KAY-OH", example: "Kite", slowSound: "Kkkay" }
+    ],
+    L: [
+      { name: "Standard", sound: "Ell", clearSound: "ELL", example: "Lion", slowSound: "Elll" },
+      { name: "Phonics", sound: "Lll", clearSound: "LLL", example: "Leaf", slowSound: "Lll-lll" },
+      { name: "Musical", sound: "L", clearSound: "ELL-OH", example: "Lullaby", slowSound: "Lllell" }
+    ],
+    M: [
+      { name: "Standard", sound: "Emm", clearSound: "EMM", example: "Monkey", slowSound: "Emmm" },
+      { name: "Phonics", sound: "Mmm", clearSound: "MMM", example: "Moon", slowSound: "Mmm-mmm" },
+      { name: "Musical", sound: "M", clearSound: "EMM-OH", example: "Magic", slowSound: "Mmmemm" }
+    ],
+    N: [
+      { name: "Standard", sound: "Enn", clearSound: "ENN", example: "Nest", slowSound: "Ennn" },
+      { name: "Phonics", sound: "Nnn", clearSound: "NNN", example: "Nose", slowSound: "Nnn-nnn" },
+      { name: "Musical", sound: "N", clearSound: "ENN-OH", example: "Night", slowSound: "Nnnen" }
+    ],
+    O: [
+      { name: "Standard", sound: "Oh", clearSound: "OH", example: "Orange", slowSound: "Ohhh" },
+      { name: "Phonics", sound: "Ah", clearSound: "AH", example: "Octopus", slowSound: "Ahhh" },
+      { name: "Musical", sound: "O", clearSound: "OH-OH", example: "Ocean", slowSound: "Ooooh" }
+    ],
+    P: [
+      { name: "Standard", sound: "Pee", clearSound: "PEE", example: "Panda", slowSound: "Peee" },
+      { name: "Phonics", sound: "Puh", clearSound: "PUH", example: "Pizza", slowSound: "Puh-puh" },
+      { name: "Musical", sound: "P", clearSound: "PEE-OH", example: "Popcorn", slowSound: "Pppee" }
+    ],
+    Q: [
+      { name: "Standard", sound: "Queue", clearSound: "KYOO", example: "Queen", slowSound: "Kyooo" },
+      { name: "Phonics", sound: "Kwu", clearSound: "KWUH", example: "Quilt", slowSound: "Kwuh-kwuh" },
+      { name: "Musical", sound: "Q", clearSound: "KYOO-OH", example: "Quiet", slowSound: "Qqqyoo" }
+    ],
+    R: [
+      { name: "Standard", sound: "Arr", clearSound: "ARR", example: "Rabbit", slowSound: "Arrr" },
+      { name: "Phonics", sound: "Rrr", clearSound: "RRR", example: "Rainbow", slowSound: "Rrr-rrr" },
+      { name: "Musical", sound: "R", clearSound: "ARR-OH", example: "Rain", slowSound: "Rrrar" }
+    ],
+    S: [
+      { name: "Standard", sound: "Ess", clearSound: "ESS", example: "Sun", slowSound: "Esss" },
+      { name: "Phonics", sound: "Sss", clearSound: "SSS", example: "Snake", slowSound: "Sss-sss" },
+      { name: "Musical", sound: "S", clearSound: "ESS-OH", example: "Symphony", slowSound: "Sssess" }
+    ],
+    T: [
+      { name: "Standard", sound: "Tee", clearSound: "TEE", example: "Tree", slowSound: "Teee" },
+      { name: "Phonics", sound: "Tuh", clearSound: "TUH", example: "Tiger", slowSound: "Tuh-tuh" },
+      { name: "Musical", sound: "T", clearSound: "TEE-OH", example: "Tambourine", slowSound: "Ttttee" }
+    ],
+    U: [
+      { name: "Standard", sound: "You", clearSound: "YOO", example: "Umbrella", slowSound: "Yooo" },
+      { name: "Phonics", sound: "Uh", clearSound: "UH", example: "Unicorn", slowSound: "Uhh" },
+      { name: "Musical", sound: "U", clearSound: "YOO-OH", example: "Up", slowSound: "Uuuuh" }
+    ],
+    V: [
+      { name: "Standard", sound: "Vee", clearSound: "VEE", example: "Violin", slowSound: "Veee" },
+      { name: "Phonics", sound: "Vvv", clearSound: "VVV", example: "Volcano", slowSound: "Vvv-vvv" },
+      { name: "Musical", sound: "V", clearSound: "VEE-OH", example: "Vibration", slowSound: "Vvvvee" }
+    ],
+    W: [
+      { name: "Standard", sound: "Double you", clearSound: "DOUBLE-YOO", example: "Whale", slowSound: "Double-yooo" },
+      { name: "Phonics", sound: "Wuh", clearSound: "WUH", example: "Watermelon", slowSound: "Wuh-wuh" },
+      { name: "Musical", sound: "W", clearSound: "WUH-OH", example: "Wave", slowSound: "Wwwwuh" }
+    ],
+    X: [
+      { name: "Standard", sound: "Ex", clearSound: "EKS", example: "Xylophone", slowSound: "Ekss" },
+      { name: "Phonics", sound: "Ks", clearSound: "KS", example: "X-ray", slowSound: "Ks-ks" },
+      { name: "Musical", sound: "X", clearSound: "EKS-OH", example: "Xylophone", slowSound: "Xxxeks" }
+    ],
+    Y: [
+      { name: "Standard", sound: "Wye", clearSound: "WYE", example: "Yak", slowSound: "Wyyy" },
+      { name: "Phonics", sound: "Yuh", clearSound: "YUH", example: "Yo-yo", slowSound: "Yuh-yuh" },
+      { name: "Musical", sound: "Y", clearSound: "WYE-OH", example: "Yodel", slowSound: "Yyywye" }
+    ],
+    Z: [
+      { name: "Standard", sound: "Zee", clearSound: "ZEE", example: "Zebra", slowSound: "Zeee" },
+      { name: "Phonics", sound: "Zzz", clearSound: "ZZZ", example: "Zipper", slowSound: "Zzz-zzz" },
+      { name: "Musical", sound: "Z", clearSound: "ZEE-OH", example: "Buzz", slowSound: "Zzzzee" }
+    ]
+  };
+
   // Detect Android and iOS browsers
   useEffect(() => {
     const userAgent = navigator.userAgent.toLowerCase();
@@ -58,45 +276,68 @@ const Phase1 = ({ proceed, loseLife }) => {
     setIsIOS(/iphone|ipad|ipod/.test(userAgent));
   }, []);
 
-  // Handle initial user interaction for audio
+  // Voice selection for children
+  useEffect(() => {
+    const loadVoices = () => {
+      if (!('speechSynthesis' in window)) {
+        setAudioError(true);
+        return;
+      }
+      
+      const voices = speechSynthesis.getVoices();
+      if (voices.length > 0) {
+        const priorityVoices = [
+          'Google UK English Female',
+          'Samantha',
+          'Karen',
+          'Victoria',
+          'Microsoft Zira',
+          'Google US English',
+          'Alex',
+          'Daniel'
+        ];
+        
+        const englishVoices = voices.filter(voice => voice.lang.startsWith('en-'));
+        const sortedVoices = englishVoices.sort((a, b) => {
+          const aIndex = priorityVoices.findIndex(pv => a.name.includes(pv));
+          const bIndex = priorityVoices.findIndex(pv => b.name.includes(pv));
+          if (aIndex === -1 && bIndex === -1) return 0;
+          if (aIndex === -1) return 1;
+          if (bIndex === -1) return -1;
+          return aIndex - bIndex;
+        });
+        
+        setAvailableVoices(sortedVoices);
+        setAvailableChildVoices(sortedVoices);
+        
+        if (sortedVoices.length > 0) {
+          setSelectedVoice(sortedVoices[0]);
+        }
+        
+        if (voices.length === 0) {
+          setAudioError(true);
+        }
+      } else {
+        setTimeout(loadVoices, 500);
+      }
+    };
+
+    if (speechSynthesis.onvoiceschanged !== undefined) {
+      speechSynthesis.onvoiceschanged = loadVoices;
+    }
+
+    loadVoices();
+    const voiceTimer = setTimeout(loadVoices, 2000);
+    
+    return () => clearTimeout(voiceTimer);
+  }, []);
+
+  // Handle user interaction for audio
   useEffect(() => {
     const handleUserInteraction = () => {
       if (!interactionAttempted.current) {
         setUserInteracted(true);
         interactionAttempted.current = true;
-        
-        // Try to unlock audio context on all devices
-        if (window.AudioContext) {
-          const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-          
-          // Create an empty buffer and play it to unlock audio
-          const buffer = audioContext.createBuffer(1, 1, 22050);
-          const source = audioContext.createBufferSource();
-          source.buffer = buffer;
-          source.connect(audioContext.destination);
-          source.start();
-          
-          // Resume the audio context (required after user interaction)
-          if (audioContext.state === 'suspended') {
-            audioContext.resume().then(() => {
-              setAudioContextAllowed(true);
-            }).catch(err => {
-              console.log("Audio context resume failed:", err);
-            });
-          } else {
-            setAudioContextAllowed(true);
-          }
-          
-          // Close the context after a short time
-          setTimeout(() => {
-            try {
-              source.stop();
-              audioContext.close();
-            } catch (e) {
-              console.log("Error closing audio context:", e);
-            }
-          }, 100);
-        }
       }
     };
 
@@ -109,273 +350,148 @@ const Phase1 = ({ proceed, loseLife }) => {
     };
   }, []);
 
-  // Get available voices and filter for child-friendly ones
-  useEffect(() => {
-    const loadVoices = () => {
-      // Check if speech synthesis is available
-      if (!('speechSynthesis' in window)) {
-        console.log("Speech synthesis not supported");
-        setAudioError(true);
-        return;
-      }
-      
-      const voices = speechSynthesis.getVoices();
-      if (voices.length > 0) {
-        const childFriendlyVoices = voices.filter(voice => 
-          voice.lang.startsWith('en-') && // English voices
-          !voice.name.toLowerCase().includes('compact') && // Exclude compact voices
-          !voice.name.toLowerCase().includes('enhanced') // Exclude enhanced voices
-        );
-        
-        setAvailableVoices(childFriendlyVoices);
-        
-        // On Android, we need to handle the limited voice availability
-        if (isAndroid && childFriendlyVoices.length === 0 && voices.length > 0) {
-          // Use any available English voice on Android
-          const englishVoices = voices.filter(voice => voice.lang.startsWith('en-'));
-          setAvailableVoices(englishVoices.length > 0 ? englishVoices : [voices[0]]);
-        }
-        
-        // If no voices available at all, mark audio as error
-        if (voices.length === 0) {
-          setAudioError(true);
-        }
-      } else {
-        // Try again after a delay if no voices are loaded yet
-        setTimeout(loadVoices, 500);
-      }
-    };
-
-    // Load voices when they become available
-    if (speechSynthesis.onvoiceschanged !== undefined) {
-      speechSynthesis.onvoiceschanged = loadVoices;
-    }
-
-    // Initial load with timeout for mobile browsers
-    loadVoices();
-    const voiceTimer = setTimeout(loadVoices, 2000);
-    
-    return () => clearTimeout(voiceTimer);
-  }, [isAndroid]);
-
-  // Get the best voice for children
-  const getChildFriendlyVoice = () => {
-    if (availableVoices.length === 0) return null;
-    
-    // On Android, use the first available voice
-    if (isAndroid) {
-      return availableVoices[0];
-    }
-    
-    // Prefer female voices as they're often clearer for children
-    const preferredVoices = availableVoices.filter(voice =>
-      voice.name.toLowerCase().includes('female') ||
-      voice.name.toLowerCase().includes('woman') ||
-      voice.name.toLowerCase().includes('samantha') || // Common clear voice
-      voice.name.toLowerCase().includes('karen') || // Common clear voice (Australian English)
-      voice.name.toLowerCase().includes('victoria') // Common clear voice
-    );
-
-    // If no preferred voices, use any available English voice
-    return preferredVoices.length > 0 ? preferredVoices[0] : availableVoices[0];
-  };
-
-  // Preload tutorial audio with better error handling
-  useEffect(() => {
-    // Skip audio preloading on mobile to save bandwidth
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-    if (isMobile) {
-      setTutorialAudioReady(true);
+  // Function to play video
+  const playVideo = (songKey, songIndex) => {
+    const song = songVideos[songKey];
+    if (!song || !song.videoUrl) {
+      console.error("No video URL provided");
       return;
     }
+    
+    setVideoUrl(song.videoUrl);
+    setVideoTitle(song.name);
+    setShowVideoModal(true);
+    setSelectedSongSet(songIndex);
+    setIsPlayingSong(true);
+    setCurrentSong(song);
+  };
 
-    const testAudioUrl = (url) => {
-      return new Promise((resolve) => {
-        const audio = new Audio();
-        audio.preload = 'auto';
-        
-        audio.addEventListener('canplaythrough', () => {
-          resolve(true);
-        });
-        
-        audio.addEventListener('error', () => {
-          resolve(false);
-        });
-        
-        audio.src = url;
-        audio.load();
-        
-        setTimeout(() => resolve(false), 2000);
-      });
-    };
+  // Close video modal
+  const closeVideoModal = () => {
+    if (videoRef.current) {
+      videoRef.current.pause();
+      videoRef.current.currentTime = 0;
+    }
+    setShowVideoModal(false);
+    setVideoUrl('');
+    setIsPlayingSong(false);
+  };
 
-    const initializeAudio = async () => {
-      const audioUrls = [
-        'https://assets.mixkit.co/sfx/preview/mixkit-software-interface-start-2574.mp3',
-      ];
-
-      let audioAvailable = false;
-
-      for (const url of audioUrls) {
-        const isAvailable = await testAudioUrl(url);
-        if (isAvailable) {
-          tutorialAudioRef.current = new Audio(url);
-          audioAvailable = true;
-          break;
-        }
-      }
-
-      if (!audioAvailable) {
-        setAudioError(true);
-        setTutorialAudioReady(true);
+  // Speak function for clear pronunciation
+  const speakClear = (text, options = {}) => {
+    return new Promise((resolve, reject) => {
+      if (!('speechSynthesis' in window) || availableVoices.length === 0) {
+        reject(new Error('Speech synthesis not available'));
         return;
       }
 
-      tutorialAudioRef.current.addEventListener('canplaythrough', () => {
-        setTutorialAudioReady(true);
-      });
-
-      tutorialAudioRef.current.addEventListener('error', (e) => {
-        setAudioError(true);
-        setTutorialAudioReady(true);
-      });
-
-      tutorialAudioRef.current.load();
-    };
-
-    initializeAudio();
-
-    return () => {
-      if (tutorialAudioRef.current) {
-        tutorialAudioRef.current.pause();
-        tutorialAudioRef.current = null;
+      if (window.speechSynthesis.speaking) {
+        window.speechSynthesis.cancel();
       }
-    };
-  }, []);
 
-  // Play tutorial audio when ready
-  useEffect(() => {
-    if (showTutorial && tutorialAudioReady && tutorialAudioRef.current && !audioError && userInteracted) {
-      const playTutorial = async () => {
-        try {
-          setPlayingAudio(true);
-          
-          // On Android, we'll skip the tutorial audio and show text instead
-          if (isAndroid) {
-            setAudioError(true); // This will trigger the text tutorial
-            setPlayingAudio(false);
-            return;
-          }
-          
-          await tutorialAudioRef.current.play();
-          
-          tutorialAudioRef.current.onended = () => {
-            setPlayingAudio(false);
-            setShowTutorial(false);
-          };
-        } catch (error) {
-          setAudioError(true);
-          setPlayingAudio(false);
-        }
+      const utterance = new SpeechSynthesisUtterance(text);
+      
+      if (selectedVoice) {
+        utterance.voice = selectedVoice;
+      } else if (availableVoices.length > 0) {
+        utterance.voice = availableVoices[0];
+      }
+      
+      utterance.rate = options.rate || 0.7;
+      utterance.pitch = options.pitch || 1.15;
+      utterance.volume = 1.0;
+      
+      utterance.onend = () => {
+        setPlayingAudio(false);
+        resolve();
       };
       
-      playTutorial();
-    }
-  }, [showTutorial, tutorialAudioReady, audioError, userInteracted, isAndroid]);
+      utterance.onerror = (e) => {
+        console.error('Speech error:', e);
+        setPlayingAudio(false);
+        reject(e);
+      };
+      
+      currentUtteranceRef.current = utterance;
+      
+      setTimeout(() => {
+        try {
+          window.speechSynthesis.speak(utterance);
+        } catch (error) {
+          console.error('Error speaking:', error);
+          setPlayingAudio(false);
+          reject(error);
+        }
+      }, 50);
+    });
+  };
 
-  const handleComplete = () => {
-    setCompleted(true);
-    proceed();
+  // Pronounce letter with crystal clarity
+  const pronounceLetter = async (letter, pronunciationIndex) => {
+    if (playingAudio) return;
+    
+    setPlayingAudio(true);
+    
+    const pronunciation = letterPronunciations[letter]?.[pronunciationIndex];
+    if (!pronunciation) {
+      setPlayingAudio(false);
+      return;
+    }
+    
+    let textToSpeak = "";
+    let rate = 0.65;
+    let pitch = 1.2;
+    
+    switch(pronunciationIndex) {
+      case 0:
+        textToSpeak = `The letter ${letter} says ${pronunciation.clearSound}. ${pronunciation.clearSound} is for ${pronunciation.example}. ${letter} for ${pronunciation.example}!`;
+        rate = 0.7;
+        pitch = 1.15;
+        break;
+      case 1:
+        textToSpeak = `${pronunciation.clearSound}! ${pronunciation.clearSound}! ${pronunciation.clearSound}! The letter ${letter} makes the ${pronunciation.sound} sound. Like in ${pronunciation.example}!`;
+        rate = 0.65;
+        pitch = 1.25;
+        break;
+      case 2:
+        textToSpeak = `${pronunciation.slowSound}~ ${letter}~ ${pronunciation.slowSound}~ ${letter} is for ${pronunciation.example}~ Let's learn ${letter} together~!`;
+        rate = 0.6;
+        pitch = 1.3;
+        break;
+      default:
+        textToSpeak = `${letter} is for ${pronunciation.example}. ${letter} says ${pronunciation.clearSound}.`;
+    }
+    
+    try {
+      await speakClear(textToSpeak, { rate, pitch });
+    } catch (error) {
+      console.error('Error pronouncing letter:', error);
+      setPlayingAudio(false);
+    }
   };
 
   const handleLetterClick = (letter) => {
-    if (showTutorial) return;
+    if (showTutorial || playingAudio) return;
     setSelectedLetter(letter);
     setItems(letterItems[letter] || []);
+    pronounceLetter(letter, selectedPronunciation);
   };
 
-  const handleItemClick = (item) => {
+  const handleItemClick = async (item) => {
     if (showTutorial || playingAudio || !userInteracted) return;
     
     try {
-      setPlayingAudio(true);
-      
-      // Check if speech synthesis is available and allowed
-      if ('speechSynthesis' in window && availableVoices.length > 0) {
-        // Cancel any ongoing speech before starting new one
-        if (window.speechSynthesis.speaking) {
-          window.speechSynthesis.cancel();
-        }
-        
-        const utterance = new SpeechSynthesisUtterance(item);
-        
-        // Configure for child-friendly speech
-        const voice = getChildFriendlyVoice();
-        if (voice) {
-          utterance.voice = voice;
-        }
-        
-        utterance.rate = 0.8; // Slower speed for clarity
-        utterance.pitch = 1.1; // Slightly higher pitch (more friendly)
-        utterance.volume = 1.0;
-        
-        // Add slight pauses between words for multi-word items
-        if (item.includes(' ')) {
-          utterance.text = item.split(' ').join('... '); // Add pauses between words
-        }
-        
-        utterance.onend = () => {
-          setPlayingAudio(false);
-        };
-        
-        utterance.onerror = (e) => {
-          console.error('Speech synthesis error:', e);
-          setPlayingAudio(false);
-          
-          // On Android, try a fallback approach
-          if (isAndroid) {
-            // Try to use a different approach for Android
-            setTimeout(() => {
-              try {
-                const fallbackUtterance = new SpeechSynthesisUtterance(item);
-                fallbackUtterance.rate = 0.8;
-                fallbackUtterance.pitch = 1.0;
-                window.speechSynthesis.speak(fallbackUtterance);
-              } catch (err) {
-                console.error("Fallback speech synthesis failed:", err);
-                setPlayingAudio(false);
-              }
-            }, 100);
-          }
-        };
-        
-        // Add a small delay for all devices
-        setTimeout(() => {
-          try {
-            window.speechSynthesis.speak(utterance);
-          } catch (error) {
-            console.error('Error speaking utterance:', error);
-            setPlayingAudio(false);
-          }
-        }, 100);
-      } else {
-        // Fallback: visual feedback with longer delay for multi-word items
-        const delay = item.includes(' ') ? 1500 : 1000;
-        setTimeout(() => {
-          setPlayingAudio(false);
-        }, delay);
-      }
+      await speakClear(item, {
+        rate: 0.7,
+        pitch: 1.15
+      });
     } catch (error) {
-      console.error('Error with speech synthesis:', error);
+      console.error('Error speaking item:', error);
       setPlayingAudio(false);
     }
   };
 
   const skipTutorial = () => {
-    if (tutorialAudioRef.current) {
-      tutorialAudioRef.current.pause();
-      tutorialAudioRef.current.currentTime = 0;
-    }
     if (window.speechSynthesis && window.speechSynthesis.speaking) {
       window.speechSynthesis.cancel();
     }
@@ -383,70 +499,184 @@ const Phase1 = ({ proceed, loseLife }) => {
     setPlayingAudio(false);
   };
 
-  // Auto-skip tutorial if audio fails to load
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (showTutorial && !tutorialAudioReady) {
-        setAudioError(true);
-        setTutorialAudioReady(true);
-      }
-    }, 5000);
-
-    return () => clearTimeout(timer);
-  }, [showTutorial, tutorialAudioReady]);
-
   return (
     <div className="phase-container">
+      {/* Video Modal */}
+      {showVideoModal && (
+        <div className="video-modal-overlay" onClick={closeVideoModal}>
+          <div className="video-modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="video-modal-header">
+              <h3>{videoTitle}</h3>
+              <button className="close-modal-btn" onClick={closeVideoModal}>✕</button>
+            </div>
+            <div className="video-container">
+              <video
+                ref={videoRef}
+                src={videoUrl}
+                controls
+                autoPlay
+                className="song-video"
+                onEnded={closeVideoModal}
+                onError={(e) => {
+                  console.error("Video playback error:", e);
+                  alert("Sorry, the video couldn't be played. Please check if the MP4 file exists in the /public/videos/ folder.");
+                  closeVideoModal();
+                }}
+              >
+                Your browser does not support the video tag.
+              </video>
+            </div>
+            {currentSong && (
+              <div className="video-lyrics">
+                <h4>Song Lyrics:</h4>
+                {currentSong.lyrics.map((line, index) => (
+                  <p key={index}>{line}</p>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {showTutorial && (
         <div className="tutorial-overlay">
           <div className="tutorial-content">
             <h2>Welcome to Alphabet Adventure! 🎉</h2>
-            {audioError || isAndroid ? (
-              <div>
-                <p>Let's learn about letters and words! 📚</p>
-                <ol style={{textAlign: 'left', margin: '15px 0', paddingLeft: '20px', fontSize: '16px', lineHeight: '1.6'}}>
-                  <li>✨ Click on any letter to see items that start with it</li>
-                  <li>🎵 Click on an item to hear its pronunciation</li>
-                  <li>🔤 Explore all the letters from A to Z!</li>
-                  <li>🎯 Have fun learning!</li>
-                </ol>
-                {isAndroid && (
-                  <div className="android-audio-note">
-                    <p>🔊 <strong>Note for Android users:</strong> Make sure your device volume is turned up and you've given permission for audio playback.</p>
-                  </div>
+            <div>
+              <p>Let's learn letters with crystal clear sounds and music videos! 📚</p>
+              <ol style={{textAlign: 'left', margin: '15px 0', paddingLeft: '20px', fontSize: '16px', lineHeight: '1.6'}}>
+                <li>✨ Click any letter to hear it pronounced clearly</li>
+                <li>🎬 Click the song buttons to watch fun alphabet music videos!</li>
+                <li>🔊 Choose from 3 pronunciation styles (Standard, Phonics, or Musical)</li>
+                <li>🎯 Click items to hear their names spoken slowly</li>
+                <li>👂 Each sound is optimized for children's learning</li>
+              </ol>
+              <div className="audio-quality-note">
+                <p>🔊 <strong>High-quality voice and video content for maximum engagement</strong></p>
+                {selectedVoice && (
+                  <p className="voice-info">Using voice: {selectedVoice.name}</p>
                 )}
+                <p className="voice-info">🎬 Videos will play MP4 files from your local storage</p>
               </div>
-            ) : (
-              <div>
-                <p>Listening to game instructions... 🔊</p>
-                <div className="audio-wave"></div>
-              </div>
-            )}
+            </div>
             <button onClick={skipTutorial} className="skip-tutorial-btn">
-              {audioError || isAndroid ? 'Start Playing! 🚀' : 'Skip Tutorial'}
+              Start Playing! 🚀
             </button>
           </div>
         </div>
       )}
       
       <h2>Exercise: Alphabet Adventure 🎓</h2>
-      <p>Click a letter to see items that start with it! 👇</p>
+      <p>Click a letter to hear it clearly! 👇</p>
+      
+      {/* Voice Quality Indicator */}
+      {selectedVoice && !showTutorial && (
+        <div className="voice-quality-badge">
+          🎤 Clear Voice: <span>{selectedVoice.name}</span>
+          <button 
+            className="change-voice-btn"
+            onClick={() => {
+              if (availableChildVoices.length > 1) {
+                const currentIndex = availableChildVoices.findIndex(v => v.name === selectedVoice.name);
+                const nextIndex = (currentIndex + 1) % availableChildVoices.length;
+                setSelectedVoice(availableChildVoices[nextIndex]);
+                speakClear(`Now using ${availableChildVoices[nextIndex].name} voice`, { rate: 0.8 });
+              }
+            }}
+          >
+            Change Voice
+          </button>
+        </div>
+      )}
+      
+      {/* Video Song Selection Panel */}
+      {showSongPlayer && !showTutorial && (
+        <div className="song-player-panel">
+          <h3>🎬 Alphabet Music Videos 🎬</h3>
+          <div className="song-buttons">
+            {Object.keys(songVideos).map((key, index) => (
+              <button
+                key={index}
+                className={`song-btn ${selectedSongSet === index && isPlayingSong ? 'playing' : ''}`}
+                onClick={() => playVideo(key, index)}
+              >
+                {songVideos[key].name}
+                <span className="video-icon">📺</span>
+              </button>
+            ))}
+          </div>
+          
+          {isPlayingSong && (
+            <div className="now-playing-banner">
+              <p>🎬 Now playing: <strong>{currentSong?.name}</strong> - Watch the video above!</p>
+            </div>
+          )}
+          
+          <div className="song-info">
+            <p>💡 <strong>Tip:</strong> Click any song button to watch a fun alphabet learning video!</p>
+            <p>📁 To add your own videos: Place MP4 files in <code>/public/videos/</code> folder and update the <code>songVideos</code> object.</p>
+          </div>
+        </div>
+      )}
+      
+      {/* Pronunciation Selection Panel */}
+      {!showTutorial && (
+        <div className="pronunciation-panel">
+          <h3>🔊 Clear Pronunciation Styles 🔊</h3>
+          <div className="pronunciation-buttons">
+            <button
+              className={`pronunciation-btn ${selectedPronunciation === 0 ? 'active' : ''}`}
+              onClick={() => {
+                setSelectedPronunciation(0);
+                if (selectedLetter) {
+                  pronounceLetter(selectedLetter, 0);
+                }
+              }}
+            >
+              📖 Standard (Clear)
+            </button>
+            <button
+              className={`pronunciation-btn ${selectedPronunciation === 1 ? 'active' : ''}`}
+              onClick={() => {
+                setSelectedPronunciation(1);
+                if (selectedLetter) {
+                  pronounceLetter(selectedLetter, 1);
+                }
+              }}
+            >
+              🎓 Phonics Sound (Slow)
+            </button>
+            <button
+              className={`pronunciation-btn ${selectedPronunciation === 2 ? 'active' : ''}`}
+              onClick={() => {
+                setSelectedPronunciation(2);
+                if (selectedLetter) {
+                  pronounceLetter(selectedLetter, 2);
+                }
+              }}
+            >
+              🎵 Musical Tone (Melodic)
+            </button>
+          </div>
+          {selectedLetter && (
+            <div className="current-pronunciation-info">
+              <p>Letter <strong className="current-letter">{selectedLetter}</strong> - <strong>{letterPronunciations[selectedLetter]?.[selectedPronunciation]?.name}</strong></p>
+              <p className="pronunciation-example">🔊 Saying: <em>"{letterPronunciations[selectedLetter]?.[selectedPronunciation]?.clearSound}"</em> like in <strong>{letterPronunciations[selectedLetter]?.[selectedPronunciation]?.example}</strong></p>
+              <button 
+                className="replay-pronunciation-btn"
+                onClick={() => pronounceLetter(selectedLetter, selectedPronunciation)}
+                disabled={playingAudio}
+              >
+                🔄 Say it Again (Slow & Clear)
+              </button>
+            </div>
+          )}
+        </div>
+      )}
       
       {!userInteracted && (
         <div className="audio-info">
-          <p>👆 Tap anywhere to enable audio features</p>
-        </div>
-      )}
-      
-      {audioError && availableVoices.length === 0 && (
-        <div className="audio-warning">
-          <p>🔈 Text-to-speech not available. Click items to see their names!</p>
-        </div>
-      )}
-      
-      {audioError && availableVoices.length > 0 && (
-        <div className="audio-info">
-          <p>🎵 Click items to hear clear pronunciation!</p>
+          <p>👆 Tap anywhere to enable crystal clear audio and videos</p>
         </div>
       )}
       
@@ -456,7 +686,7 @@ const Phase1 = ({ proceed, loseLife }) => {
             key={letter}
             className={`letter-btn ${selectedLetter === letter ? 'active' : ''} ${showTutorial ? 'disabled' : ''}`}
             onClick={() => handleLetterClick(letter)}
-            disabled={showTutorial}
+            disabled={showTutorial || playingAudio}
           >
             {letter}
           </button>
@@ -489,7 +719,7 @@ const Phase1 = ({ proceed, loseLife }) => {
       
       {playingAudio && !showTutorial && (
         <div className="audio-playing">
-          <p>Speaking word... 🗣️</p>
+          <p>🎤 Speaking clearly... 🗣️</p>
           <div className="audio-wave"></div>
           <button 
             className="stop-audio-btn"

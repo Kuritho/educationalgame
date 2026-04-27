@@ -480,3 +480,650 @@ button {
     padding: 8px;
   }
 }
+
+/* Add these styles to your existing Phase1.css */
+
+/* Song Player Panel */
+.song-player-panel {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 15px;
+  padding: 20px;
+  margin: 20px 0;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.song-player-panel h3 {
+  color: white;
+  margin: 0 0 15px 0;
+  text-align: center;
+}
+
+.song-buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.song-btn {
+  background: white;
+  color: #667eea;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 25px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.song-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.song-btn.playing {
+  background: #ffd700;
+  color: #667eea;
+  animation: pulse 1s infinite;
+}
+
+.playing-indicator {
+  font-size: 12px;
+  margin-left: 10px;
+}
+
+.stop-song-btn {
+  background: #ff4757;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  margin-top: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.stop-song-btn:hover {
+  background: #ff3838;
+  transform: scale(1.05);
+}
+
+/* Pronunciation Panel */
+.pronunciation-panel {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  border-radius: 15px;
+  padding: 20px;
+  margin: 20px 0;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.pronunciation-panel h3 {
+  color: white;
+  margin: 0 0 15px 0;
+  text-align: center;
+}
+
+.pronunciation-buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.pronunciation-btn {
+  background: white;
+  color: #f5576c;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 25px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.pronunciation-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+.pronunciation-btn.active {
+  background: #ffd700;
+  color: #f5576c;
+  box-shadow: 0 0 0 3px rgba(255,215,0,0.5);
+}
+
+.current-pronunciation-info {
+  background: rgba(255,255,255,0.2);
+  border-radius: 10px;
+  padding: 15px;
+  text-align: center;
+  color: white;
+}
+
+.current-pronunciation-info p {
+  margin: 0 0 10px 0;
+}
+
+.replay-pronunciation-btn {
+  background: #ffd700;
+  color: #f5576c;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.replay-pronunciation-btn:hover:not(:disabled) {
+  transform: scale(1.05);
+}
+
+.replay-pronunciation-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Animations */
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .song-buttons, .pronunciation-buttons {
+    flex-direction: column;
+  }
+  
+  .song-btn, .pronunciation-btn {
+    width: 100%;
+  }
+  
+  .current-pronunciation-info {
+    font-size: 14px;
+  }
+}
+
+/* Audio wave animation */
+.audio-wave {
+  display: inline-block;
+  width: 30px;
+  height: 20px;
+  margin-left: 10px;
+}
+
+.audio-wave::before {
+  content: '';
+  display: inline-block;
+  width: 4px;
+  height: 100%;
+  background: #4CAF50;
+  animation: wave 0.8s infinite;
+}
+
+@keyframes wave {
+  0%, 100% {
+    height: 10px;
+  }
+  50% {
+    height: 20px;
+  }
+}
+
+/* Android audio note */
+.android-audio-note {
+  background: rgba(255,255,255,0.2);
+  border-radius: 10px;
+  padding: 10px;
+  margin-top: 15px;
+}
+
+.android-audio-note p {
+  margin: 0;
+  font-size: 14px;
+}
+
+/* Add to Phase1.css */
+
+/* Voice Quality Badge */
+.voice-quality-badge {
+  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+  border-radius: 25px;
+  padding: 10px 20px;
+  margin: 10px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  color: white;
+  font-weight: bold;
+}
+
+.voice-quality-badge span {
+  background: rgba(0,0,0,0.2);
+  padding: 4px 12px;
+  border-radius: 15px;
+  font-size: 14px;
+}
+
+.change-voice-btn {
+  background: white;
+  color: #43e97b;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.change-voice-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+/* Enhanced Pronunciation Panel */
+.pronunciation-panel {
+  background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+  border-radius: 20px;
+  padding: 20px;
+  margin: 20px 0;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.current-letter {
+  font-size: 32px;
+  display: inline-block;
+  margin: 0 5px;
+  color: #ffd700;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+
+.pronunciation-example {
+  background: rgba(255,255,255,0.2);
+  padding: 10px;
+  border-radius: 10px;
+  margin: 10px 0;
+  font-size: 16px;
+}
+
+.pronunciation-example em {
+  font-style: italic;
+  background: rgba(255,255,255,0.3);
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
+/* Audio Quality Note */
+.audio-quality-note {
+  background: rgba(255,255,255,0.15);
+  border-radius: 15px;
+  padding: 15px;
+  margin: 15px 0;
+  text-align: center;
+}
+
+.voice-info {
+  font-size: 14px;
+  margin-top: 8px;
+  opacity: 0.9;
+}
+
+/* Enhanced Audio Wave Animation */
+.audio-wave {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+  margin-left: 10px;
+}
+
+.audio-wave::before,
+.audio-wave::after {
+  content: '';
+  display: inline-block;
+  width: 4px;
+  height: 20px;
+  background: #4CAF50;
+  animation: wave 0.6s infinite;
+}
+
+.audio-wave::before {
+  animation-delay: 0.2s;
+}
+
+.audio-wave::after {
+  animation-delay: 0.4s;
+}
+
+@keyframes wave {
+  0%, 100% {
+    height: 10px;
+  }
+  50% {
+    height: 25px;
+  }
+}
+
+/* Responsive updates */
+@media (max-width: 768px) {
+  .voice-quality-badge {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .pronunciation-example {
+    font-size: 14px;
+  }
+  
+  .current-letter {
+    font-size: 28px;
+  }
+}
+
+/* Pronunciation Button Active State Enhancement */
+.pronunciation-btn.active {
+  background: #ffd700;
+  color: #f5576c;
+  box-shadow: 0 0 0 3px rgba(255,215,0,0.5);
+  animation: pulse-glow 1.5s infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 0 3px rgba(255,215,0,0.5);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(255,215,0,0.3);
+  }
+}
+
+/* Replay Button Enhancement */
+.replay-pronunciation-btn {
+  background: #ffd700;
+  color: #f5576c;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 25px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 10px;
+}
+
+.replay-pronunciation-btn:hover:not(:disabled) {
+  transform: scale(1.05);
+  background: #ffe44d;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.replay-pronunciation-btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+/* Add to Phase1.css */
+
+.song-info {
+  background: rgba(255,255,255,0.2);
+  border-radius: 10px;
+  padding: 10px;
+  margin-top: 15px;
+  text-align: center;
+  font-size: 14px;
+}
+
+.song-info p {
+  margin: 0;
+  color: white;
+}
+
+/* Ensure audio context works */
+.phase-container {
+  user-select: none; /* Prevents accidental selections while playing */
+}
+
+/* Note: For songs to work, users must interact with the page first (tap/click anywhere) */
+/* This is a browser security requirement for Web Audio API */
+
+/* Add to Phase1.css */
+
+/* Song Progress Bar */
+.song-progress-container {
+  width: 100%;
+  height: 6px;
+  background: rgba(255,255,255,0.3);
+  border-radius: 3px;
+  margin: 15px 0;
+  overflow: hidden;
+}
+
+.song-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #ffd700, #ff9500);
+  border-radius: 3px;
+  transition: width 0.1s linear;
+}
+
+/* Current Lyrics Display */
+.current-lyrics {
+  background: rgba(255,255,255,0.15);
+  border-radius: 10px;
+  padding: 12px;
+  margin-top: 15px;
+  text-align: center;
+}
+
+.current-lyrics p {
+  margin: 5px 0;
+  color: white;
+}
+
+.lyrics-preview p {
+  font-size: 14px;
+  font-style: italic;
+}
+
+/* Enhanced Song Info */
+.song-info code {
+  background: rgba(0,0,0,0.3);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 12px;
+}
+
+.song-info p {
+  margin: 8px 0;
+  font-size: 13px;
+}
+
+/* Add to Phase1.css */
+
+/* Video Modal Styles */
+.video-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.9);
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: fadeIn 0.3s ease;
+}
+
+.video-modal-content {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 20px;
+  width: 80%;
+  max-width: 900px;
+  max-height: 90vh;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.3s ease;
+}
+
+.video-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  background: rgba(0, 0, 0, 0.3);
+  color: white;
+}
+
+.video-modal-header h3 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.close-modal-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.close-modal-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+.video-container {
+  position: relative;
+  padding-bottom: 56.25%; /* 16:9 aspect ratio */
+  height: 0;
+  overflow: hidden;
+  background: black;
+}
+
+.song-video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.video-lyrics {
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.3);
+  color: white;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.video-lyrics h4 {
+  margin: 0 0 10px 0;
+  text-align: center;
+}
+
+.video-lyrics p {
+  margin: 5px 0;
+  text-align: center;
+  font-size: 14px;
+}
+
+/* Now Playing Banner */
+.now-playing-banner {
+  background: rgba(255, 215, 0, 0.3);
+  border-radius: 10px;
+  padding: 10px;
+  margin-top: 15px;
+  text-align: center;
+  animation: pulse 2s infinite;
+}
+
+.now-playing-banner p {
+  margin: 0;
+  color: white;
+  font-weight: bold;
+}
+
+/* Video Icon */
+.video-icon {
+  margin-left: 8px;
+  font-size: 14px;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+/* Responsive Design for Video Modal */
+@media (max-width: 768px) {
+  .video-modal-content {
+    width: 95%;
+    max-height: 95vh;
+  }
+  
+  .video-modal-header h3 {
+    font-size: 16px;
+  }
+  
+  .video-lyrics p {
+    font-size: 12px;
+  }
+}
+
+/* Song Button Enhancement */
+.song-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.song-btn.playing {
+  background: #ffd700;
+  color: #667eea;
+  animation: pulse 1s infinite;
+}

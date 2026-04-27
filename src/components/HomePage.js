@@ -119,7 +119,7 @@ const HomePage = () => {
           <div className="testimonial-card animate-pop-in forest-card">
             <div className="testimonial-decoration"></div>
             <p>"Because every child deserves the joy of learning."</p>
-            <div className="testimonial-author">© 2025 Babes T. Terania</div>
+            <div className="testimonial-author">© 2026 Babes T. Terania</div>
           </div>
         </div>
       </div>
