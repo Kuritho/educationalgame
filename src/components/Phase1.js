@@ -12,7 +12,7 @@ const Phase1 = ({ proceed, loseLife }) => {
   const [userInteracted, setUserInteracted] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
-  const [voicesReady, setVoicesReady] = useState(false);
+  const [voicesReady, setVoicesReady] = useState(true); // Start as true on Android
   const [selectedVoice, setSelectedVoice] = useState(null);
   const [availableVoices, setAvailableVoices] = useState([]);
   
@@ -30,7 +30,6 @@ const Phase1 = ({ proceed, loseLife }) => {
   const interactionAttempted = useRef(false);
   const speechSynthRef = useRef(null);
   const currentUtteranceRef = useRef(null);
-  const voiceLoadAttempts = useRef(0);
 
   // Video URLs
   const songVideos = {
@@ -238,102 +237,53 @@ const Phase1 = ({ proceed, loseLife }) => {
     const isMobileDevice = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
     setIsMobile(isMobileDevice);
     setIsIOS(/iphone|ipad|ipod/.test(userAgent));
+    
+    // On Android, we can use speech synthesis immediately
+    if (isMobileDevice && /android/.test(userAgent)) {
+      setVoicesReady(true);
+    }
   }, []);
 
-  // Initialize speech synthesis with retry logic
+  // Initialize speech synthesis for mobile
   useEffect(() => {
-    let mounted = true;
+    if (!window.speechSynthesis) {
+      setAudioError(true);
+      return;
+    }
     
-    const initSpeechSynthesis = () => {
-      if (!window.speechSynthesis) {
-        console.log("Speech synthesis not supported");
-        setAudioError(true);
-        return;
-      }
-      
-      speechSynthRef.current = window.speechSynthesis;
-      
-      const loadVoices = () => {
-        if (!mounted) return;
-        
-        let voices = speechSynthRef.current.getVoices();
-        
-        if (voices.length > 0) {
-          // Filter for English voices
-          const englishVoices = voices.filter(voice => voice.lang.startsWith('en-'));
-          
-          // Prioritize clear, child-friendly voices
-          const priorityVoices = [
-            'Google UK English Female',
-            'Google US English',
-            'Samantha',
-            'Karen',
-            'Victoria',
-            'Microsoft Zira',
-            'Alex',
-            'Daniel'
-          ];
-          
-          const sortedVoices = englishVoices.sort((a, b) => {
-            const aIndex = priorityVoices.findIndex(pv => a.name.includes(pv));
-            const bIndex = priorityVoices.findIndex(pv => b.name.includes(pv));
-            if (aIndex === -1 && bIndex === -1) return 0;
-            if (aIndex === -1) return 1;
-            if (bIndex === -1) return -1;
-            return aIndex - bIndex;
-          });
-          
-          if (sortedVoices.length > 0) {
-            setAvailableVoices(sortedVoices);
-            setSelectedVoice(sortedVoices[0]);
-            setVoicesReady(true);
-            setAudioError(false);
-          } else if (englishVoices.length > 0) {
-            setAvailableVoices(englishVoices);
-            setSelectedVoice(englishVoices[0]);
-            setVoicesReady(true);
-            setAudioError(false);
-          } else if (voices.length > 0) {
-            // Fallback to any voice
-            setAvailableVoices(voices);
-            setSelectedVoice(voices[0]);
-            setVoicesReady(true);
-            setAudioError(false);
-          } else {
-            setAudioError(true);
-          }
-        } else {
-          // Retry loading voices
-          if (voiceLoadAttempts.current < 10) {
-            voiceLoadAttempts.current++;
-            setTimeout(loadVoices, 500);
-          } else {
-            setAudioError(true);
-          }
+    speechSynthRef.current = window.speechSynthesis;
+    
+    // For Android, we don't need to wait for voices - just use default
+    if (isMobile && /android/.test(navigator.userAgent.toLowerCase())) {
+      setVoicesReady(true);
+      setAudioError(false);
+      return;
+    }
+    
+    // For iOS and other devices, try to load voices
+    const loadVoices = () => {
+      const voices = speechSynthRef.current.getVoices();
+      if (voices.length > 0) {
+        const englishVoices = voices.filter(voice => voice.lang.startsWith('en-'));
+        if (englishVoices.length > 0) {
+          setAvailableVoices(englishVoices);
+          setSelectedVoice(englishVoices[0]);
         }
-      };
-      
-      // Try to load voices
-      if (speechSynthRef.current.onvoiceschanged !== undefined) {
-        speechSynthRef.current.onvoiceschanged = loadVoices;
-      }
-      
-      loadVoices();
-      
-      // Also try loading after a delay (for some mobile browsers)
-      setTimeout(loadVoices, 1000);
-      setTimeout(loadVoices, 3000);
-    };
-    
-    initSpeechSynthesis();
-    
-    return () => {
-      mounted = false;
-      if (speechSynthRef.current && speechSynthRef.current.speaking) {
-        speechSynthRef.current.cancel();
+        setVoicesReady(true);
+        setAudioError(false);
+      } else {
+        // Still mark as ready - we can use default voice
+        setVoicesReady(true);
       }
     };
-  }, []);
+    
+    if (speechSynthRef.current.onvoiceschanged !== undefined) {
+      speechSynthRef.current.onvoiceschanged = loadVoices;
+    }
+    
+    loadVoices();
+    setTimeout(loadVoices, 500);
+  }, [isMobile]);
 
   // Handle user interaction for audio (required for mobile)
   useEffect(() => {
@@ -342,13 +292,13 @@ const Phase1 = ({ proceed, loseLife }) => {
         setUserInteracted(true);
         interactionAttempted.current = true;
         
-        // Pre-load speech synthesis by speaking a silent character
-        if (speechSynthRef.current && voicesReady) {
-          const silentUtterance = new SpeechSynthesisUtterance('');
-          silentUtterance.volume = 0;
-          speechSynthRef.current.speak(silentUtterance);
+        // Pre-warm speech synthesis on mobile
+        if (speechSynthRef.current) {
+          // Create a tiny silent utterance to wake up speech synthesis
+          const warmup = new SpeechSynthesisUtterance('');
+          warmup.volume = 0;
+          speechSynthRef.current.speak(warmup);
           
-          // Cancel it immediately
           setTimeout(() => {
             if (speechSynthRef.current.speaking) {
               speechSynthRef.current.cancel();
@@ -356,7 +306,7 @@ const Phase1 = ({ proceed, loseLife }) => {
           }, 100);
         }
         
-        // Remove event listeners after first interaction
+        // Remove event listeners
         document.removeEventListener('click', handleUserInteraction);
         document.removeEventListener('touchstart', handleUserInteraction);
         document.removeEventListener('touchend', handleUserInteraction);
@@ -372,69 +322,70 @@ const Phase1 = ({ proceed, loseLife }) => {
       document.removeEventListener('touchstart', handleUserInteraction);
       document.removeEventListener('touchend', handleUserInteraction);
     };
-  }, [voicesReady]);
+  }, []);
 
-  // Speak function optimized for mobile
+  // Speak function - simplified for Android
   const speakText = (text, options = {}) => {
     return new Promise((resolve, reject) => {
-      if (!speechSynthRef.current || !voicesReady) {
-        console.log("Speech synthesis not ready");
-        reject(new Error('Speech synthesis not ready'));
+      if (!speechSynthRef.current) {
+        reject(new Error('Speech synthesis not available'));
         return;
       }
 
       // Cancel any ongoing speech
       if (speechSynthRef.current.speaking) {
         speechSynthRef.current.cancel();
-        
-        // Small delay to ensure cancellation completes
-        setTimeout(() => {
-          performSpeak();
-        }, 100);
-      } else {
-        performSpeak();
       }
       
-      function performSpeak() {
-        const utterance = new SpeechSynthesisUtterance(text);
-        
-        if (selectedVoice) {
-          utterance.voice = selectedVoice;
-        }
-        
-        // Mobile-optimized settings
-        utterance.rate = options.rate || 0.8;
-        utterance.pitch = options.pitch || 1.1;
-        utterance.volume = 1.0;
-        
-        utterance.onend = () => {
-          setPlayingAudio(false);
-          resolve();
-        };
-        
-        utterance.onerror = (e) => {
-          console.error('Speech error:', e);
-          setPlayingAudio(false);
-          reject(e);
-        };
-        
-        currentUtteranceRef.current = utterance;
-        
-        // Small delay for mobile devices
-        setTimeout(() => {
-          try {
-            speechSynthRef.current.speak(utterance);
-          } catch (error) {
-            console.error('Error speaking:', error);
-            setPlayingAudio(false);
-            reject(error);
+      // Small delay for Android
+      setTimeout(() => {
+        try {
+          const utterance = new SpeechSynthesisUtterance(text);
+          
+          // Use selected voice if available
+          if (selectedVoice && !isMobile) {
+            utterance.voice = selectedVoice;
           }
-        }, 50);
-      }
+          
+          // Optimized settings for mobile
+          utterance.rate = options.rate || 0.8;
+          utterance.pitch = options.pitch || 1.1;
+          utterance.volume = 1.0;
+          
+          utterance.onend = () => {
+            setPlayingAudio(false);
+            resolve();
+          };
+          
+          utterance.onerror = (e) => {
+            console.error('Speech error:', e);
+            setPlayingAudio(false);
+            // Try again with default settings
+            try {
+              const retryUtterance = new SpeechSynthesisUtterance(text);
+              retryUtterance.rate = 0.8;
+              retryUtterance.pitch = 1.0;
+              retryUtterance.onend = () => {
+                setPlayingAudio(false);
+                resolve();
+              };
+              speechSynthRef.current.speak(retryUtterance);
+            } catch (retryError) {
+              reject(e);
+            }
+          };
+          
+          speechSynthRef.current.speak(utterance);
+        } catch (error) {
+          console.error('Error speaking:', error);
+          setPlayingAudio(false);
+          reject(error);
+        }
+      }, 50);
     });
   };
 
-  // Play video with mobile fixes
+  // Play video 
   const playVideo = async (songKey, songIndex) => {
     const song = songVideos[songKey];
     if (!song) return;
@@ -445,7 +396,6 @@ const Phase1 = ({ proceed, loseLife }) => {
       setVideoUrl(song.videoUrl);
     } else {
       setVideoError(true);
-      alert("Video not available. Please check if the MP4 file exists in the /public/videos/ folder.");
       return;
     }
     
@@ -467,18 +417,11 @@ const Phase1 = ({ proceed, loseLife }) => {
     setVideoError(false);
   };
 
-  // Pronounce letter with crystal clarity
+  // Pronounce letter 
   const pronounceLetter = async (letter, pronunciationIndex) => {
     if (playingAudio) return;
     
     if (!userInteracted) {
-      // Remind user to tap first
-      setAudioError(true);
-      setTimeout(() => setAudioError(false), 2000);
-      return;
-    }
-    
-    if (!voicesReady) {
       setAudioError(true);
       setTimeout(() => setAudioError(false), 2000);
       return;
@@ -530,12 +473,6 @@ const Phase1 = ({ proceed, loseLife }) => {
   const handleItemClick = async (item) => {
     if (showTutorial || playingAudio || !userInteracted) return;
     
-    if (!voicesReady) {
-      setAudioError(true);
-      setTimeout(() => setAudioError(false), 2000);
-      return;
-    }
-    
     try {
       await speakText(item, { rate: 0.75 });
     } catch (error) {
@@ -558,14 +495,6 @@ const Phase1 = ({ proceed, loseLife }) => {
       {isMobile && !userInteracted && (
         <div className="mobile-warning">
           <p>👆 Tap anywhere to enable voice</p>
-        </div>
-      )}
-
-      {/* Voice Status Indicator */}
-      {!voicesReady && userInteracted && (
-        <div className="audio-info">
-          <p>🎤 Loading voice... Please wait</p>
-          <div className="loading-spinner"></div>
         </div>
       )}
 
@@ -642,10 +571,10 @@ const Phase1 = ({ proceed, loseLife }) => {
       <h2>Exercise: Alphabet Adventure 🎓</h2>
       <p>Click a letter to hear it clearly! 👇</p>
       
-      {/* Voice Status Badge */}
-      {voicesReady && !showTutorial && selectedVoice && (
+      {/* Voice Status Badge - Only show on non-Android or when ready */}
+      {!isMobile && voicesReady && !showTutorial && selectedVoice && (
         <div className="voice-quality-badge">
-          🎤 Voice Ready: <span>{selectedVoice.name}</span>
+          🎤 Voice Ready
         </div>
       )}
       
@@ -691,7 +620,6 @@ const Phase1 = ({ proceed, loseLife }) => {
                   pronounceLetter(selectedLetter, 0);
                 }
               }}
-              disabled={!voicesReady}
             >
               📖 Standard
             </button>
@@ -703,7 +631,6 @@ const Phase1 = ({ proceed, loseLife }) => {
                   pronounceLetter(selectedLetter, 1);
                 }
               }}
-              disabled={!voicesReady}
             >
               🎓 Phonics
             </button>
@@ -715,7 +642,6 @@ const Phase1 = ({ proceed, loseLife }) => {
                   pronounceLetter(selectedLetter, 2);
                 }
               }}
-              disabled={!voicesReady}
             >
               🎵 Musical
             </button>
@@ -726,7 +652,7 @@ const Phase1 = ({ proceed, loseLife }) => {
               <button 
                 className="replay-pronunciation-btn"
                 onClick={() => pronounceLetter(selectedLetter, selectedPronunciation)}
-                disabled={playingAudio || !voicesReady}
+                disabled={playingAudio}
               >
                 🔄 Say it Again
               </button>
@@ -753,7 +679,7 @@ const Phase1 = ({ proceed, loseLife }) => {
             key={letter}
             className={`letter-btn ${selectedLetter === letter ? 'active' : ''}`}
             onClick={() => handleLetterClick(letter)}
-            disabled={playingAudio || showTutorial || !voicesReady}
+            disabled={playingAudio || showTutorial}
           >
             {letter}
           </button>
@@ -769,7 +695,7 @@ const Phase1 = ({ proceed, loseLife }) => {
                 key={item}
                 className={`item-btn ${playingAudio ? 'disabled' : ''}`}
                 onClick={() => handleItemClick(item)}
-                disabled={playingAudio || !userInteracted || !voicesReady}
+                disabled={playingAudio || !userInteracted}
               >
                 <div className="item-image-placeholder">
                   {item.charAt(0)}
