@@ -23,6 +23,7 @@ const Phase4 = ({ proceed, loseLife, lives: initialLives }) => {
   const [retryCount, setRetryCount] = useState(0);
   const [isSpeechSupported, setIsSpeechSupported] = useState(true);
   const [showTutorial, setShowTutorial] = useState(true);
+  const [microphonePermission, setMicrophonePermission] = useState('prompt'); // 'prompt', 'granted', 'denied'
   const recognitionRef = useRef(null);
   const [isMazeReady, setIsMazeReady] = useState(false);
   const audioRef = useRef(null);
@@ -60,27 +61,54 @@ const Phase4 = ({ proceed, loseLife, lives: initialLives }) => {
     'zee': 'Z', 'zed': 'Z', 'zulu': 'Z', 'zoo': 'Z'
   };
 
+  // Request microphone permission for mobile apps
+  const requestMicrophonePermission = async () => {
+    try {
+      // For mobile apps (median.co), we need to request permission first
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        // Permission granted, stop the stream immediately
+        stream.getTracks().forEach(track => track.stop());
+        setMicrophonePermission('granted');
+        setMessage('🎤 Microphone access granted! Click the mic button to start.');
+        return true;
+      } else {
+        setMicrophonePermission('denied');
+        setMessage('❌ Microphone not supported on this device.');
+        return false;
+      }
+    } catch (error) {
+      console.error('Microphone permission error:', error);
+      setMicrophonePermission('denied');
+      setMessage('❌ Microphone permission denied. Please check your app settings.');
+      return false;
+    }
+  };
+
   // Initialize audio elements
   useEffect(() => {
     audioRef.current = new Audio(backgroundMusic);
     audioRef.current.loop = true;
-    audioRef.current.volume = 0.3; // Set volume to 30%
+    audioRef.current.volume = 0.3;
     
     successAudioRef.current = new Audio(successSound);
     successAudioRef.current.volume = 0.5;
     
-    // Automatically start playing background music
     const playBackgroundMusic = async () => {
       try {
         await audioRef.current.play();
         console.log('Background music started');
       } catch (error) {
         console.log('Background music play failed:', error);
-        // Some browsers require user interaction first
       }
     };
     
     playBackgroundMusic();
+    
+    // Auto-request microphone permission on component mount for mobile apps
+    setTimeout(() => {
+      requestMicrophonePermission();
+    }, 1000);
     
     return () => {
       if (audioRef.current) {
@@ -134,7 +162,7 @@ const Phase4 = ({ proceed, loseLife, lives: initialLives }) => {
     }
   }, [letters]);
 
-  // Voice recognition setup
+  // Voice recognition setup with mobile app compatibility
   useEffect(() => {
     // Check if we're in a browser environment
     if (typeof window === 'undefined') return;
@@ -152,6 +180,25 @@ const Phase4 = ({ proceed, loseLife, lives: initialLives }) => {
     recognition.interimResults = false;
     recognition.lang = 'en-US';
     recognition.maxAlternatives = 10;
+
+    recognition.onstart = () => {
+      console.log('Speech recognition started');
+      setListening(true);
+      setMessage('🎤 Listening... Say a letter clearly');
+    };
+
+    recognition.onend = () => {
+      console.log('Speech recognition ended');
+      setListening(false);
+      // Auto-restart if still supposed to be listening (for continuous mode)
+      if (recognitionRef.current && listening) {
+        try {
+          recognitionRef.current.start();
+        } catch (e) {
+          console.log('Could not restart recognition:', e);
+        }
+      }
+    };
 
     recognition.onresult = (event) => {
       console.log('Raw results:', event.results);
@@ -181,33 +228,72 @@ const Phase4 = ({ proceed, loseLife, lives: initialLives }) => {
 
     recognition.onerror = (event) => {
       console.error('Recognition error:', event.error);
-      setMessage(`Error: ${event.error}. Try again.`);
+      
+      // Handle different error types for mobile apps
+      if (event.error === 'not-allowed') {
+        setMessage('❌ Microphone access denied. Please check your app permissions.');
+        setListening(false);
+        setMicrophonePermission('denied');
+      } else if (event.error === 'audio-capture') {
+        setMessage('❌ No microphone found. Please check your device settings.');
+        setListening(false);
+      } else if (event.error === 'network') {
+        setMessage('⚠️ Network error. Please check your connection and try again.');
+        setListening(false);
+      } else {
+        setMessage(`Error: ${event.error}. Try again.`);
+      }
     };
 
     recognitionRef.current = recognition;
 
     return () => {
       if (recognitionRef.current) {
-        recognitionRef.current.stop();
+        try {
+          recognitionRef.current.stop();
+        } catch (e) {
+          console.log('Error stopping recognition:', e);
+        }
       }
     };
-  }, [handleDetectedLetter]);
+  }, [handleDetectedLetter, letterPool]);
 
-  const toggleVoiceControl = () => {
-    if (!recognitionRef.current) return;
+  const toggleVoiceControl = async () => {
+    if (!recognitionRef.current) {
+      setMessage('Speech recognition not supported in this browser.');
+      return;
+    }
+    
+    // Check if we have microphone permission
+    if (microphonePermission !== 'granted') {
+      const granted = await requestMicrophonePermission();
+      if (!granted) {
+        return;
+      }
+    }
     
     if (listening) {
-      recognitionRef.current.stop();
-      setListening(false);
-      setMessage('Microphone off');
-    } else {
-      setListening(true);
-      setMessage('Listening... Say a letter clearly');
       try {
-        recognitionRef.current.start();
+        recognitionRef.current.stop();
+      } catch (e) {
+        console.log('Error stopping:', e);
+      }
+      setListening(false);
+      setMessage('🎤 Microphone off. Click to start listening.');
+    } else {
+      setMessage('🎤 Requesting microphone access...');
+      try {
+        // Request permission again before starting
+        if (microphonePermission !== 'granted') {
+          await requestMicrophonePermission();
+        }
+        
+        // Start recognition
+        await recognitionRef.current.start();
+        setMessage('🎤 Listening... Say a letter clearly');
       } catch (error) {
         console.error('Failed to start recognition:', error);
-        setMessage('Error starting voice recognition. Try refreshing the page.');
+        setMessage('Error starting voice recognition. Please check microphone permissions.');
         setListening(false);
       }
     }
@@ -400,14 +486,6 @@ const Phase4 = ({ proceed, loseLife, lives: initialLives }) => {
   };
 
   const renderCell = (cellValue, x, y) => {
-    console.log(`Rendering cell ${x},${y}`, {
-      cellValue,
-      playerPosition,
-      exitPosition,
-      visited,
-      letters
-    });
-    
     const isPlayer = playerPosition && x === playerPosition.x && y === playerPosition.y;
     const isExit = exitPosition && x === exitPosition.x && y === exitPosition.y;
     const wasVisited = visited && visited.some(pos => pos && pos.x === x && pos.y === y);
@@ -452,18 +530,22 @@ const Phase4 = ({ proceed, loseLife, lives: initialLives }) => {
             <div className="tutorial-steps">
               <div className="tutorial-step">
                 <span className="step-number">1</span>
-                <p>Click the microphone button to enable voice control 🎤</p>
+                <p>The app will request microphone permission automatically 📱</p>
               </div>
               <div className="tutorial-step">
                 <span className="step-number">2</span>
-                <p>Say a letter clearly to guide the bee to that letter 🗣️</p>
+                <p>Click the microphone button to enable voice control 🎤</p>
               </div>
               <div className="tutorial-step">
                 <span className="step-number">3</span>
-                <p>Collect letters and reach the hive 🏡</p>
+                <p>Say a letter clearly to guide the bee to that letter 🗣️</p>
               </div>
               <div className="tutorial-step">
                 <span className="step-number">4</span>
+                <p>Collect letters and reach the hive 🏡</p>
+              </div>
+              <div className="tutorial-step">
+                <span className="step-number">5</span>
                 <p>Complete before time runs out! ⏱️</p>
               </div>
             </div>
@@ -488,6 +570,11 @@ const Phase4 = ({ proceed, loseLife, lives: initialLives }) => {
       <div className="message-box">{message}</div>
       
       <div className="voice-control-panel">
+        {microphonePermission === 'denied' && (
+          <div className="permission-warning">
+            ⚠️ Microphone access denied. Please check your app settings.
+          </div>
+        )}
         {isSpeechSupported && (
           <button 
             onClick={toggleVoiceControl}
@@ -538,6 +625,7 @@ const Phase4 = ({ proceed, loseLife, lives: initialLives }) => {
           <li>Collect letters and reach the hive 🏡</li>
           <li>Complete all 5 rounds before time runs out!</li>
           {!isSpeechSupported && <li>Voice control is not supported in your browser</li>}
+          {microphonePermission === 'granted' && <li>✅ Microphone access granted!</li>}
         </ul>
       </div>
     </div>
