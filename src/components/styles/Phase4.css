@@ -1,401 +1,547 @@
-/* Phase4.css - Colorful Redesigned Version */
+/* Phase4.css - Mobile Responsive */
 
-.phase4-container {
+.mobile-maze-container {
+  width: 100%;
   max-width: 100%;
+  margin: 0;
+  padding: 15px;
+  font-family: 'Comic Sans MS', 'Arial Rounded MT Bold', sans-serif;
+  background-color: #fff9e6;
+  border-radius: 0;
+  box-sizing: border-box;
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 20px;
-  font-family: 'Poppins', 'Segoe UI', 'Comic Neue', sans-serif;
-  position: relative;
+  display: flex;
+  flex-direction: column;
 }
 
-.game-header {
+.header {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
   align-items: center;
-  padding: 15px 20px;
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 20px;
-  margin-bottom: 20px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-  backdrop-filter: blur(10px);
-}
-
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 20px;
+  padding: 10px;
+  background-color: #ffd700;
+  border-radius: 10px;
+  margin-bottom: 15px;
   font-weight: bold;
-  color: #764ba2;
+  color: #8b4513;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  text-align: center;
 }
 
-.bee-icon {
-  font-size: 28px;
-  animation: buzz 1s infinite;
-}
-
-@keyframes buzz {
-  0%, 100% { transform: translate(0, 0); }
-  25% { transform: translate(2px, -2px); }
-  75% { transform: translate(-2px, 2px); }
-}
-
-.round-text {
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  font-size: 18px;
-}
-
-.stats {
+.header-info {
   display: flex;
-  gap: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  font-size: 0.9rem;
+  margin-top: 5px;
 }
 
-.stat-item {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 18px;
-  font-weight: bold;
-  color: #333;
+.header-info span {
+  padding: 3px 8px;
+  background-color: rgba(139, 69, 19, 0.1);
+  border-radius: 15px;
 }
 
-.stat-icon {
-  font-size: 20px;
-}
-
-.timer {
-  font-weight: bold;
-  transition: color 0.3s ease;
+h1 {
+  color: #8b4513;
+  text-align: center;
+  margin: 10px 0 15px;
+  font-size: 1.5rem;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .message-box {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 14px 20px;
-  border-radius: 20px;
-  text-align: center;
-  margin-bottom: 20px;
-  font-size: 16px;
+  padding: 12px;
+  margin: 10px 0;
+  background-color: #fff;
+  border-radius: 8px;
+  border-left: 5px solid #ffd700;
   font-weight: bold;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-  animation: slideIn 0.5s ease;
-}
-
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.mic-button-container {
   text-align: center;
-  margin-bottom: 20px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  min-height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
 }
 
-.mic-button {
-  background: linear-gradient(135deg, #FF6B6B, #EE5A24);
+.voice-control-panel {
+  margin: 15px 0;
+  padding: 15px;
+  background-color: #f0f8ff;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.voice-control-button {
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #4a90e2, #8e44ad);
   color: white;
   border: none;
-  padding: 16px 32px;
-  font-size: 18px;
-  border-radius: 60px;
-  cursor: pointer;
+  border-radius: 50px;
   font-weight: bold;
+  cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 10px;
+  justify-content: center;
+  gap: 8px;
+  margin: 0 auto 15px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  width: 100%;
+  max-width: 300px;
+  font-size: 0.9rem;
 }
 
-.mic-button:hover {
+.voice-control-button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
 }
 
-.mic-button:active {
-  transform: translateY(1px);
-}
-
-.mic-button.listening {
-  background: linear-gradient(135deg, #E74C3C, #C0392B);
+.voice-control-button.active {
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
   animation: pulse 1.5s infinite;
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0% {
     box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7);
   }
+  70% {
+    box-shadow: 0 0 0 10px rgba(231, 76, 60, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(231, 76, 60, 0);
+  }
+}
+
+.pulse-dot {
+  width: 10px;
+  height: 10px;
+  background-color: white;
+  border-radius: 50%;
+  animation: pulseDot 1.5s infinite;
+}
+
+@keyframes pulseDot {
+  0% {
+    transform: scale(0.8);
+  }
   50% {
-    box-shadow: 0 0 0 15px rgba(231, 76, 60, 0);
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(0.8);
   }
 }
 
-.mic-icon {
-  font-size: 24px;
-}
-
-.last-letter {
+.voice-feedback {
   text-align: center;
-  margin-top: 15px;
-  font-size: 18px;
-  background: rgba(255, 255, 255, 0.9);
-  padding: 10px;
-  border-radius: 20px;
-  display: inline-block;
-  width: auto;
-  margin-left: auto;
-  margin-right: auto;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  font-size: 0.9rem;
+  margin-top: 10px;
 }
 
-.letters-remaining {
-  background: rgba(255, 255, 255, 0.95);
-  padding: 15px;
-  border-radius: 20px;
-  margin-bottom: 15px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-}
-
-.letters-title {
+.detected-letter {
   font-weight: bold;
-  color: #764ba2;
-  margin-bottom: 10px;
-  font-size: 14px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
+  color: #e74c3c;
+  font-size: 1.2rem;
 }
 
-.letters-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  align-items: center;
-}
-
-.letter-badge {
-  padding: 8px 16px;
-  border-radius: 30px;
+.available-letters {
+  margin-top: 8px;
+  padding: 8px;
+  background-color: #e8f4f8;
+  border-radius: 5px;
   font-weight: bold;
-  font-size: 18px;
-  color: white;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  animation: bounceIn 0.5s ease;
-}
-
-@keyframes bounceIn {
-  from {
-    transform: scale(0);
-  }
-  to {
-    transform: scale(1);
-  }
-}
-
-.hive-message {
-  font-size: 16px;
-  color: #27ae60;
-  font-weight: bold;
-}
-
-.collected-letters {
-  background: rgba(46, 204, 113, 0.1);
-  padding: 12px 15px;
-  border-radius: 20px;
-  margin-bottom: 20px;
-  backdrop-filter: blur(5px);
-}
-
-.collected-title {
-  font-weight: bold;
-  color: #27ae60;
-  margin-bottom: 8px;
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-.collected-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.collected-badge {
-  padding: 5px 12px;
-  background: rgba(46, 204, 113, 0.3);
-  border-radius: 20px;
-  font-size: 14px;
-  color: #27ae60;
-  font-weight: bold;
+  color: #2c3e50;
+  font-size: 0.8rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .maze-wrapper {
-  background: rgba(0, 0, 0, 0.2);
-  padding: 20px;
-  border-radius: 20px;
-  overflow-x: auto;
-  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  overflow: auto;
+  margin: 15px 0;
+  padding: 10px;
+  background-color: #f5f5dc;
+  border-radius: 10px;
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
+  flex: 1;
+  display: flex;
+  justify-content: center;
 }
 
 .maze-grid {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 3px;
-  background: rgba(255, 255, 255, 0.1);
-  padding: 10px;
-  border-radius: 15px;
+  display: inline-block;
+  border: 3px solid #8b4513;
+  background-color: #f5f5dc;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  max-width: 100%;
 }
 
 .maze-row {
   display: flex;
-  gap: 3px;
-  justify-content: center;
 }
 
 .maze-cell {
-  width: 35px;
-  height: 35px;
+  width: 18px;
+  height: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
-  font-weight: bold;
-  border-radius: 8px;
-  transition: all 0.2s ease;
   position: relative;
+  font-size: 0.7rem;
+  font-weight: bold;
+}
+
+.maze-loading {
+  padding: 20px;
+  text-align: center;
+  font-weight: bold;
+  color: #8b4513;
 }
 
 .wall {
-  background: linear-gradient(135deg, #2c3e50, #34495e);
-  box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.3);
+  background-color: #8b4513;
 }
 
 .path {
-  background: linear-gradient(135deg, #f5f0e8, #fff9e6);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  background-color: #f5f5dc;
 }
 
 .visited {
-  background: linear-gradient(135deg, #a8e6cf, #d4edda);
-  position: relative;
-}
-
-.visited::after {
-  content: '👣';
-  position: absolute;
-  font-size: 12px;
-  opacity: 0.3;
+  background-color: #e6f7ff;
 }
 
 .player {
-  background: linear-gradient(135deg, #FFD700, #FFA500);
-  animation: bouncePlayer 0.5s ease;
-  position: relative;
-  z-index: 2;
-}
-
-@keyframes bouncePlayer {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.1); }
+  background-color: #fffacd;
 }
 
 .exit {
-  background: linear-gradient(135deg, #27ae60, #2ecc71);
-  position: relative;
-  animation: glow 2s infinite;
-}
-
-@keyframes glow {
-  0%, 100% { box-shadow: 0 0 5px #27ae60; }
-  50% { box-shadow: 0 0 20px #2ecc71; }
+  background-color: #d4edda;
 }
 
 .bee {
-  font-size: 22px;
-  animation: fly 0.3s ease;
-  filter: drop-shadow(2px 2px 2px rgba(0, 0, 0, 0.2));
+  font-size: 0.9rem;
+  animation: float 2s infinite ease-in-out;
 }
 
-@keyframes fly {
-  from {
-    transform: translate(0, 0);
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
   }
-  to {
-    transform: translate(0, -5px);
+  50% {
+    transform: translateY(-3px);
   }
 }
 
-.hive {
-  font-size: 22px;
-  animation: wiggle 1s infinite;
+.beehouse {
+  font-size: 0.9rem;
+  position: relative;
+  z-index: 1;
 }
 
-@keyframes wiggle {
-  0%, 100% { transform: rotate(0deg); }
-  25% { transform: rotate(10deg); }
-  75% { transform: rotate(-10deg); }
-}
-
-.letter {
-  font-size: 18px;
+.maze-letter {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #e74c3c;
   font-weight: bold;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
-  animation: popIn 0.3s ease;
+  font-size: 0.8rem;
+  animation: bounce 1s infinite alternate;
+  z-index: 2;
 }
 
-@keyframes popIn {
-  from {
-    transform: scale(0);
+.exit-letter {
+  color: white;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+@keyframes bounce {
+  0% {
+    transform: translateY(0);
   }
-  to {
-    transform: scale(1);
+  100% {
+    transform: translateY(-3px);
   }
 }
 
+.instructions {
+  margin-top: 15px;
+  padding: 15px;
+  background-color: #f0f8ff;
+  border-radius: 10px;
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+.instructions p {
+  margin-bottom: 10px;
+  font-weight: bold;
+  color: #2c3e50;
+  text-align: center;
+}
+
+.instructions ul {
+  padding-left: 20px;
+  margin: 0;
+}
+
+.instructions li {
+  margin-bottom: 8px;
+}
+
+/* Tutorial Overlay */
 .tutorial-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.95);
-  backdrop-filter: blur(10px);
+  background-color: rgba(0, 0, 0, 0.85);
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
   z-index: 1000;
-  animation: fadeIn 0.3s ease;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  color: white;
+  padding: 15px;
+  box-sizing: border-box;
 }
 
 .tutorial-content {
-  background: linear-gradient(135deg, #fff5e6, #ffe4cc);
-  padding: 30px;
-  border-radius: 40px;
-  max-width: 350px;
-  width: 90%;
+  background: linear-gradient(135deg, #b875ff 0%, #71a5ff 100%);
+  padding: 20px;
+  border-radius: 15px;
   text-align: center;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.tutorial-content h2 {
+  margin-bottom: 15px;
+  color: #fff;
+  font-size: 1.5rem;
+}
+
+.tutorial-steps {
+  margin: 15px 0;
+}
+
+.tutorial-step {
+  display: flex;
+  align-items: center;
+  margin: 15px 0;
+  text-align: left;
+}
+
+.step-number {
+  background-color: white;
+  color: #6a11cb;
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  margin-right: 10px;
+  flex-shrink: 0;
+  font-size: 0.9rem;
+}
+
+.tutorial-step p {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.start-playing-btn {
+  padding: 12px 25px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 50px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 10px;
+  width: 100%;
+}
+
+.start-playing-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(76, 175, 80, 0.6);
+}
+
+/* Ensure the game content is not interactive during tutorial */
+.tutorial-overlay ~ * {
+  filter: blur(2px);
+  pointer-events: none;
+}
+
+/* Accessibility focus styles */
+button:focus {
+  outline: 3px solid #4a90e2;
+  outline-offset: 2px;
+}
+
+/* Animation for when the bee moves */
+@keyframes moveBee {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.player.moving {
+  animation: moveBee 0.3s ease-in-out;
+}
+
+/* Landscape orientation adjustments */
+@media (max-height: 500px) and (orientation: landscape) {
+  .mobile-maze-container {
+    padding: 10px;
+  }
+  
+  .maze-wrapper {
+    max-height: 60vh;
+  }
+  
+  .header {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+  
+  .header-info {
+    margin-top: 0;
+  }
+}
+
+/* Tablet adjustments */
+@media (min-width: 768px) {
+  .mobile-maze-container {
+    padding: 20px;
+    max-width: 90%;
+    margin: 0 auto;
+    border-radius: 15px;
+  }
+  
+  .maze-cell {
+    width: 25px;
+    height: 25px;
+    font-size: 0.9rem;
+  }
+  
+  .bee, .beehouse {
+    font-size: 1.1rem;
+  }
+  
+  .maze-letter {
+    font-size: 0.9rem;
+  }
+  
+  h1 {
+    font-size: 2rem;
+  }
+}
+
+/* Desktop adjustments */
+@media (min-width: 1024px) {
+  .mobile-maze-container {
+    max-width: 1000px;
+  }
+  
+  .maze-cell {
+    width: 30px;
+    height: 30px;
+  }
+}
+
+/* Add to Phase4.css */
+
+/* Permission Modal Styles */
+.permission-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.95);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.permission-card {
+  background: linear-gradient(135deg, #fff5e6, #ffe4cc);
+  max-width: 400px;
+  border-radius: 40px;
+  padding: 40px 30px;
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
   animation: slideUp 0.4s ease;
+}
+
+.permission-card h2 {
+  color: #7b1fa2;
+  margin-bottom: 20px;
+  font-size: 1.8rem;
+}
+
+.permission-card p {
+  color: #4a0072;
+  margin-bottom: 30px;
+  line-height: 1.5;
+}
+
+.permission-button {
+  background: linear-gradient(135deg, #7b1fa2, #6a1b9a);
+  color: white;
+  border: none;
+  padding: 15px 35px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 5px 0 #4a0072;
+  margin-bottom: 15px;
+}
+
+.permission-button:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #4a0072;
+}
+
+.permission-note {
+  font-size: 0.85rem;
+  color: #7e6b44;
+  margin-top: 15px;
+}
+
+.microphone-waiting {
+  background: #ff9800;
+  color: white;
+  padding: 15px;
+  border-radius: 15px;
+  text-align: center;
+  font-weight: bold;
+  animation: pulse 1.5s infinite;
 }
 
 @keyframes slideUp {
@@ -409,206 +555,128 @@
   }
 }
 
-.tutorial-content h2 {
-  color: #764ba2;
-  margin-bottom: 20px;
-  font-size: 24px;
-}
+/* Add to Phase4.css - Fix for permission modal */
 
-.tutorial-step {
-  display: flex;
-  align-items: center;
-  background: white;
-  padding: 12px;
-  margin: 12px 0;
-  border-radius: 20px;
-  text-align: left;
-  gap: 12px;
-}
-
-.step-number {
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  color: white;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-  flex-shrink: 0;
-}
-
-.tutorial-step p {
-  margin: 0;
-  color: #333;
-  font-size: 14px;
-}
-
-.start-btn {
-  background: linear-gradient(135deg, #27ae60, #2ecc71);
-  color: white;
-  border: none;
-  padding: 14px 30px;
-  border-radius: 40px;
-  font-size: 16px;
-  font-weight: bold;
-  cursor: pointer;
-  margin-top: 20px;
-  transition: all 0.3s ease;
-}
-
-.start-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(39, 174, 96, 0.4);
-}
-
-/* Permission Modal */
-.permission-modal-container {
+/* Permission Overlay - FIXED */
+.permission-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 999999;
-}
-
-.permission-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+  z-index: 9999;
   display: flex;
   align-items: center;
   justify-content: center;
-  backdrop-filter: blur(10px);
+  pointer-events: auto !important;
 }
 
 .permission-modal {
-  background: white;
+  background: linear-gradient(135deg, #ffffff, #f5f0e8);
   max-width: 380px;
   width: 85%;
   border-radius: 48px;
   padding: 40px 30px;
   text-align: center;
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
   animation: modalSlideIn 0.4s ease-out;
+  position: relative;
+  z-index: 10000;
+  pointer-events: auto !important;
+  border: 1px solid rgba(123, 31, 162, 0.3);
 }
 
 .permission-icon {
-  font-size: 64px;
-  margin-bottom: 20px;
+  font-size: 4rem;
+  margin-bottom: 15px;
   animation: bounce 1s infinite;
 }
 
-@keyframes bounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
-}
-
 .permission-modal h2 {
-  color: #764ba2;
+  color: #6a1b9a;
   margin-bottom: 15px;
-  font-size: 28px;
+  font-size: 1.8rem;
+  font-weight: bold;
 }
 
 .permission-modal p {
-  color: #666;
-  margin-bottom: 30px;
+  color: #4a4a4a;
+  margin-bottom: 25px;
   line-height: 1.5;
+  font-size: 1rem;
 }
 
 .permission-allow-btn {
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: linear-gradient(135deg, #7b1fa2, #6a1b9a);
   color: white;
   border: none;
   padding: 16px 32px;
-  font-size: 16px;
+  font-size: 1.1rem;
   font-weight: bold;
   border-radius: 60px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
+  box-shadow: 0 6px 0 #4a0072;
   width: 100%;
+  margin-bottom: 20px;
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 10001;
 }
 
-.permission-allow-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+.permission-allow-btn:active {
+  transform: translateY(3px);
+  box-shadow: 0 3px 0 #4a0072;
+}
+
+.permission-allow-btn:disabled {
+  opacity: 0.6;
+  transform: none;
+  cursor: not-allowed;
 }
 
 .permission-privacy {
-  font-size: 12px;
-  color: #999;
-  margin-top: 20px;
+  font-size: 0.8rem !important;
+  color: #888 !important;
+  margin-top: 10px;
+  margin-bottom: 0 !important;
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-  .phase4-container {
-    padding: 15px;
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(20px);
   }
-  
-  .maze-cell {
-    width: 28px;
-    height: 28px;
-    font-size: 12px;
-  }
-  
-  .bee, .hive {
-    font-size: 18px;
-  }
-  
-  .letter {
-    font-size: 14px;
-  }
-  
-  .mic-button {
-    padding: 14px 25px;
-    font-size: 16px;
-  }
-  
-  .game-header {
-    padding: 12px 15px;
-  }
-  
-  .stat-item {
-    font-size: 16px;
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
   }
 }
 
-@media (max-width: 480px) {
-  .maze-cell {
-    width: 24px;
-    height: 24px;
-  }
-  
-  .bee, .hive {
-    font-size: 16px;
-  }
-  
-  .letter-badge {
-    padding: 6px 12px;
-    font-size: 14px;
-  }
-  
-  .stats {
-    gap: 12px;
-  }
+/* Fix for any parent container issues */
+.mobile-maze-container {
+  position: relative;
+  overflow-x: hidden;
 }
 
-/* Scrollbar Styling */
-.maze-wrapper::-webkit-scrollbar {
-  height: 8px;
+/* Ensure the game content is properly layered */
+.mobile-maze-container > * {
+  position: relative;
+  z-index: 1;
 }
 
-.maze-wrapper::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 10px;
+/* Fix for tutorial overlay if it exists */
+.tutorial-overlay {
+  z-index: 10000 !important;
+  pointer-events: auto !important;
 }
 
-.maze-wrapper::-webkit-scrollbar-thumb {
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  border-radius: 10px;
+.tutorial-content {
+  pointer-events: auto !important;
+  z-index: 10001 !important;
 }
+
