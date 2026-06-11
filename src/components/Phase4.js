@@ -277,8 +277,8 @@ const Phase4 = ({ proceed, loseLife, lives: initialLives }) => {
     setPlayerPosition({ x: 1, y: 1 });
     setExitPosition({ x: exitX, y: exitY });
     setVisited([{ x: 1, y: 1 }]);
-    setMessage(`Find the hive! Round ${currentRound}/1`);
-    setTimeLeft(500);
+    setMessage(`Find the hive! Round ${currentRound}/5`);
+    setTimeLeft(60);
     setTimerActive(true);
     setLastSpokenLetter('');
   };
@@ -306,7 +306,7 @@ const Phase4 = ({ proceed, loseLife, lives: initialLives }) => {
     // Play success sound when reaching the final letter
     playSuccessSound();
     
-    if (currentRound < 1) {
+    if (currentRound < 5) {
       setMessage(`Round ${currentRound} complete! Starting round ${currentRound + 1}`);
       setTimeout(() => {
         setCurrentRound(prev => prev + 1);
@@ -475,9 +475,9 @@ const Phase4 = ({ proceed, loseLife, lives: initialLives }) => {
       )}
       
       <div className="header">
-        <span>Busy Bee Challenge</span>
+        <span>Buzzy Bee Maze</span>
         <div className="header-info">
-          <span>Round: {currentRound}/1</span>
+          <span>Round: {currentRound}/5</span>
           <span>Time: {timeLeft}s</span>
           <span>Find its way home</span>
         </div>

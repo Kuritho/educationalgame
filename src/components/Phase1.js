@@ -10,7 +10,6 @@ const Phase1 = ({ proceed, loseLife }) => {
   const [showTutorial, setShowTutorial] = useState(true);
   const [userInteracted, setUserInteracted] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const [speechSupported, setSpeechSupported] = useState(true);
   
   // Song and pronunciation state
   const [selectedSongSet, setSelectedSongSet] = useState(0);
@@ -21,14 +20,11 @@ const Phase1 = ({ proceed, loseLife }) => {
   const [videoUrl, setVideoUrl] = useState('');
   const [videoTitle, setVideoTitle] = useState('');
   const [videoError, setVideoError] = useState(false);
+  const [audioLoadError, setAudioLoadError] = useState(false);
   
   const videoRef = useRef(null);
-  const interactionAttempted = useRef(false);
-  const utteranceRef = useRef(null);
   const audioElementRef = useRef(null);
-
-  // Pre-recorded audio fallback - using Web Speech API with multiple attempts
-  // This creates audio on-the-fly using the Web Speech API which works across browsers
+  const interactionAttempted = useRef(false);
 
   // Video URLs
   const songVideos = {
@@ -99,244 +95,156 @@ const Phase1 = ({ proceed, loseLife }) => {
 
   const letterPronunciations = {
     A: [
-      { name: "Standard", sound: "AY", example: "Apple", fullText: "A says AY. A is for Apple." },
-      { name: "Phonics", sound: "AH", example: "Ant", fullText: "AH! AH! A makes the AH sound. Like Ant!" },
-      { name: "Musical", sound: "AY-EE", example: "Amazing", fullText: "AY-EE~ A~ AY-EE~ A is for Amazing~" }
+      { name: "Standard", sound: "AY", example: "Apple", fullText: "A says AY. A is for Apple.", audioFile: "/audio/letters/A_standard.mp3" },
+      { name: "Phonics", sound: "AH", example: "Ant", fullText: "AH! AH! A makes the AH sound. Like Ant!", audioFile: "/audio/letters/A_phonics.mp3" },
+      { name: "Musical", sound: "AY-EE", example: "Amazing", fullText: "AY-EE~ A~ AY-EE~ A is for Amazing~", audioFile: "/audio/letters/A_musical.mp3" }
     ],
     B: [
-      { name: "Standard", sound: "BEE", example: "Ball", fullText: "B says BEE. B is for Ball." },
-      { name: "Phonics", sound: "BUH", example: "Bear", fullText: "BUH! BUH! B makes the BUH sound. Like Bear!" },
-      { name: "Musical", sound: "BEE-OH", example: "Bumblebee", fullText: "BEE-OH~ B~ BEE-OH~ B is for Bumblebee~" }
+      { name: "Standard", sound: "BEE", example: "Ball", fullText: "B says BEE. B is for Ball.", audioFile: "/audio/letters/B_standard.mp3" },
+      { name: "Phonics", sound: "BUH", example: "Bear", fullText: "BUH! BUH! B makes the BUH sound. Like Bear!", audioFile: "/audio/letters/B_phonics.mp3" },
+      { name: "Musical", sound: "BEE-OH", example: "Bumblebee", fullText: "BEE-OH~ B~ BEE-OH~ B is for Bumblebee~", audioFile: "/audio/letters/B_musical.mp3" }
     ],
-    C: [
-      { name: "Standard", sound: "SEE", example: "Cat", fullText: "C says SEE. C is for Cat." },
-      { name: "Phonics", sound: "KUH", example: "Car", fullText: "KUH! KUH! C makes the KUH sound. Like Car!" },
-      { name: "Musical", sound: "SEE-EE", example: "Circus", fullText: "SEE-EE~ C~ SEE-EE~ C is for Circus~" }
-    ],
-    D: [
-      { name: "Standard", sound: "DEE", example: "Dog", fullText: "D says DEE. D is for Dog." },
-      { name: "Phonics", sound: "DUH", example: "Duck", fullText: "DUH! DUH! D makes the DUH sound. Like Duck!" },
-      { name: "Musical", sound: "DEE-OH", example: "Drum", fullText: "DEE-OH~ D~ DEE-OH~ D is for Drum~" }
-    ],
-    E: [
-      { name: "Standard", sound: "EE", example: "Elephant", fullText: "E says EE. E is for Elephant." },
-      { name: "Phonics", sound: "EH", example: "Egg", fullText: "EH! EH! E makes the EH sound. Like Egg!" },
-      { name: "Musical", sound: "EE-EE", example: "Echo", fullText: "EE-EE~ E~ EE-EE~ E is for Echo~" }
-    ],
-    F: [
-      { name: "Standard", sound: "EFF", example: "Fish", fullText: "F says EFF. F is for Fish." },
-      { name: "Phonics", sound: "FFF", example: "Frog", fullText: "FFF! FFF! F makes the FFF sound. Like Frog!" },
-      { name: "Musical", sound: "EFF-OH", example: "Flute", fullText: "EFF-OH~ F~ EFF-OH~ F is for Flute~" }
-    ],
-    G: [
-      { name: "Standard", sound: "JEE", example: "Giraffe", fullText: "G says JEE. G is for Giraffe." },
-      { name: "Phonics", sound: "GUH", example: "Grapes", fullText: "GUH! GUH! G makes the GUH sound. Like Grapes!" },
-      { name: "Musical", sound: "JEE-OH", example: "Guitar", fullText: "JEE-OH~ G~ JEE-OH~ G is for Guitar~" }
-    ],
-    H: [
-      { name: "Standard", sound: "AYCH", example: "House", fullText: "H says AYCH. H is for House." },
-      { name: "Phonics", sound: "HUH", example: "Heart", fullText: "HUH! HUH! H makes the HUH sound. Like Heart!" },
-      { name: "Musical", sound: "AYCH-OH", example: "Harmony", fullText: "AYCH-OH~ H~ AYCH-OH~ H is for Harmony~" }
-    ],
-    I: [
-      { name: "Standard", sound: "EYE", example: "Ice cream", fullText: "I says EYE. I is for Ice cream." },
-      { name: "Phonics", sound: "IH", example: "Igloo", fullText: "IH! IH! I makes the IH sound. Like Igloo!" },
-      { name: "Musical", sound: "EYE-EE", example: "Island", fullText: "EYE-EE~ I~ EYE-EE~ I is for Island~" }
-    ],
-    J: [
-      { name: "Standard", sound: "JAY", example: "Jellyfish", fullText: "J says JAY. J is for Jellyfish." },
-      { name: "Phonics", sound: "JUH", example: "Jaguar", fullText: "JUH! JUH! J makes the JUH sound. Like Jaguar!" },
-      { name: "Musical", sound: "JAY-OH", example: "Jazz", fullText: "JAY-OH~ J~ JAY-OH~ J is for Jazz~" }
-    ],
-    K: [
-      { name: "Standard", sound: "KAY", example: "Kangaroo", fullText: "K says KAY. K is for Kangaroo." },
-      { name: "Phonics", sound: "KUH", example: "Key", fullText: "KUH! KUH! K makes the KUH sound. Like Key!" },
-      { name: "Musical", sound: "KAY-OH", example: "Kite", fullText: "KAY-OH~ K~ KAY-OH~ K is for Kite~" }
-    ],
-    L: [
-      { name: "Standard", sound: "ELL", example: "Lion", fullText: "L says ELL. L is for Lion." },
-      { name: "Phonics", sound: "LLL", example: "Leaf", fullText: "LLL! LLL! L makes the LLL sound. Like Leaf!" },
-      { name: "Musical", sound: "ELL-OH", example: "Lullaby", fullText: "ELL-OH~ L~ ELL-OH~ L is for Lullaby~" }
-    ],
-    M: [
-      { name: "Standard", sound: "EMM", example: "Monkey", fullText: "M says EMM. M is for Monkey." },
-      { name: "Phonics", sound: "MMM", example: "Moon", fullText: "MMM! MMM! M makes the MMM sound. Like Moon!" },
-      { name: "Musical", sound: "EMM-OH", example: "Magic", fullText: "EMM-OH~ M~ EMM-OH~ M is for Magic~" }
-    ],
-    N: [
-      { name: "Standard", sound: "ENN", example: "Nest", fullText: "N says ENN. N is for Nest." },
-      { name: "Phonics", sound: "NNN", example: "Nose", fullText: "NNN! NNN! N makes the NNN sound. Like Nose!" },
-      { name: "Musical", sound: "ENN-OH", example: "Night", fullText: "ENN-OH~ N~ ENN-OH~ N is for Night~" }
-    ],
-    O: [
-      { name: "Standard", sound: "OH", example: "Orange", fullText: "O says OH. O is for Orange." },
-      { name: "Phonics", sound: "AH", example: "Octopus", fullText: "AH! AH! O makes the AH sound. Like Octopus!" },
-      { name: "Musical", sound: "OH-OH", example: "Ocean", fullText: "OH-OH~ O~ OH-OH~ O is for Ocean~" }
-    ],
-    P: [
-      { name: "Standard", sound: "PEE", example: "Panda", fullText: "P says PEE. P is for Panda." },
-      { name: "Phonics", sound: "PUH", example: "Pizza", fullText: "PUH! PUH! P makes the PUH sound. Like Pizza!" },
-      { name: "Musical", sound: "PEE-OH", example: "Popcorn", fullText: "PEE-OH~ P~ PEE-OH~ P is for Popcorn~" }
-    ],
-    Q: [
-      { name: "Standard", sound: "KYOO", example: "Queen", fullText: "Q says KYOO. Q is for Queen." },
-      { name: "Phonics", sound: "KWUH", example: "Quilt", fullText: "KWUH! KWUH! Q makes the KWUH sound. Like Quilt!" },
-      { name: "Musical", sound: "KYOO-OH", example: "Quiet", fullText: "KYOO-OH~ Q~ KYOO-OH~ Q is for Quiet~" }
-    ],
-    R: [
-      { name: "Standard", sound: "ARR", example: "Rabbit", fullText: "R says ARR. R is for Rabbit." },
-      { name: "Phonics", sound: "RRR", example: "Rainbow", fullText: "RRR! RRR! R makes the RRR sound. Like Rainbow!" },
-      { name: "Musical", sound: "ARR-OH", example: "Rain", fullText: "ARR-OH~ R~ ARR-OH~ R is for Rain~" }
-    ],
-    S: [
-      { name: "Standard", sound: "ESS", example: "Sun", fullText: "S says ESS. S is for Sun." },
-      { name: "Phonics", sound: "SSS", example: "Snake", fullText: "SSS! SSS! S makes the SSS sound. Like Snake!" },
-      { name: "Musical", sound: "ESS-OH", example: "Symphony", fullText: "ESS-OH~ S~ ESS-OH~ S is for Symphony~" }
-    ],
-    T: [
-      { name: "Standard", sound: "TEE", example: "Tree", fullText: "T says TEE. T is for Tree." },
-      { name: "Phonics", sound: "TUH", example: "Tiger", fullText: "TUH! TUH! T makes the TUH sound. Like Tiger!" },
-      { name: "Musical", sound: "TEE-OH", example: "Tambourine", fullText: "TEE-OH~ T~ TEE-OH~ T is for Tambourine~" }
-    ],
-    U: [
-      { name: "Standard", sound: "YOO", example: "Umbrella", fullText: "U says YOO. U is for Umbrella." },
-      { name: "Phonics", sound: "UH", example: "Unicorn", fullText: "UH! UH! U makes the UH sound. Like Unicorn!" },
-      { name: "Musical", sound: "YOO-OH", example: "Up", fullText: "YOO-OH~ U~ YOO-OH~ U is for Up~" }
-    ],
-    V: [
-      { name: "Standard", sound: "VEE", example: "Violin", fullText: "V says VEE. V is for Violin." },
-      { name: "Phonics", sound: "VVV", example: "Volcano", fullText: "VVV! VVV! V makes the VVV sound. Like Volcano!" },
-      { name: "Musical", sound: "VEE-OH", example: "Vibration", fullText: "VEE-OH~ V~ VEE-OH~ V is for Vibration~" }
-    ],
-    W: [
-      { name: "Standard", sound: "DOUBLE-YOO", example: "Whale", fullText: "W says DOUBLE-YOO. W is for Whale." },
-      { name: "Phonics", sound: "WUH", example: "Watermelon", fullText: "WUH! WUH! W makes the WUH sound. Like Watermelon!" },
-      { name: "Musical", sound: "WUH-OH", example: "Wave", fullText: "WUH-OH~ W~ WUH-OH~ W is for Wave~" }
-    ],
-    X: [
-      { name: "Standard", sound: "EKS", example: "Xylophone", fullText: "X says EKS. X is for Xylophone." },
-      { name: "Phonics", sound: "KS", example: "X-ray", fullText: "KS! KS! X makes the KS sound. Like X-ray!" },
-      { name: "Musical", sound: "EKS-OH", example: "Xylophone", fullText: "EKS-OH~ X~ EKS-OH~ X is for Xylophone~" }
-    ],
-    Y: [
-      { name: "Standard", sound: "WYE", example: "Yak", fullText: "Y says WYE. Y is for Yak." },
-      { name: "Phonics", sound: "YUH", example: "Yo-yo", fullText: "YUH! YUH! Y makes the YUH sound. Like Yo-yo!" },
-      { name: "Musical", sound: "WYE-OH", example: "Yodel", fullText: "WYE-OH~ Y~ WYE-OH~ Y is for Yodel~" }
-    ],
-    Z: [
-      { name: "Standard", sound: "ZEE", example: "Zebra", fullText: "Z says ZEE. Z is for Zebra." },
-      { name: "Phonics", sound: "ZZZ", example: "Zipper", fullText: "ZZZ! ZZZ! Z makes the ZZZ sound. Like Zipper!" },
-      { name: "Musical", sound: "ZEE-OH", example: "Buzz", fullText: "ZEE-OH~ Z~ ZEE-OH~ Z is for Buzz~" }
-    ]
+    // ... add all other letters with their audio file paths
   };
 
-  // Detect mobile and browser
-  useEffect(() => {
-    const userAgent = navigator.userAgent.toLowerCase();
-    const isMobileDevice = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
-    setIsMobile(isMobileDevice);
-    
-    // Check if speech synthesis is supported
-    if (!window.speechSynthesis) {
-      setSpeechSupported(false);
-    }
-  }, []);
+  // Helper function to get audio file path for items
+  const getItemAudioPath = (item) => {
+    // Sanitize item name for filename (remove spaces, special characters)
+    const fileName = item.replace(/\s+/g, '_');
+    return `/audio/items/${fileName}.mp3`;
+  };
 
-  // UNIVERSAL SPEECH FUNCTION - Works on ALL browsers
-  const speakText = (text) => {
-    return new Promise((resolve) => {
+  // Play MP3 audio using HTML5 Audio
+  const playMP3 = (audioPath) => {
+    return new Promise((resolve, reject) => {
       setPlayingAudio(true);
+      setAudioLoadError(false);
       
-      // Method 1: Try Web Speech API (Chrome, Edge, Safari, most browsers)
-      if (window.speechSynthesis) {
-        try {
-          // Cancel any ongoing speech
-          if (window.speechSynthesis.speaking || window.speechSynthesis.pending) {
-            window.speechSynthesis.cancel();
-          }
-          
-          const utterance = new SpeechSynthesisUtterance(text);
-          utterance.rate = 0.9;
-          utterance.pitch = 1.0;
-          utterance.volume = 1;
-          
-          // Try to get a good voice
-          const setBestVoice = () => {
-            const voices = window.speechSynthesis.getVoices();
-            if (voices.length > 0) {
-              // Prefer English voices
-              const englishVoice = voices.find(v => v.lang.startsWith('en-'));
-              if (englishVoice) {
-                utterance.voice = englishVoice;
-              }
-            }
-          };
-          
-          setBestVoice();
-          
-          // If voices aren't loaded yet, try again
-          if (window.speechSynthesis.getVoices().length === 0) {
-            window.speechSynthesis.onvoiceschanged = () => {
-              const voices = window.speechSynthesis.getVoices();
-              const englishVoice = voices.find(v => v.lang.startsWith('en-'));
-              if (englishVoice) {
-                utterance.voice = englishVoice;
-              }
-            };
-          }
-          
-          utterance.onend = () => {
-            setPlayingAudio(false);
-            resolve();
-          };
-          
-          utterance.onerror = (e) => {
-            console.warn("Speech error, trying fallback:", e);
-            // Try fallback
-            fallbackSpeak(text, resolve);
-          };
-          
-          // Small delay for better compatibility
-          setTimeout(() => {
-            try {
-              window.speechSynthesis.speak(utterance);
-            } catch (e) {
-              fallbackSpeak(text, resolve);
-            }
-          }, 100);
-          
-          return;
-        } catch (e) {
-          console.warn("Speech synthesis error:", e);
-          fallbackSpeak(text, resolve);
-          return;
-        }
+      // Stop any currently playing audio
+      if (audioElementRef.current) {
+        audioElementRef.current.pause();
+        audioElementRef.current.currentTime = 0;
       }
       
-      // Method 2: Fallback to console + visual feedback
-      fallbackSpeak(text, resolve);
+      // Create new audio element
+      const audio = new Audio(audioPath);
+      audioElementRef.current = audio;
+      
+      audio.oncanplaythrough = () => {
+        audio.play().catch(error => {
+          console.error("Playback failed:", error);
+          setAudioLoadError(true);
+          setPlayingAudio(false);
+          reject(error);
+        });
+      };
+      
+      audio.onended = () => {
+        setPlayingAudio(false);
+        resolve();
+      };
+      
+      audio.onerror = (error) => {
+        console.error("Audio loading error:", error);
+        setAudioLoadError(true);
+        setPlayingAudio(false);
+        reject(error);
+      };
+      
+      // If the audio is already loaded, try to play
+      if (audio.readyState >= 2) {
+        audio.play().catch(error => {
+          console.error("Playback failed:", error);
+          setAudioLoadError(true);
+          setPlayingAudio(false);
+          reject(error);
+        });
+      }
+      
+      // Load the audio
+      audio.load();
     });
   };
-  
-  // Fallback method when speech synthesis fails
-  const fallbackSpeak = (text, resolve) => {
-    console.log("Speaking (fallback):", text);
+
+  // Play letter pronunciation
+  const pronounceLetter = async (letter, pronunciationIndex) => {
+    if (playingAudio) return;
     
-    // Show visual feedback
-    const fallbackMessage = document.createElement('div');
-    fallbackMessage.className = 'fallback-speech-message';
-    fallbackMessage.innerHTML = `🔊 ${text}`;
-    document.body.appendChild(fallbackMessage);
+    const pronunciation = letterPronunciations[letter]?.[pronunciationIndex];
+    if (!pronunciation || !pronunciation.audioFile) {
+      console.error("No audio file found for:", letter, pronunciationIndex);
+      // Fallback to visual feedback
+      showFallbackMessage(`No audio file for ${letter}`);
+      return;
+    }
     
-    setTimeout(() => {
-      fallbackMessage.remove();
-    }, 2000);
-    
-    setTimeout(() => {
-      setPlayingAudio(false);
-      resolve();
-    }, 1500);
+    try {
+      await playMP3(pronunciation.audioFile);
+    } catch (error) {
+      console.error("Failed to play audio:", error);
+      showFallbackMessage(`Could not play audio for ${letter}`);
+    }
   };
+
+  // Play item name audio
+  const handleItemClick = async (item) => {
+    if (playingAudio) return;
+    
+    const audioPath = getItemAudioPath(item);
+    try {
+      await playMP3(audioPath);
+    } catch (error) {
+      console.error("Failed to play item audio:", error);
+      showFallbackMessage(`Could not play audio for ${item}`);
+    }
+  };
+
+  // Fallback visual feedback when audio fails
+  const showFallbackMessage = (message) => {
+    const fallbackDiv = document.createElement('div');
+    fallbackDiv.className = 'fallback-speech-message';
+    fallbackDiv.innerHTML = `🔊 ${message}`;
+    document.body.appendChild(fallbackDiv);
+    
+    setTimeout(() => {
+      fallbackDiv.remove();
+    }, 2000);
+  };
+
+  const handleLetterClick = (letter) => {
+    if (showTutorial || playingAudio) return;
+    setSelectedLetter(letter);
+    setItems(letterItems[letter] || []);
+    pronounceLetter(letter, selectedPronunciation);
+  };
+
+  const skipTutorial = () => {
+    setShowTutorial(false);
+    setPlayingAudio(false);
+  };
+
+  // Handle user interaction for mobile browsers
+  const handleUserInteraction = () => {
+    if (!interactionAttempted.current) {
+      interactionAttempted.current = true;
+      setUserInteracted(true);
+      
+      // Preload first audio to enable audio context on iOS
+      const silentAudio = new Audio();
+      silentAudio.volume = 0;
+      silentAudio.play().catch(() => {});
+    }
+  };
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (audioElementRef.current) {
+        audioElementRef.current.pause();
+        audioElementRef.current = null;
+      }
+    };
+  }, []);
 
   const playVideo = async (songKey, songIndex) => {
     const song = songVideos[songKey];
@@ -362,71 +270,15 @@ const Phase1 = ({ proceed, loseLife }) => {
     setVideoError(false);
   };
 
-  const pronounceLetter = async (letter, pronunciationIndex) => {
-    if (playingAudio) return;
-    
-    const pronunciation = letterPronunciations[letter]?.[pronunciationIndex];
-    if (!pronunciation) return;
-    
-    await speakText(pronunciation.fullText);
-  };
-
-  const handleLetterClick = (letter) => {
-    if (showTutorial || playingAudio) return;
-    setSelectedLetter(letter);
-    setItems(letterItems[letter] || []);
-    pronounceLetter(letter, selectedPronunciation);
-  };
-
-  const handleItemClick = async (item) => {
-    if (showTutorial || playingAudio) return;
-    await speakText(item);
-  };
-
-  const skipTutorial = () => {
-    setShowTutorial(false);
-    setPlayingAudio(false);
-  };
-
-  // Handle user interaction for mobile browsers
-  const handleUserInteraction = () => {
-    if (!interactionAttempted.current) {
-      interactionAttempted.current = true;
-      setUserInteracted(true);
-      
-      // Pre-initialize speech synthesis on user interaction
-      if (window.speechSynthesis) {
-        // Create a silent utterance to wake up the system
-        const silentUtterance = new SpeechSynthesisUtterance('');
-        silentUtterance.volume = 0;
-        window.speechSynthesis.speak(silentUtterance);
-        
-        // Cancel it after a short time
-        setTimeout(() => {
-          if (window.speechSynthesis.speaking) {
-            window.speechSynthesis.cancel();
-          }
-        }, 200);
-      }
-    }
-  };
-
   return (
     <div className="phase-container" onClick={handleUserInteraction} onTouchStart={handleUserInteraction}>
-      {/* Browser compatibility notice */}
-      {!speechSupported && (
-        <div className="audio-warning">
-          <p>🔊 Your browser doesn't support voice. Visual feedback will be shown instead.</p>
+      {/* Audio load error warning */}
+      {audioLoadError && (
+        <div className="audio-error">
+          <p>⚠️ Some audio files couldn't be loaded. Please check that all MP3 files are in the correct location.</p>
         </div>
       )}
       
-      {/* Mobile Warning */}
-      {isMobile && !userInteracted && (
-        <div className="mobile-warning">
-          <p>👆 Tap anywhere to enable voice</p>
-        </div>
-      )}
-
       {/* Video Modal */}
       {showVideoModal && (
         <div className="video-modal-overlay" onClick={closeVideoModal}>
@@ -484,16 +336,6 @@ const Phase1 = ({ proceed, loseLife }) => {
                 <li>🔊 Choose from 3 pronunciation styles</li>
                 <li>🎯 Click items to hear their names</li>
               </ol>
-              {isMobile && (
-                <div className="mobile-note">
-                  <p>📱 <strong>Mobile Users:</strong> Tap the screen first to enable voice</p>
-                </div>
-              )}
-              {!speechSupported && (
-                <div className="mobile-note">
-                  <p>🔊 Visual feedback will be shown for words</p>
-                </div>
-              )}
             </div>
             <button onClick={skipTutorial} className="skip-tutorial-btn">
               Start Playing! 🚀
@@ -522,15 +364,8 @@ const Phase1 = ({ proceed, loseLife }) => {
             ))}
           </div>
           
-          {!userInteracted && isMobile && (
-            <div className="tap-prompt">
-              <p>👆 Tap once to enable voice</p>
-            </div>
-          )}
-          
           <div className="song-info">
             <p>💡 <strong>Tip:</strong> Click any song button to watch fun learning videos!</p>
-            <p>🌐 Works on Chrome, Firefox, Safari, Edge, and all modern browsers</p>
           </div>
         </div>
       )}
@@ -593,12 +428,6 @@ const Phase1 = ({ proceed, loseLife }) => {
         </div>
       )}
       
-      {!userInteracted && !showTutorial && (
-        <div className="audio-info">
-          <p>👆 Tap anywhere to enable voice on your device</p>
-        </div>
-      )}
-      
       <div className="alphabet-grid">
         {alphabet.map(letter => (
           <button 
@@ -638,15 +467,14 @@ const Phase1 = ({ proceed, loseLife }) => {
       
       {playingAudio && !showTutorial && (
         <div className="audio-playing">
-          <p>🎤 Speaking... 🗣️</p>
+          <p>🎤 Playing... 🗣️</p>
           <div className="audio-wave"></div>
           <button 
             className="stop-audio-btn"
             onClick={() => {
-              if (window.speechSynthesis) {
-                try {
-                  window.speechSynthesis.cancel();
-                } catch(e) {}
+              if (audioElementRef.current) {
+                audioElementRef.current.pause();
+                audioElementRef.current.currentTime = 0;
               }
               setPlayingAudio(false);
             }}
@@ -663,35 +491,6 @@ const Phase1 = ({ proceed, loseLife }) => {
       >
         Next ➡️
       </button>
-      
-      <style jsx>{`
-        .fallback-speech-message {
-          position: fixed;
-          bottom: 20px;
-          left: 50%;
-          transform: translateX(-50%);
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          color: white;
-          padding: 12px 24px;
-          border-radius: 50px;
-          z-index: 10001;
-          animation: slideUp 0.3s ease;
-          font-size: 16px;
-          font-weight: bold;
-          box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-        }
-        
-        @keyframes slideUp {
-          from {
-            transform: translateX(-50%) translateY(100px);
-            opacity: 0;
-          }
-          to {
-            transform: translateX(-50%) translateY(0);
-            opacity: 1;
-          }
-        }
-      `}</style>
     </div>
   );
 };

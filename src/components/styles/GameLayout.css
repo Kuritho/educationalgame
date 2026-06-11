@@ -10,24 +10,24 @@
   flex-direction: column;
   height: 80vh;
   width: 100%;
-  max-width: 100%; /* Changed from 1200px to 100% */
-  margin: 0; /* Removed margin */
-  border: none; /* Removed border */
-  border-radius: 0; /* Removed border radius */
-  box-shadow: none; /* Removed shadow */
+  max-width: 100%;
+  margin: 0;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
   overflow: hidden;
 }
 
 .game-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
   padding: 0.6rem;
   background-color: #2c3e50;
   color: white;
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
   min-height: 60px;
-  width: 100%; /* Ensure full width */
+  width: 100%;
 }
 
 .header-left {
@@ -38,13 +38,10 @@
 }
 
 .header-right {
-  position: absolute;
-  left: 31%;
-  top: 90%;
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 3rem;
+  flex-direction: row;
+  align-items: center;
+  gap: 1rem;
 }
 
 .player-info {
@@ -112,7 +109,7 @@
   flex: 1;
   padding: 0.7rem;
   overflow: auto;
-  width: 100%; /* Ensure full width */
+  width: 100%;
 }
 
 .confirmation-overlay {
@@ -170,16 +167,17 @@
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .game-header {
-    flex-direction: column;
-    gap: 0.6rem;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
     padding: 0.5rem;
   }
   
   .header-left, .header-right {
     flex-direction: row;
     align-items: center;
-    width: 100%;
-    justify-content: space-between;
+    width: auto;
+    justify-content: flex-start;
   }
   
   .action-button {
@@ -193,6 +191,31 @@
   
   .user-status span {
     font-size: 0.65rem;
+  }
+}
+
+/* Mobile styles for screens up to 425px - SHOW LOGOUT TEXT */
+@media (max-width: 425px) {
+  .logout-button {
+    padding: 6px 10px;
+  }
+  
+  /* Force the logout text to be visible */
+  .logout-button span,
+  .logout-button .logout-text,
+  .logout-button .logout-button-text {
+    display: inline-block !important;
+    margin-left: 5px;
+    font-size: 12px;
+  }
+  
+  /* Adjust header spacing for mobile */
+  .game-header {
+    padding: 0.5rem;
+  }
+  
+  .header-right {
+    gap: 0.5rem;
   }
 }
 
