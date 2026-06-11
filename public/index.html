@@ -3,31 +3,31 @@
 <head>
     <meta charset="utf-8" />
     <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no, shrink-to-fit=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
     <meta name="theme-color" content="#000000" />
-    <meta name="description" content="Voice-Controlled Word Puzzle Game" />
+    <meta name="description" content="Voice-Controlled Word Puzzle Game - Phase 4 Bee Maze" />
     
-    <!-- iOS specific -->
+    <!-- Android and iOS specific meta tags for WebView apps -->
+    <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval' data: gap: content: https://ssl.gstatic.com; media-src *; img-src * data: content:; style-src * 'unsafe-inline'; script-src * 'unsafe-inline' 'unsafe-eval' blob:;" />
+    
+    <!-- For iOS standalone mode -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="Bee Maze" />
+    <meta name="apple-mobile-web-app-title" content="Word Game" />
     
-    <!-- Android specific -->
+    <!-- For Android Chrome -->
     <meta name="mobile-web-app-capable" content="yes" />
-    
-    <!-- Improve touch response -->
-    <meta name="msapplication-tap-highlight" content="no" />
     
     <title>BeeTrail</title>
     
     <style>
+        /* Global styles to ensure no click blocking */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
-            /* Improve touch responsiveness */
-            touch-action: manipulation;
+            pointer-events: auto !important;
         }
         
         html, body {
@@ -35,44 +35,46 @@
             height: 100%;
             margin: 0;
             padding: 0;
-            overflow: hidden;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            overflow-x: hidden;
             background: linear-gradient(135deg, #1a2a3a 0%, #0f1a24 100%);
             font-family: 'Segoe UI', 'Poppins', 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
         }
         
         #root {
             width: 100%;
-            height: 100%;
+            min-height: 100%;
             position: relative;
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
         }
         
-        /* Make buttons larger and more touch-friendly */
+        /* Ensure all buttons are clickable */
         button, 
+        a, 
+        [role="button"],
+        .clickable,
         .voice-control-button,
         .permission-button,
-        .start-playing-btn,
-        .action-button,
-        .letter-tile {
-            min-height: 48px;
-            min-width: 48px;
-            touch-action: manipulation;
-            cursor: pointer;
-            -webkit-tap-highlight-color: rgba(123, 31, 162, 0.3);
+        .start-playing-btn {
+            cursor: pointer !important;
+            pointer-events: auto !important;
+            touch-action: manipulation !important;
         }
         
-        /* Remove any pointer-events restrictions */
-        button:active,
-        .voice-control-button:active,
-        .permission-button:active {
-            transform: scale(0.97);
-            transition: transform 0.05s;
+        /* Remove any backdrop filters that might cause issues */
+        .permission-overlay,
+        .tutorial-overlay,
+        .modal-overlay {
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+        }
+        
+        /* Ensure proper touch events for mobile */
+        @media (hover: none) and (pointer: coarse) {
+            button, 
+            .voice-control-button,
+            .permission-button {
+                min-height: 44px;
+                min-width: 44px;
+            }
         }
         
         /* Loading indicator */
@@ -87,17 +89,18 @@
             justify-content: center;
             background: #1a2a3a;
             color: white;
+            font-size: 1.2rem;
             z-index: 9999;
         }
         
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid rgba(255,255,255,0.3);
+        .app-loading .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255,255,255,0.3);
             border-top-color: #7b1fa2;
             border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            margin-right: 12px;
+            animation: spin 1s linear infinite;
+            margin-right: 15px;
         }
         
         @keyframes spin {
@@ -119,74 +122,135 @@
         window.addEventListener('load', function() {
             setTimeout(function() {
                 const loadingEl = document.querySelector('.app-loading');
-                if (loadingEl) loadingEl.style.display = 'none';
+                if (loadingEl) {
+                    loadingEl.style.display = 'none';
+                }
             }, 500);
         });
         
         // ============================================
-        // SIMPLIFIED MICROPHONE HANDLER FOR MEDIAN.CO
+        // MICROPHONE PERMISSION HANDLER FOR MEDIAN.CO APP
         // ============================================
         
-        console.log('App initializing...');
+        // Detect if running in median.co app
+        const isMedianApp = () => {
+            return window.Median !== undefined || 
+                   navigator.userAgent.includes('Median') || 
+                   window.location.protocol === 'capacitor:' ||
+                   window.location.href.includes('median');
+        };
         
-        // Global permission state
-        window.hasMicrophonePermission = false;
+        // Detect platform
+        const isAndroid = () => {
+            return /Android/i.test(navigator.userAgent);
+        };
         
-        // Simple function to request microphone permission
-        window.requestMicrophonePermission = async function() {
-            console.log('Requesting microphone permission...');
+        const isIOS = () => {
+            return /iPhone|iPad|iPod/i.test(navigator.userAgent);
+        };
+        
+        console.log('Platform detection:', { 
+            isMedian: isMedianApp(), 
+            isAndroid: isAndroid(), 
+            isIOS: isIOS(),
+            userAgent: navigator.userAgent
+        });
+        
+        // Auto-request microphone permission on page load for median.co apps
+        async function autoRequestMicrophonePermission() {
+            console.log('Attempting to auto-request microphone permission...');
             
             try {
                 if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                    console.error('getUserMedia not available');
+                    console.log('getUserMedia not available');
                     return false;
                 }
                 
+                // For iOS, we need user interaction first, so we'll wait for a tap
+                if (isIOS() && !window.hasRequestedPermission) {
+                    console.log('iOS requires user interaction first');
+                    
+                    // Listen for first touch anywhere on screen
+                    const requestOnTouch = async () => {
+                        try {
+                            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                            stream.getTracks().forEach(track => track.stop());
+                            console.log('Microphone permission granted via touch');
+                            window.hasMicrophonePermission = true;
+                            window.removeEventListener('touchstart', requestOnTouch);
+                            window.removeEventListener('click', requestOnTouch);
+                        } catch (err) {
+                            console.log('Microphone permission denied:', err);
+                        }
+                    };
+                    
+                    window.addEventListener('touchstart', requestOnTouch);
+                    window.addEventListener('click', requestOnTouch);
+                    return false;
+                }
+                
+                // For Android and other platforms, request directly
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 stream.getTracks().forEach(track => track.stop());
+                console.log('Microphone permission granted automatically');
                 window.hasMicrophonePermission = true;
-                console.log('Microphone permission GRANTED!');
                 return true;
                 
             } catch (error) {
-                console.error('Microphone permission error:', error.name, error.message);
-                window.hasMicrophonePermission = false;
-                
-                // Show helpful message based on error
-                if (error.name === 'NotAllowedError') {
-                    alert('Please grant microphone permission in your device settings.');
-                } else if (error.name === 'NotFoundError') {
-                    alert('No microphone found on this device.');
-                }
+                console.log('Auto-request microphone failed:', error);
+                return false;
+            }
+        }
+        
+        // Store permission status globally
+        window.hasMicrophonePermission = false;
+        
+        // Try to auto-request after a short delay
+        setTimeout(() => {
+            autoRequestMicrophonePermission();
+        }, 1000);
+        
+        // Also listen for any user interaction to request permission if not yet granted
+        function requestMicrophoneOnInteraction() {
+            if (!window.hasMicrophonePermission) {
+                console.log('User interaction detected, requesting microphone...');
+                navigator.mediaDevices.getUserMedia({ audio: true })
+                    .then(stream => {
+                        stream.getTracks().forEach(track => track.stop());
+                        window.hasMicrophonePermission = true;
+                        console.log('Microphone permission granted');
+                    })
+                    .catch(err => {
+                        console.log('Microphone permission denied:', err);
+                    });
+            }
+        }
+        
+        // Add event listeners for user interaction
+        document.addEventListener('click', requestMicrophoneOnInteraction);
+        document.addEventListener('touchstart', requestMicrophoneOnInteraction);
+        
+        // Export permission status for React components
+        window.getMicrophoneStatus = () => window.hasMicrophonePermission;
+        
+        // Function to explicitly request permission (to be called from React)
+        window.requestMicrophonePermission = async () => {
+            console.log('Explicit microphone permission request from React');
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                stream.getTracks().forEach(track => track.stop());
+                window.hasMicrophonePermission = true;
+                return true;
+            } catch (error) {
+                console.error('Microphone permission error:', error);
                 return false;
             }
         };
         
-        // Auto-request after user touches anywhere (for iOS)
-        let permissionRequested = false;
-        
-        async function handleUserInteraction() {
-            if (!permissionRequested && !window.hasMicrophonePermission) {
-                permissionRequested = true;
-                console.log('User interaction - requesting microphone...');
-                await window.requestMicrophonePermission();
-            }
-        }
-        
-        // Listen for user interaction
-        document.addEventListener('touchstart', handleUserInteraction);
-        document.addEventListener('click', handleUserInteraction);
-        
-        // For Android, try to request after a short delay
-        setTimeout(async () => {
-            const isAndroid = /Android/i.test(navigator.userAgent);
-            if (isAndroid && !permissionRequested) {
-                console.log('Android - attempting auto-request...');
-                await window.requestMicrophonePermission();
-            }
-        }, 2000);
-        
-        console.log('App ready - waiting for user interaction');
+        // Console log for debugging
+        console.log('Index.html loaded - Microphone handlers ready');
     </script>
+    
+    <!-- Your React app will be injected here -->
 </body>
 </html>
