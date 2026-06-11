@@ -1,8 +1,6 @@
-// components/Phase4.js
+// components/Phase4.js - SIMPLIFIED VERSION WITH DEBUG LOGGING
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import './styles/Phase4.css';
-import LivesCounter from './LivesCounter';
-import MicrophonePermission from './MicrophonePermission';
 
 // Import sound files
 import backgroundMusic from '../components/sounds/bee.mp3';
@@ -22,19 +20,20 @@ const Phase4 = ({ proceed, loseLife, lives: initialLives }) => {
   const [timerActive, setTimerActive] = useState(true);
   const [listening, setListening] = useState(false);
   const [lastSpokenLetter, setLastSpokenLetter] = useState('');
-  const [retryCount, setRetryCount] = useState(0);
   const [isSpeechSupported, setIsSpeechSupported] = useState(true);
   const [showTutorial, setShowTutorial] = useState(true);
-  const [microphoneReady, setMicrophoneReady] = useState(false);
-  const recognitionRef = useRef(null);
+  const [microphonePermission, setMicrophonePermission] = useState('prompt');
+  const [isRequestingPermission, setIsRequestingPermission] = useState(false);
   const [isMazeReady, setIsMazeReady] = useState(false);
+  
+  const recognitionRef = useRef(null);
   const audioRef = useRef(null);
   const successAudioRef = useRef(null);
 
   const letterPool = ['B', 'C', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 
                      'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'X', 'Y', 'Z'];
 
-  // Comprehensive pronunciation mapping
+  // Pronunciation mapping
   const letterPronunciationMap = {
     'ay': 'A', 'eh': 'A', 'alpha': 'A',
     'bee': 'B', 'be': 'B', 'bravo': 'B', 'beer': 'B',
@@ -63,103 +62,48 @@ const Phase4 = ({ proceed, loseLife, lives: initialLives }) => {
     'zee': 'Z', 'zed': 'Z', 'zulu': 'Z', 'zoo': 'Z'
   };
 
-  // Handle microphone permission granted
-  const handleMicrophoneGranted = () => {
-    console.log('Microphone permission granted');
-    setMicrophoneReady(true);
-    setMessage('🎤 Microphone ready! Click the mic button to start voice control.');
-  };
-
-  // Handle microphone permission denied
-  const handleMicrophoneDenied = () => {
-    console.log('Microphone permission denied');
-    setMicrophoneReady(false);
-    setMessage('❌ Microphone access needed for voice control. Please grant permission.');
-  };
-
-  // Initialize audio elements
-  useEffect(() => {
-    audioRef.current = new Audio(backgroundMusic);
-    audioRef.current.loop = true;
-    audioRef.current.volume = 0.3;
+  // Request microphone permission - SIMPLIFIED
+  const requestMicrophonePermission = async () => {
+    console.log('🔴 PERMISSION BUTTON CLICKED!');
+    alert('Button clicked!'); // This will show if click is working
     
-    successAudioRef.current = new Audio(successSound);
-    successAudioRef.current.volume = 0.5;
+    if (isRequestingPermission) return;
+    setIsRequestingPermission(true);
     
-    const playBackgroundMusic = async () => {
-      try {
-        await audioRef.current.play();
-        console.log('Background music started');
-      } catch (error) {
-        console.log('Background music play failed:', error);
+    try {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        alert('getUserMedia not supported');
+        setMicrophonePermission('denied');
+        setIsRequestingPermission(false);
+        return false;
       }
-    };
-    
-    playBackgroundMusic();
-    
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-      }
-    };
-  }, []);
-
-  // Play success sound
-  const playSuccessSound = () => {
-    if (successAudioRef.current) {
-      successAudioRef.current.currentTime = 0;
-      successAudioRef.current.play().catch(error => {
-        console.log('Success sound play failed:', error);
-      });
+      
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      stream.getTracks().forEach(track => track.stop());
+      
+      setMicrophonePermission('granted');
+      alert('Microphone permission granted!');
+      setIsRequestingPermission(false);
+      initSpeechRecognition();
+      
+      return true;
+    } catch (error) {
+      console.error('Microphone permission error:', error);
+      alert('Error: ' + error.message);
+      setMicrophonePermission('denied');
+      setIsRequestingPermission(false);
+      return false;
     }
   };
 
-  // Generate initial maze
-  useEffect(() => {
-    generateMaze();
-  }, []);
-
-  // Timer effect
-  useEffect(() => {
-    let timer;
-    if (timerActive && timeLeft > 0) {
-      timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
-    } else if (timeLeft === 0 && timerActive) {
-      handleTimeOut();
-    }
-    return () => clearTimeout(timer);
-  }, [timeLeft, timerActive]);
-
-  // Letter detection handler
-  const handleDetectedLetter = useCallback((letter) => {
-    console.log('Processing letter:', letter);
-    setLastSpokenLetter(letter);
-    setMessage(`Moving to ${letter}...`);
-
-    const letterPos = Object.entries(letters).find(
-      ([pos, l]) => l === letter
-    );
-
-    if (letterPos) {
-      const [posKey] = letterPos;
-      const [x, y] = posKey.split(',').map(Number);
-      moveBeeToPosition({ x, y });
-    } else {
-      setMessage(`${letter} not found. Try: ${Object.values(letters).join(', ')}`);
-    }
-  }, [letters]);
-
-  // Voice recognition setup (only if microphone is ready)
-  useEffect(() => {
-    if (!microphoneReady) return;
-    
+  // Initialize speech recognition
+  const initSpeechRecognition = () => {
     if (typeof window === 'undefined') return;
     
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     
     if (!SpeechRecognition) {
       setIsSpeechSupported(false);
-      setMessage('Voice control not supported. Use keyboard instead.');
       return;
     }
 
@@ -197,63 +141,104 @@ const Phase4 = ({ proceed, loseLife, lives: initialLives }) => {
           }
         }
       }
-      
-      setMessage(`Didn't catch that. Try saying just the letter clearly`);
     };
 
     recognition.onerror = (event) => {
       console.error('Recognition error:', event.error);
-      
-      if (event.error === 'not-allowed') {
-        setMessage('❌ Microphone access denied. Please grant permission.');
-        setListening(false);
-      } else if (event.error === 'audio-capture') {
-        setMessage('❌ No microphone found. Please check your device.');
-        setListening(false);
-      } else {
-        setMessage(`Error: ${event.error}. Try again.`);
-      }
     };
 
     recognitionRef.current = recognition;
+  };
 
-    return () => {
-      if (recognitionRef.current) {
-        try {
-          recognitionRef.current.stop();
-        } catch (e) {
-          console.log('Error stopping recognition:', e);
-        }
+  // Initialize audio
+  useEffect(() => {
+    audioRef.current = new Audio(backgroundMusic);
+    audioRef.current.loop = true;
+    audioRef.current.volume = 0.3;
+    
+    successAudioRef.current = new Audio(successSound);
+    successAudioRef.current.volume = 0.5;
+    
+    const playBackgroundMusic = async () => {
+      try {
+        await audioRef.current.play();
+      } catch (error) {
+        console.log('Background music play failed:', error);
       }
     };
-  }, [handleDetectedLetter, letterPool, microphoneReady]);
+    
+    playBackgroundMusic();
+    
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+    };
+  }, []);
+
+  // Play success sound
+  const playSuccessSound = () => {
+    if (successAudioRef.current) {
+      successAudioRef.current.currentTime = 0;
+      successAudioRef.current.play().catch(error => {
+        console.log('Success sound play failed:', error);
+      });
+    }
+  };
+
+  // Generate maze
+  useEffect(() => {
+    generateMaze();
+  }, []);
+
+  // Timer effect
+  useEffect(() => {
+    let timer;
+    if (timerActive && timeLeft > 0) {
+      timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
+    } else if (timeLeft === 0 && timerActive) {
+      handleTimeOut();
+    }
+    return () => clearTimeout(timer);
+  }, [timeLeft, timerActive]);
+
+  // Letter detection handler
+  const handleDetectedLetter = useCallback((letter) => {
+    console.log('Processing letter:', letter);
+    setLastSpokenLetter(letter);
+    setMessage(`Moving to ${letter}...`);
+
+    const letterPos = Object.entries(letters).find(
+      ([pos, l]) => l === letter
+    );
+
+    if (letterPos) {
+      const [posKey] = letterPos;
+      const [x, y] = posKey.split(',').map(Number);
+      moveBeeToPosition({ x, y });
+    } else {
+      setMessage(`${letter} not found. Try: ${Object.values(letters).join(', ')}`);
+    }
+  }, [letters]);
 
   const toggleVoiceControl = () => {
-    if (!microphoneReady) {
-      setMessage('🎤 Please grant microphone permission first.');
+    if (microphonePermission !== 'granted') {
+      setMessage('Please grant microphone permission first.');
       return;
     }
     
-    if (!recognitionRef.current) {
-      setMessage('Speech recognition not supported.');
-      return;
-    }
+    if (!recognitionRef.current) return;
     
     if (listening) {
       try {
         recognitionRef.current.stop();
-      } catch (e) {
-        console.log('Error stopping:', e);
-      }
+      } catch (e) {}
       setListening(false);
-      setMessage('🎤 Microphone off. Click to start listening.');
     } else {
       try {
         recognitionRef.current.start();
       } catch (error) {
         console.error('Failed to start recognition:', error);
-        setMessage('Error starting voice recognition. Please try again.');
-        setListening(false);
       }
     }
   };
@@ -339,7 +324,7 @@ const Phase4 = ({ proceed, loseLife, lives: initialLives }) => {
         proceed(score);
       }, 2000);
     } else {
-      setMessage(`Time's up! Lost a life. ${initialLives - 1} lives remaining. Restarting round ${currentRound}`);
+      setMessage(`Time's up! Lost a life. ${initialLives - 1} lives remaining.`);
       setTimeout(() => {
         generateMaze();
       }, 1500);
@@ -351,7 +336,7 @@ const Phase4 = ({ proceed, loseLife, lives: initialLives }) => {
     playSuccessSound();
     
     if (currentRound < 5) {
-      setMessage(`Round ${currentRound} complete! Starting round ${currentRound + 1}`);
+      setMessage(`Round ${currentRound} complete!`);
       setTimeout(() => {
         setCurrentRound(prev => prev + 1);
         generateMaze();
@@ -412,10 +397,6 @@ const Phase4 = ({ proceed, loseLife, lives: initialLives }) => {
           delete updatedLetters[posKey];
           setLetters(updatedLetters);
           setScore(prev => prev + 10);
-          
-          if (posKey === `${exitPosition.x},${exitPosition.y}`) {
-            playSuccessSound();
-          }
         }
 
         if (path[i].x === exitPosition.x && path[i].y === exitPosition.y) {
@@ -458,15 +439,8 @@ const Phase4 = ({ proceed, loseLife, lives: initialLives }) => {
         }`}
       >
         {isPlayer && <div className="bee">🐝</div>}
-        {isExit && (
-          <>
-            <div className="beehouse">🏡</div>
-            {hasLetter && <div className="maze-letter exit-letter">{hasLetter}</div>}
-          </>
-        )}
-        {!isExit && hasLetter && (
-          <div className="maze-letter">{hasLetter}</div>
-        )}
+        {isExit && <div className="beehouse">🏡</div>}
+        {!isExit && hasLetter && <div className="maze-letter">{hasLetter}</div>}
       </div>
     );
   };
@@ -475,45 +449,104 @@ const Phase4 = ({ proceed, loseLife, lives: initialLives }) => {
     setShowTutorial(false);
   };
 
-  // The main game content
-  const GameContent = () => (
-    <>
+  // PERMISSION MODAL - Using native HTML button with onClick
+  if (microphonePermission !== 'granted') {
+    return (
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        backgroundColor: '#1a2a3a',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 999999
+      }}>
+        <div style={{
+          backgroundColor: 'white',
+          borderRadius: '30px',
+          padding: '40px',
+          maxWidth: '350px',
+          textAlign: 'center'
+        }}>
+          <div style={{ fontSize: '50px' }}>🎤</div>
+          <h2>Microphone Required</h2>
+          <p>This game needs microphone access for voice control.</p>
+          <button 
+            onClick={requestMicrophonePermission}
+            style={{
+              backgroundColor: '#7b1fa2',
+              color: 'white',
+              border: 'none',
+              padding: '15px 30px',
+              fontSize: '18px',
+              borderRadius: '50px',
+              cursor: 'pointer',
+              width: '100%'
+            }}
+          >
+            {isRequestingPermission ? 'Requesting...' : 'Allow Microphone Access'}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Main game
+  return (
+    <div className="mobile-maze-container">
+      {showTutorial && (
+        <div className="tutorial-overlay">
+          <div className="tutorial-content">
+            <h2>Welcome to Voice-Controlled Bee Maze! 🐝</h2>
+            <div className="tutorial-steps">
+              <div className="tutorial-step">
+                <span className="step-number">1</span>
+                <p>Click the microphone button to enable voice control 🎤</p>
+              </div>
+              <div className="tutorial-step">
+                <span className="step-number">2</span>
+                <p>Say a letter clearly to guide the bee 🗣️</p>
+              </div>
+              <div className="tutorial-step">
+                <span className="step-number">3</span>
+                <p>Collect letters and reach the hive 🏡</p>
+              </div>
+              <div className="tutorial-step">
+                <span className="step-number">4</span>
+                <p>Complete all 5 rounds before time runs out! ⏱️</p>
+              </div>
+            </div>
+            <button onClick={skipTutorial} className="start-playing-btn">
+              Start Playing!
+            </button>
+          </div>
+        </div>
+      )}
+      
       <div className="header">
         <span>Buzzy Bee Maze</span>
         <div className="header-info">
           <span>Round: {currentRound}/5</span>
+          <span>Score: {score}</span>
+          <span>❤️ Lives: {initialLives}</span>
           <span>Time: {timeLeft}s</span>
-          <span>Find its way home</span>
         </div>
       </div>
       
-      <h1>🐝Voice-Controlled Bee Maze🍯</h1>
+      <h1>🐝 Voice-Controlled Bee Maze 🍯</h1>
       
       <div className="message-box">{message}</div>
       
       <div className="voice-control-panel">
-        {isSpeechSupported && microphoneReady && (
-          <button 
-            onClick={toggleVoiceControl}
-            className={`voice-control-button ${listening ? 'active' : ''}`}
-            disabled={showTutorial}
-          >
-            {listening ? (
-              <>
-                <span className="pulse-dot"></span>
-                Listening... Say a letter
-              </>
-            ) : (
-              '🎤 Enable Voice Control'
-            )}
-          </button>
-        )}
-        
-        {isSpeechSupported && !microphoneReady && (
-          <div className="microphone-waiting">
-            ⏳ Waiting for microphone permission...
-          </div>
-        )}
+        <button 
+          onClick={toggleVoiceControl}
+          className={`voice-control-button ${listening ? 'active' : ''}`}
+        >
+          {listening ? '🎤 Listening... Say a letter' : '🎤 Enable Voice Control'}
+        </button>
         
         <div className="voice-feedback">
           {lastSpokenLetter && (
@@ -545,61 +578,11 @@ const Phase4 = ({ proceed, loseLife, lives: initialLives }) => {
       <div className="instructions">
         <p><strong>How to Play:</strong></p>
         <ul>
-          <li>Allow microphone permission when prompted</li>
-          <li>Click the microphone button and say a letter clearly</li>
+          <li>✅ Microphone ready! Click the mic button to start</li>
+          <li>Say a letter clearly to guide the bee 🗣️</li>
           <li>Collect letters and reach the hive 🏡</li>
-          <li>Complete all 5 rounds before time runs out!</li>
-          {microphoneReady && <li>✅ Microphone is ready!</li>}
         </ul>
       </div>
-    </>
-  );
-
-  // Tutorial overlay
-  const TutorialOverlay = () => (
-    <div className="tutorial-overlay">
-      <div className="tutorial-content">
-        <h2>Welcome to Voice-Controlled Bee Maze! 🐝</h2>
-        <div className="tutorial-steps">
-          <div className="tutorial-step">
-            <span className="step-number">1</span>
-            <p>Allow microphone permission when prompted 📱</p>
-          </div>
-          <div className="tutorial-step">
-            <span className="step-number">2</span>
-            <p>Click the microphone button to enable voice control 🎤</p>
-          </div>
-          <div className="tutorial-step">
-            <span className="step-number">3</span>
-            <p>Say a letter clearly to guide the bee 🗣️</p>
-          </div>
-          <div className="tutorial-step">
-            <span className="step-number">4</span>
-            <p>Collect letters and reach the hive 🏡</p>
-          </div>
-          <div className="tutorial-step">
-            <span className="step-number">5</span>
-            <p>Complete before time runs out! ⏱️</p>
-          </div>
-        </div>
-        <button onClick={skipTutorial} className="start-playing-btn">
-          Start Playing!
-        </button>
-      </div>
-    </div>
-  );
-
-  return (
-    <div className="mobile-maze-container">
-      {showTutorial && <TutorialOverlay />}
-      
-      {/* Wrap game content with MicrophonePermission */}
-      <MicrophonePermission 
-        onPermissionGranted={handleMicrophoneGranted}
-        onPermissionDenied={handleMicrophoneDenied}
-      >
-        <GameContent />
-      </MicrophonePermission>
     </div>
   );
 };

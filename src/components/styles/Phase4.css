@@ -554,3 +554,154 @@ button:focus {
     transform: translateY(0);
   }
 }
+
+/* Add to Phase4.css - Fix for permission modal */
+
+/* Permission Overlay - FIXED */
+.permission-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto !important;
+}
+
+.permission-modal {
+  background: linear-gradient(135deg, #ffffff, #f5f0e8);
+  max-width: 380px;
+  width: 85%;
+  border-radius: 48px;
+  padding: 40px 30px;
+  text-align: center;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+  animation: modalSlideIn 0.4s ease-out;
+  position: relative;
+  z-index: 10000;
+  pointer-events: auto !important;
+  border: 1px solid rgba(123, 31, 162, 0.3);
+}
+
+.permission-icon {
+  font-size: 4rem;
+  margin-bottom: 15px;
+  animation: bounce 1s infinite;
+}
+
+.permission-modal h2 {
+  color: #6a1b9a;
+  margin-bottom: 15px;
+  font-size: 1.8rem;
+  font-weight: bold;
+}
+
+.permission-modal p {
+  color: #4a4a4a;
+  margin-bottom: 25px;
+  line-height: 1.5;
+  font-size: 1rem;
+}
+
+.permission-allow-btn {
+  background: linear-gradient(135deg, #7b1fa2, #6a1b9a);
+  color: white;
+  border: none;
+  padding: 16px 32px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  border-radius: 60px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 6px 0 #4a0072;
+  width: 100%;
+  margin-bottom: 20px;
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 10001;
+}
+
+.permission-allow-btn:active {
+  transform: translateY(3px);
+  box-shadow: 0 3px 0 #4a0072;
+}
+
+.permission-allow-btn:disabled {
+  opacity: 0.6;
+  transform: none;
+  cursor: not-allowed;
+}
+
+.permission-privacy {
+  font-size: 0.8rem !important;
+  color: #888 !important;
+  margin-top: 10px;
+  margin-bottom: 0 !important;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Fix for any parent container issues */
+.mobile-maze-container {
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Ensure the game content is properly layered */
+.mobile-maze-container > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Fix for tutorial overlay if it exists */
+.tutorial-overlay {
+  z-index: 10000 !important;
+  pointer-events: auto !important;
+}
+
+.tutorial-content {
+  pointer-events: auto !important;
+  z-index: 10001 !important;
+}
+
+/* Add to the end of Phase4.css */
+
+/* Ensure no element blocks the permission modal */
+.permission-modal-container {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  z-index: 999999 !important;
+  background-color: #1a2a3a !important;
+}
+
+.permission-modal-container * {
+  pointer-events: auto !important;
+}
+
+/* Remove any backdrop filters that might cause blur */
+.phase4-container,
+.mobile-maze-container,
+body,
+html {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
