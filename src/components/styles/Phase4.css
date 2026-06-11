@@ -469,3 +469,88 @@ button:focus {
     height: 30px;
   }
 }
+
+/* Add to Phase4.css */
+
+/* Permission Modal Styles */
+.permission-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.95);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.permission-card {
+  background: linear-gradient(135deg, #fff5e6, #ffe4cc);
+  max-width: 400px;
+  border-radius: 40px;
+  padding: 40px 30px;
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+  animation: slideUp 0.4s ease;
+}
+
+.permission-card h2 {
+  color: #7b1fa2;
+  margin-bottom: 20px;
+  font-size: 1.8rem;
+}
+
+.permission-card p {
+  color: #4a0072;
+  margin-bottom: 30px;
+  line-height: 1.5;
+}
+
+.permission-button {
+  background: linear-gradient(135deg, #7b1fa2, #6a1b9a);
+  color: white;
+  border: none;
+  padding: 15px 35px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 5px 0 #4a0072;
+  margin-bottom: 15px;
+}
+
+.permission-button:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #4a0072;
+}
+
+.permission-note {
+  font-size: 0.85rem;
+  color: #7e6b44;
+  margin-top: 15px;
+}
+
+.microphone-waiting {
+  background: #ff9800;
+  color: white;
+  padding: 15px;
+  border-radius: 15px;
+  text-align: center;
+  font-weight: bold;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
