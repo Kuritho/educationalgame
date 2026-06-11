@@ -1,13 +1,8 @@
-// components/Phase4.js - SIMPLIFIED VERSION WITH DEBUG LOGGING
+// components/Phase4.js - SIMPLIFIED WITH DIRECT PERMISSION
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import './styles/Phase4.css';
 
-// Import sound files
-import backgroundMusic from '../components/sounds/bee.mp3';
-import successSound from '../components/sounds/success.mp3';
-
 const Phase4 = ({ proceed, loseLife, lives: initialLives }) => {
-  // State declarations
   const [maze, setMaze] = useState([[]]);
   const [letters, setLetters] = useState({});
   const [playerPosition, setPlayerPosition] = useState({ x: 0, y: 0 });
@@ -16,94 +11,58 @@ const Phase4 = ({ proceed, loseLife, lives: initialLives }) => {
   const [currentRound, setCurrentRound] = useState(1);
   const [score, setScore] = useState(0);
   const [message, setMessage] = useState('Find the hive! Round 1/5');
-  const [timeLeft, setTimeLeft] = useState(30);
+  const [timeLeft, setTimeLeft] = useState(60);
   const [timerActive, setTimerActive] = useState(true);
   const [listening, setListening] = useState(false);
   const [lastSpokenLetter, setLastSpokenLetter] = useState('');
-  const [isSpeechSupported, setIsSpeechSupported] = useState(true);
   const [showTutorial, setShowTutorial] = useState(true);
-  const [microphonePermission, setMicrophonePermission] = useState('prompt');
-  const [isRequestingPermission, setIsRequestingPermission] = useState(false);
+  const [permissionGranted, setPermissionGranted] = useState(false);
+  const [isRequesting, setIsRequesting] = useState(false);
   const [isMazeReady, setIsMazeReady] = useState(false);
   
   const recognitionRef = useRef(null);
-  const audioRef = useRef(null);
-  const successAudioRef = useRef(null);
 
   const letterPool = ['B', 'C', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 
                      'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'X', 'Y', 'Z'];
 
-  // Pronunciation mapping
-  const letterPronunciationMap = {
-    'ay': 'A', 'eh': 'A', 'alpha': 'A',
-    'bee': 'B', 'be': 'B', 'bravo': 'B', 'beer': 'B',
-    'see': 'C', 'sea': 'C', 'cee': 'C', 'si': 'C', 'charley': 'C', 'charlie': 'C',
-    'dee': 'D', 'delta': 'D', 'dog': 'D', 'day': 'D',
-    'ee': 'E', 'echo': 'E', 'eat': 'E',
-    'eff': 'F', 'foxtrot': 'F', 'fox': 'F',
-    'gee': 'G', 'golf': 'G', 'go': 'G', 'girl': 'G',
-    'aitch': 'H', 'haitch': 'H', 'hotel': 'H', 'house': 'H',
-    'jay': 'J', 'juliet': 'J', 'jump': 'J', 'jet': 'J',
-    'kay': 'K', 'kilo': 'K', 'king': 'K', 'key': 'K',
-    'el': 'L', 'lima': 'L', 'love': 'L', 'lake': 'L',
-    'em': 'M', 'mike': 'M', 'mother': 'M', 'man': 'M',
-    'en': 'N', 'november': 'N', 'no': 'N', 'now': 'N',
-    'oh': 'O', 'oscar': 'O', 'open': 'O', 'orange': 'O',
-    'pee': 'P', 'papa': 'P', 'pet': 'P', 'park': 'P',
-    'cue': 'Q', 'quebec': 'Q', 'queen': 'Q', 'quick': 'Q',
-    'are': 'R', 'romeo': 'R', 'red': 'R', 'run': 'R',
-    'ess': 'S', 'sierra': 'S', 'sun': 'S', 'soap': 'S',
-    'tee': 'T', 'tango': 'T', 'top': 'T', 'talk': 'T',
-    'you': 'U', 'uniform': 'U', 'up': 'U', 'under': 'U',
-    'vee': 'V', 'victor': 'V', 'van': 'V', 'voice': 'V',
-    'double you': 'W', 'double-u': 'W', 'whiskey': 'W', 'water': 'W',
-    'ex': 'X', 'x-ray': 'X',
-    'why': 'Y', 'yankee': 'Y', 'yes': 'Y', 'yellow': 'Y',
-    'zee': 'Z', 'zed': 'Z', 'zulu': 'Z', 'zoo': 'Z'
-  };
-
-  // Request microphone permission - SIMPLIFIED
-  const requestMicrophonePermission = async () => {
-    console.log('🔴 PERMISSION BUTTON CLICKED!');
-    alert('Button clicked!'); // This will show if click is working
-    
-    if (isRequestingPermission) return;
-    setIsRequestingPermission(true);
+  // Request permission using the global function
+  const requestPermission = async () => {
+    if (isRequesting) return;
+    setIsRequesting(true);
+    setMessage('Requesting microphone access...');
     
     try {
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        alert('getUserMedia not supported');
-        setMicrophonePermission('denied');
-        setIsRequestingPermission(false);
-        return false;
+      // Use the global function from index.html
+      if (window.requestMicrophonePermission) {
+        const granted = await window.requestMicrophonePermission();
+        setPermissionGranted(granted);
+        if (granted) {
+          setMessage('✅ Microphone ready! Click the mic button to start.');
+          initSpeechRecognition();
+        } else {
+          setMessage('❌ Please grant microphone permission in settings.');
+        }
+      } else {
+        // Fallback for browser
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        stream.getTracks().forEach(track => track.stop());
+        setPermissionGranted(true);
+        setMessage('✅ Microphone ready!');
+        initSpeechRecognition();
       }
-      
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      stream.getTracks().forEach(track => track.stop());
-      
-      setMicrophonePermission('granted');
-      alert('Microphone permission granted!');
-      setIsRequestingPermission(false);
-      initSpeechRecognition();
-      
-      return true;
     } catch (error) {
-      console.error('Microphone permission error:', error);
-      alert('Error: ' + error.message);
-      setMicrophonePermission('denied');
-      setIsRequestingPermission(false);
-      return false;
+      console.error('Permission error:', error);
+      setPermissionGranted(false);
+      setMessage('❌ Could not access microphone. Please check permissions.');
     }
+    setIsRequesting(false);
   };
 
   // Initialize speech recognition
   const initSpeechRecognition = () => {
-    if (typeof window === 'undefined') return;
-    
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    
     if (!SpeechRecognition) {
-      setIsSpeechSupported(false);
+      setMessage('Speech recognition not supported.');
       return;
     }
 
@@ -111,138 +70,56 @@ const Phase4 = ({ proceed, loseLife, lives: initialLives }) => {
     recognition.continuous = true;
     recognition.interimResults = false;
     recognition.lang = 'en-US';
-    recognition.maxAlternatives = 10;
 
     recognition.onstart = () => {
-      console.log('Speech recognition started');
       setListening(true);
-      setMessage('🎤 Listening... Say a letter clearly');
+      setMessage('🎤 Listening... Say a letter');
     };
 
     recognition.onend = () => {
-      console.log('Speech recognition ended');
       setListening(false);
     };
 
     recognition.onresult = (event) => {
-      const results = event.results[event.results.length - 1];
-      for (let i = 0; i < results.length; i++) {
-        const transcript = results[i].transcript.trim().toLowerCase();
-        
-        if (transcript.length === 1 && letterPool.includes(transcript.toUpperCase())) {
-          handleDetectedLetter(transcript.toUpperCase());
-          return;
-        }
-        
-        for (const [word, letter] of Object.entries(letterPronunciationMap)) {
-          if (transcript.includes(word)) {
-            handleDetectedLetter(letter);
-            return;
-          }
-        }
+      const result = event.results[event.results.length - 1];
+      const word = result[0].transcript.trim().toUpperCase();
+      if (word.length === 1 && /[A-Z]/.test(word)) {
+        handleDetectedLetter(word);
       }
     };
 
     recognition.onerror = (event) => {
       console.error('Recognition error:', event.error);
+      setListening(false);
     };
 
     recognitionRef.current = recognition;
   };
 
-  // Initialize audio
-  useEffect(() => {
-    audioRef.current = new Audio(backgroundMusic);
-    audioRef.current.loop = true;
-    audioRef.current.volume = 0.3;
+  const toggleListening = () => {
+    if (!permissionGranted) {
+      requestPermission();
+      return;
+    }
     
-    successAudioRef.current = new Audio(successSound);
-    successAudioRef.current.volume = 0.5;
+    if (!recognitionRef.current) {
+      initSpeechRecognition();
+    }
     
-    const playBackgroundMusic = async () => {
+    if (listening) {
+      recognitionRef.current?.stop();
+      setListening(false);
+      setMessage('🎤 Microphone off');
+    } else {
       try {
-        await audioRef.current.play();
-      } catch (error) {
-        console.log('Background music play failed:', error);
+        recognitionRef.current?.start();
+      } catch (e) {
+        console.error('Start error:', e);
       }
-    };
-    
-    playBackgroundMusic();
-    
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-      }
-    };
-  }, []);
-
-  // Play success sound
-  const playSuccessSound = () => {
-    if (successAudioRef.current) {
-      successAudioRef.current.currentTime = 0;
-      successAudioRef.current.play().catch(error => {
-        console.log('Success sound play failed:', error);
-      });
     }
   };
 
   // Generate maze
-  useEffect(() => {
-    generateMaze();
-  }, []);
-
-  // Timer effect
-  useEffect(() => {
-    let timer;
-    if (timerActive && timeLeft > 0) {
-      timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
-    } else if (timeLeft === 0 && timerActive) {
-      handleTimeOut();
-    }
-    return () => clearTimeout(timer);
-  }, [timeLeft, timerActive]);
-
-  // Letter detection handler
-  const handleDetectedLetter = useCallback((letter) => {
-    console.log('Processing letter:', letter);
-    setLastSpokenLetter(letter);
-    setMessage(`Moving to ${letter}...`);
-
-    const letterPos = Object.entries(letters).find(
-      ([pos, l]) => l === letter
-    );
-
-    if (letterPos) {
-      const [posKey] = letterPos;
-      const [x, y] = posKey.split(',').map(Number);
-      moveBeeToPosition({ x, y });
-    } else {
-      setMessage(`${letter} not found. Try: ${Object.values(letters).join(', ')}`);
-    }
-  }, [letters]);
-
-  const toggleVoiceControl = () => {
-    if (microphonePermission !== 'granted') {
-      setMessage('Please grant microphone permission first.');
-      return;
-    }
-    
-    if (!recognitionRef.current) return;
-    
-    if (listening) {
-      try {
-        recognitionRef.current.stop();
-      } catch (e) {}
-      setListening(false);
-    } else {
-      try {
-        recognitionRef.current.start();
-      } catch (error) {
-        console.error('Failed to start recognition:', error);
-      }
-    }
-  };
-
   const generateMaze = () => {
     setIsMazeReady(false);
     const size = 17;
@@ -251,18 +128,11 @@ const Phase4 = ({ proceed, loseLife, lives: initialLives }) => {
 
     const carve = (x, y) => {
       grid[y][x] = 0;
-      
-      const directions = [
-        { dx: 0, dy: -2 }, { dx: 2, dy: 0 }, 
-        { dx: 0, dy: 2 }, { dx: -2, dy: 0 }
-      ].sort(() => Math.random() - 0.5);
-
-      for (const { dx, dy } of directions) {
-        const nx = x + dx;
-        const ny = y + dy;
-        
-        if (nx > 0 && nx < size - 1 && ny > 0 && ny < size - 1 && grid[ny][nx] === 1) {
-          grid[(y + ny) / 2][(x + nx) / 2] = 0;
+      const dirs = [[0, -2], [2, 0], [0, 2], [-2, 0]].sort(() => Math.random() - 0.5);
+      for (const [dx, dy] of dirs) {
+        const nx = x + dx, ny = y + dy;
+        if (nx > 0 && nx < size-1 && ny > 0 && ny < size-1 && grid[ny][nx] === 1) {
+          grid[(y+ny)/2][(x+nx)/2] = 0;
           carve(nx, ny);
         }
       }
@@ -270,194 +140,139 @@ const Phase4 = ({ proceed, loseLife, lives: initialLives }) => {
     };
 
     carve(1, 1);
-    const exitX = size-2;
-    const exitY = size-2;
+    const exitX = size-2, exitY = size-2;
     grid[exitY][exitX] = 0;
 
-    const pathPositions = [];
+    const positions = [];
     for (let y = 0; y < size; y++) {
       for (let x = 0; x < size; x++) {
-        if (grid[y][x] === 0 && !(x === 1 && y === 1) && !(x === exitX && y === exitY)) {
-          pathPositions.push({ x, y });
+        if (grid[y][x] === 0 && !(x===1&&y===1) && !(x===exitX&&y===exitY)) {
+          positions.push({x, y});
         }
       }
     }
 
     const shuffledLetters = [...letterPool].sort(() => Math.random() - 0.5);
-    const shuffledPositions = [...pathPositions].sort(() => Math.random() - 0.5);
-
-    const placedPositions = [];
-    shuffledPositions.forEach(pos => {
-      const farEnough = placedPositions.every(placedPos => 
-        Math.abs(placedPos.x - pos.x) >= 3 || Math.abs(placedPos.y - pos.y) >= 3
-      );
-      
-      if (farEnough && shuffledLetters.length > 0) {
-        newLetters[`${pos.x},${pos.y}`] = shuffledLetters.pop();
-        placedPositions.push(pos);
-      }
+    positions.sort(() => Math.random() - 0.5).forEach((pos, i) => {
+      if (shuffledLetters[i]) newLetters[`${pos.x},${pos.y}`] = shuffledLetters[i];
     });
-
-    if (shuffledLetters.length > 0) {
-      newLetters[`${exitX},${exitY}`] = shuffledLetters[0];
-    }
 
     setMaze(grid);
     setLetters(newLetters);
     setPlayerPosition({ x: 1, y: 1 });
     setExitPosition({ x: exitX, y: exitY });
     setVisited([{ x: 1, y: 1 }]);
-    setMessage(`Find the hive! Round ${currentRound}/5`);
     setTimeLeft(60);
     setTimerActive(true);
-    setLastSpokenLetter('');
   };
 
-  const handleTimeOut = () => {
-    setTimerActive(false);
-    loseLife();
-    
-    if (initialLives <= 1) {
-      setMessage("Game Over! You ran out of lives!");
-      setTimeout(() => {
-        setCurrentRound(1);
-        proceed(score);
-      }, 2000);
-    } else {
-      setMessage(`Time's up! Lost a life. ${initialLives - 1} lives remaining.`);
-      setTimeout(() => {
-        generateMaze();
-      }, 1500);
+  useEffect(() => {
+    generateMaze();
+  }, [currentRound]);
+
+  // Timer
+  useEffect(() => {
+    let timer;
+    if (timerActive && timeLeft > 0) {
+      timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
+    } else if (timeLeft === 0 && timerActive) {
+      loseLife();
+      setMessage(`Time's up! ${initialLives - 1} lives left`);
+      if (initialLives <= 1) setTimeout(() => proceed(score), 2000);
+      else setTimeout(() => generateMaze(), 1500);
+      setTimerActive(false);
     }
-  };
+    return () => clearTimeout(timer);
+  }, [timeLeft, timerActive]);
 
-  const handleReachHive = () => {
-    setTimerActive(false);
-    playSuccessSound();
-    
-    if (currentRound < 5) {
-      setMessage(`Round ${currentRound} complete!`);
-      setTimeout(() => {
-        setCurrentRound(prev => prev + 1);
-        generateMaze();
-      }, 1500);
-    } else {
-      setMessage('Congratulations! You completed all 5 rounds!');
-      setTimeout(() => {
-        proceed(score + 100);
-      }, 2000);
+  const handleDetectedLetter = (letter) => {
+    setLastSpokenLetter(letter);
+    const pos = Object.entries(letters).find(([, l]) => l === letter)?.[0];
+    if (pos) {
+      const [x, y] = pos.split(',').map(Number);
+      moveToPosition({ x, y });
     }
   };
 
   const findPath = (start, end) => {
     const queue = [[start]];
     const visitedSet = new Set([`${start.x},${start.y}`]);
-    const directions = [
-      { dx: 0, dy: -1 },
-      { dx: 1, dy: 0 },
-      { dx: 0, dy: 1 },
-      { dx: -1, dy: 0 },
-    ];
-
-    while (queue.length > 0) {
+    const dirs = [[0,-1],[1,0],[0,1],[-1,0]];
+    while (queue.length) {
       const path = queue.shift();
-      const current = path[path.length - 1];
-
-      if (current.x === end.x && current.y === end.y) {
-        return path.slice(1);
-      }
-
-      for (const dir of directions) {
-        const next = {
-          x: current.x + dir.dx,
-          y: current.y + dir.dy,
-        };
+      const current = path[path.length-1];
+      if (current.x === end.x && current.y === end.y) return path.slice(1);
+      for (const [dx, dy] of dirs) {
+        const next = { x: current.x + dx, y: current.y + dy };
         const key = `${next.x},${next.y}`;
-
         if (!visitedSet.has(key) && maze[next.y]?.[next.x] === 0) {
           visitedSet.add(key);
           queue.push([...path, next]);
         }
       }
     }
-
     return [];
   };
 
-  const animateMovement = (path) => {
+  const moveToPosition = (target) => {
+    const path = findPath(playerPosition, target);
+    if (!path.length) {
+      setMessage('No path to that letter!');
+      return;
+    }
     let i = 0;
     const interval = setInterval(() => {
       if (i < path.length) {
         setPlayerPosition(path[i]);
         setVisited(prev => [...prev, path[i]]);
-        
-        const posKey = `${path[i].x},${path[i].y}`;
-        if (letters[posKey]) {
-          const updatedLetters = { ...letters };
-          delete updatedLetters[posKey];
-          setLetters(updatedLetters);
-          setScore(prev => prev + 10);
+        const key = `${path[i].x},${path[i].y}`;
+        if (letters[key]) {
+          const newLetters = { ...letters };
+          delete newLetters[key];
+          setLetters(newLetters);
+          setScore(s => s + 10);
         }
-
         if (path[i].x === exitPosition.x && path[i].y === exitPosition.y) {
-          handleReachHive();
           clearInterval(interval);
+          if (currentRound < 5) {
+            setMessage(`Round ${currentRound} complete!`);
+            setTimeout(() => setCurrentRound(r => r + 1), 1500);
+          } else {
+            setMessage('All rounds complete!');
+            setTimeout(() => proceed(score + 100), 2000);
+          }
+          setTimerActive(false);
         }
-
         i++;
       } else {
         clearInterval(interval);
       }
-    }, 300);
+    }, 200);
   };
 
-  const moveBeeToPosition = (targetPos) => {
-    const path = findPath(playerPosition, targetPos);
-    if (path.length > 0) {
-      animateMovement(path);
-    } else {
-      setMessage("No valid path to that letter!");
-    }
-  };
-
-  const renderCell = (cellValue, x, y) => {
-    const isPlayer = playerPosition && x === playerPosition.x && y === playerPosition.y;
-    const isExit = exitPosition && x === exitPosition.x && y === exitPosition.y;
-    const wasVisited = visited && visited.some(pos => pos && pos.x === x && pos.y === y);
-    const hasLetter = letters && letters[`${x},${y}`];
-
-    if (cellValue === undefined) return null; 
-
+  const renderCell = (cell, x, y) => {
+    const isPlayer = playerPosition?.x === x && playerPosition?.y === y;
+    const isExit = exitPosition?.x === x && exitPosition?.y === y;
+    const letter = letters[`${x},${y}`];
+    
     return (
-      <div
-        key={`${x}-${y}`}
-        className={`maze-cell ${
-          isPlayer ? 'player' :
-          isExit ? 'exit' :
-          wasVisited ? 'visited' :
-          cellValue === 1 ? 'wall' : 'path'
-        }`}
-      >
+      <div key={`${x}-${y}`} className={`maze-cell ${cell === 1 ? 'wall' : 'path'} ${isPlayer ? 'player' : ''} ${isExit ? 'exit' : ''}`}>
         {isPlayer && <div className="bee">🐝</div>}
-        {isExit && <div className="beehouse">🏡</div>}
-        {!isExit && hasLetter && <div className="maze-letter">{hasLetter}</div>}
+        {isExit && <div className="hive">🍯</div>}
+        {!isPlayer && !isExit && letter && <div className="letter">{letter}</div>}
       </div>
     );
   };
 
-  const skipTutorial = () => {
-    setShowTutorial(false);
-  };
-
-  // PERMISSION MODAL - Using native HTML button with onClick
-  if (microphonePermission !== 'granted') {
+  // Permission modal
+  if (!permissionGranted) {
     return (
       <div style={{
         position: 'fixed',
         top: 0,
         left: 0,
-        width: '100%',
-        height: '100%',
+        right: 0,
+        bottom: 0,
         backgroundColor: '#1a2a3a',
         display: 'flex',
         alignItems: 'center',
@@ -468,27 +283,35 @@ const Phase4 = ({ proceed, loseLife, lives: initialLives }) => {
           backgroundColor: 'white',
           borderRadius: '30px',
           padding: '40px',
-          maxWidth: '350px',
+          maxWidth: '320px',
           textAlign: 'center'
         }}>
-          <div style={{ fontSize: '50px' }}>🎤</div>
-          <h2>Microphone Required</h2>
-          <p>This game needs microphone access for voice control.</p>
-          <button 
-            onClick={requestMicrophonePermission}
+          <div style={{ fontSize: '50px', marginBottom: '20px' }}>🎤</div>
+          <h2 style={{ color: '#6a1b9a', marginBottom: '15px' }}>Microphone Required</h2>
+          <p style={{ marginBottom: '30px', color: '#666' }}>
+            Tap the button below to allow microphone access for voice control.
+          </p>
+          <button
+            onClick={requestPermission}
+            disabled={isRequesting}
             style={{
               backgroundColor: '#7b1fa2',
               color: 'white',
               border: 'none',
-              padding: '15px 30px',
+              padding: '16px 32px',
               fontSize: '18px',
+              fontWeight: 'bold',
               borderRadius: '50px',
               cursor: 'pointer',
-              width: '100%'
+              width: '100%',
+              touchAction: 'manipulation'
             }}
           >
-            {isRequestingPermission ? 'Requesting...' : 'Allow Microphone Access'}
+            {isRequesting ? 'Requesting...' : '🎤 Allow Microphone'}
           </button>
+          <p style={{ fontSize: '11px', color: '#999', marginTop: '20px' }}>
+            Your voice is processed locally and never stored
+          </p>
         </div>
       </div>
     );
@@ -496,93 +319,190 @@ const Phase4 = ({ proceed, loseLife, lives: initialLives }) => {
 
   // Main game
   return (
-    <div className="mobile-maze-container">
-      {showTutorial && (
-        <div className="tutorial-overlay">
-          <div className="tutorial-content">
-            <h2>Welcome to Voice-Controlled Bee Maze! 🐝</h2>
-            <div className="tutorial-steps">
-              <div className="tutorial-step">
-                <span className="step-number">1</span>
-                <p>Click the microphone button to enable voice control 🎤</p>
-              </div>
-              <div className="tutorial-step">
-                <span className="step-number">2</span>
-                <p>Say a letter clearly to guide the bee 🗣️</p>
-              </div>
-              <div className="tutorial-step">
-                <span className="step-number">3</span>
-                <p>Collect letters and reach the hive 🏡</p>
-              </div>
-              <div className="tutorial-step">
-                <span className="step-number">4</span>
-                <p>Complete all 5 rounds before time runs out! ⏱️</p>
-              </div>
-            </div>
-            <button onClick={skipTutorial} className="start-playing-btn">
-              Start Playing!
-            </button>
-          </div>
-        </div>
-      )}
-      
-      <div className="header">
-        <span>Buzzy Bee Maze</span>
-        <div className="header-info">
-          <span>Round: {currentRound}/5</span>
-          <span>Score: {score}</span>
-          <span>❤️ Lives: {initialLives}</span>
-          <span>Time: {timeLeft}s</span>
-        </div>
-      </div>
-      
-      <h1>🐝 Voice-Controlled Bee Maze 🍯</h1>
-      
-      <div className="message-box">{message}</div>
-      
-      <div className="voice-control-panel">
-        <button 
-          onClick={toggleVoiceControl}
-          className={`voice-control-button ${listening ? 'active' : ''}`}
-        >
-          {listening ? '🎤 Listening... Say a letter' : '🎤 Enable Voice Control'}
-        </button>
-        
-        <div className="voice-feedback">
-          {lastSpokenLetter && (
-            <>
-              <span>You said: </span>
-              <span className="detected-letter">{lastSpokenLetter}</span>
-            </>
-          )}
-          <div className="available-letters">
-            Available letters: {Object.values(letters).join(', ')}
-          </div>
-        </div> 
-      </div>
-      
-      <div className="maze-wrapper">
-        <div className="maze-grid">
-          {isMazeReady ? (
-            maze.map((row, y) => (
-              <div key={y} className="maze-row">
-                {row.map((cell, x) => renderCell(cell, x, y))}
-              </div>
-            ))
-          ) : (
-            <div className="maze-loading">Loading maze...</div>
-          )}
+    <div className="phase4-container">
+      <div className="game-header">
+        <div>🐝 Bee Maze - Round {currentRound}/5</div>
+        <div className="stats">
+          <span>⭐ {score}</span>
+          <span>❤️ {initialLives}</span>
+          <span>⏱️ {timeLeft}s</span>
         </div>
       </div>
 
-      <div className="instructions">
-        <p><strong>How to Play:</strong></p>
-        <ul>
-          <li>✅ Microphone ready! Click the mic button to start</li>
-          <li>Say a letter clearly to guide the bee 🗣️</li>
-          <li>Collect letters and reach the hive 🏡</li>
-        </ul>
+      <div className="message-box">{message}</div>
+
+      <div className="mic-button-container">
+        <button 
+          className={`mic-button ${listening ? 'listening' : ''}`}
+          onClick={toggleListening}
+          style={{
+            padding: '15px 30px',
+            fontSize: '20px',
+            borderRadius: '50px',
+            border: 'none',
+            backgroundColor: listening ? '#e74c3c' : '#7b1fa2',
+            color: 'white',
+            cursor: 'pointer',
+            touchAction: 'manipulation'
+          }}
+        >
+          {listening ? '🎤 Listening... Tap to Stop' : '🎤 Tap to Say a Letter'}
+        </button>
+        {lastSpokenLetter && <div className="last-letter">Last: {lastSpokenLetter}</div>}
       </div>
+
+      <div className="letters-remaining">
+        Letters: {Object.values(letters).join(', ') || 'None left! Find the hive!'}
+      </div>
+
+      <div className="maze-container">
+        {isMazeReady && maze.map((row, y) => (
+          <div key={y} className="maze-row">
+            {row.map((cell, x) => renderCell(cell, x, y))}
+          </div>
+        ))}
+      </div>
+
+      {showTutorial && (
+        <div className="tutorial" onClick={() => setShowTutorial(false)}>
+          <div className="tutorial-content">
+            <h3>How to Play</h3>
+            <p>1. Tap the mic button and say a letter</p>
+            <p>2. The bee will move to that letter</p>
+            <p>3. Collect all letters to reach the hive 🍯</p>
+            <button>Got it!</button>
+          </div>
+        </div>
+      )}
+
+      <style jsx>{`
+        .phase4-container {
+          max-width: 100%;
+          min-height: 100vh;
+          background: linear-gradient(135deg, #1a2a3a, #0f1a24);
+          padding: 20px;
+          color: white;
+        }
+        .game-header {
+          display: flex;
+          justify-content: space-between;
+          padding: 15px;
+          background: rgba(0,0,0,0.3);
+          border-radius: 20px;
+          margin-bottom: 20px;
+        }
+        .stats {
+          display: flex;
+          gap: 20px;
+        }
+        .message-box {
+          background: #34495e;
+          padding: 12px;
+          border-radius: 15px;
+          text-align: center;
+          margin-bottom: 20px;
+        }
+        .mic-button-container {
+          text-align: center;
+          margin-bottom: 20px;
+        }
+        .last-letter {
+          text-align: center;
+          margin-top: 10px;
+          font-size: 18px;
+          color: #ffd700;
+        }
+        .letters-remaining {
+          background: #2c3e50;
+          padding: 12px;
+          border-radius: 15px;
+          margin-bottom: 20px;
+          text-align: center;
+          font-size: 18px;
+        }
+        .maze-container {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 2px;
+          background: #2c3e50;
+          padding: 10px;
+          border-radius: 15px;
+          overflow-x: auto;
+        }
+        .maze-row {
+          display: flex;
+          gap: 2px;
+          justify-content: center;
+        }
+        .maze-cell {
+          width: 28px;
+          height: 28px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 14px;
+          font-weight: bold;
+          border-radius: 6px;
+        }
+        .wall {
+          background: #1a1a2e;
+        }
+        .path {
+          background: #f0e6d2;
+        }
+        .player {
+          background: #f39c12;
+        }
+        .exit {
+          background: #27ae60;
+        }
+        .bee, .hive {
+          font-size: 18px;
+        }
+        .letter {
+          color: #2c3e50;
+          font-weight: bold;
+        }
+        .tutorial {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(0,0,0,0.9);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 1000;
+        }
+        .tutorial-content {
+          background: white;
+          padding: 30px;
+          border-radius: 20px;
+          text-align: center;
+          color: #333;
+        }
+        .tutorial-content button {
+          margin-top: 20px;
+          padding: 10px 30px;
+          background: #7b1fa2;
+          color: white;
+          border: none;
+          border-radius: 25px;
+          font-size: 16px;
+        }
+        @media (max-width: 600px) {
+          .maze-cell {
+            width: 22px;
+            height: 22px;
+            font-size: 11px;
+          }
+          .bee, .hive {
+            font-size: 14px;
+          }
+        }
+      `}</style>
     </div>
   );
 };
